@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  static-site:
+    image: httpd:alpine
+    restart: unless-stopped
+    ports:
+      - "50995:80"
+    volumes:
+      - /mnt/immich/Jarno_app/udako:/usr/local/apache2/htdocs:ro
+
+# Notes:
+# - Paste this file into the TrueNAS SCALE Apps → Launch Docker Image → Custom Compose YAML field
+#   or upload it when creating a custom application.
+# - Adjust the host path if your dataset is at a different location.
+# - Ensure `website.html` is present at /mnt/immich/Jarno_app/udako and readable by the container.

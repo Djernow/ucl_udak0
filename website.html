@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="true">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DrinkBoard">
+<meta name="theme-color" content="#e8c84a">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23e8c84a' width='192' height='192'/><text x='50%' y='50%' font-size='120' font-weight='bold' text-anchor='middle' dy='.3em' fill='%230f0f11' font-family='Arial'>DB</text></svg>">
+<title>DrinkBoard</title>
+<style>
+  /* ============================================================
+     DEVELOPER CONFIG — CHANGE MULTIPLIERS HERE
+     All values represent how many "standard beers" each unit equals
+     ============================================================ */
+  :root {
+    --mult-normal-beer:   1.0;   /* 1 normal beer   = 1.0 standard beer  */
+    --mult-special-beer:  1.5;   /* 1 special beer  = 1.5 standard beers */
+    --mult-shot:          0.75;  /* 1 shot          = 0.75 standard beer */
+    --mult-cocktail:      1.25;  /* 1 cocktail      = 1.25 standard beers*/
+    --mult-joint:         2.0;   /* 1 joint         = 2.0 standard beers */
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #0f0f11;
+    color: #e8e4dc;
+    min-height: 100vh;
+  }
+
+  /* ---- layout ---- */
+  #app { display: flex; flex-direction: column; min-height: 100vh; }
+
+  header {
+    background: #0f0f11;
+    border-bottom: 1px solid #2a2828;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 3px;
+    color: #e8c84a;
+  }
+
+  .logo span { color: #888; font-size: 0.9rem; font-family: 'DM Sans', sans-serif; letter-spacing: 0; margin-left: 0.5rem; vertical-align: middle; }
+
+  .header-right { display: flex; align-items: center; gap: 1rem; }
+
+  .user-chip {
+    background: #1e1d20;
+    border: 1px solid #333;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.85rem;
+    color: #ccc;
+  }
+
+  .user-chip b { color: #e8c84a; }
+
+  main { flex: 1; padding: 2rem; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+  /* ---- buttons ---- */
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: #e8c84a; color: #0f0f11; }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-ghost { background: transparent; border: 1px solid #444; color: #ccc; }
+  .btn-ghost:hover { background: #1e1d20; }
+  .btn-danger { background: #8b2020; color: #ffc; }
+  .btn-danger:hover { opacity: 0.85; }
+  .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+
+  /* ---- forms ---- */
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 0.8rem; color: #999; text-transform: uppercase; letter-spacing: .05em; }
+  .field input {
+    background: #1a1919;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 9px 13px;
+    color: #e8e4dc;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .field input:focus { border-color: #e8c84a; }
+
+  /* ---- cards ---- */
+  .card {
+    background: #18171a;
+    border: 1px solid #2a2828;
+    border-radius: 14px;
+    padding: 1.5rem;
+  }
+
+  /* ---- sections ---- */
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    color: #e8c84a;
+    margin-bottom: 1.25rem;
+  }
+
+  /* ---- login ---- */
+  #login-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    background: #0f0f11;
+  }
+
+  .login-box {
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .login-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    letter-spacing: 6px;
+    color: #e8c84a;
+    text-align: center;
+    margin-bottom: 0.25rem;
+  }
+
+  .login-sub {
+    text-align: center;
+    color: #666;
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+  }
+
+  .login-form { display: flex; flex-direction: column; gap: 1rem; }
+  .login-form .btn { margin-top: 0.5rem; width: 100%; padding: 11px; font-size: 1rem; }
+  .err-msg { color: #e87a7a; font-size: 0.85rem; text-align: center; min-height: 1.2em; }
+
+  /* ---- scoreboard ---- */
+  .scoreboard { display: flex; flex-direction: column; gap: 8px; }
+
+  .score-row {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr 6rem 6rem 6rem 6rem;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1px solid #2a2828;
+    background: #18171a;
+    transition: background .15s;
+  }
+
+  .score-row.header-row {
+    background: transparent;
+    border-color: transparent;
+    padding-bottom: 4px;
+  }
+
+  .score-row.header-row span {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #666;
+  }
+
+  .score-row.top-1 { border-color: #e8c84a44; background: #1e1c10; }
+  .score-row.top-2 { border-color: #aaa6; }
+  .score-row.top-3 { border-color: #7b4c1a66; }
+
+  .rank {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    color: #555;
+    text-align: center;
+  }
+  .top-1 .rank { color: #e8c84a; }
+  .top-2 .rank { color: #b0b0b0; }
+  .top-3 .rank { color: #c07840; }
+
+  .user-name { font-weight: 500; font-size: 0.95rem; }
+  .score-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: #e8c84a; text-align: right; }
+  .score-sub { font-size: 0.75rem; color: #555; text-align: right; }
+
+  /* ---- daily checkin ---- */
+  .checkin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .checkin-item {
+    background: #111012;
+    border: 1px solid #2a2828;
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .checkin-label {
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+
+  .checkin-emoji { font-size: 1.6rem; }
+
+  .checkin-counter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .counter-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #1e1d20;
+    color: #e8e4dc;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .12s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .counter-btn:hover { background: #2a2828; }
+
+  .counter-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: #e8c84a;
+    min-width: 2ch;
+    text-align: center;
+  }
+
+  /* ---- admin panel ---- */
+  .admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .user-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .user-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #111012;
+    border: 1px solid #2a2828;
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+
+  .user-list-item .name { font-weight: 500; }
+  .user-list-item .meta { font-size: 0.75rem; color: #666; margin-top: 2px; }
+  .user-list-item .actions { display: flex; gap: 6px; }
+
+  /* ---- tabs ---- */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid #2a2828;
+    margin-bottom: 1.5rem;
+  }
+
+  .tab {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #666;
+    padding: 10px 16px;
+    cursor: pointer;
+    margin-bottom: -1px;
+    transition: color .15s;
+  }
+  .tab:hover { color: #ccc; }
+  .tab.active { color: #e8c84a; border-bottom-color: #e8c84a; }
+
+  /* ---- modal ---- */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    padding: 1rem;
+  }
+
+  .modal {
+    background: #18171a;
+    border: 1px solid #333;
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 440px;
+  }
+
+  .modal h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+    color: #e8c84a;
+    margin-bottom: 0.25rem;
+  }
+
+  .modal p { font-size: 0.875rem; color: #888; margin-bottom: 1.25rem; }
+
+  .modal-form { display: flex; flex-direction: column; gap: 1rem; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 0.5rem; }
+
+  /* ---- toast ---- */
+  #toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #e8c84a;
+    color: #0f0f11;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 10px 22px;
+    border-radius: 100px;
+    z-index: 999;
+    transition: transform .3s ease;
+    white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ---- summary bar ---- */
+  .summary-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-card {
+    background: #18171a;
+    border: 1px solid #2a2828;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .summary-label { font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: .05em; }
+  .summary-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: #e8e4dc; }
+  .summary-val.gold { color: #e8c84a; }
+
+  /* ---- history table ---- */
+  .history-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  .history-table th {
+    text-align: left;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #666;
+    padding: 6px 12px;
+    border-bottom: 1px solid #2a2828;
+  }
+  .history-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #1e1d20;
+    color: #ccc;
+  }
+  .history-table tr:last-child td { border-bottom: none; }
+  .history-table .gold { color: #e8c84a; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; }
+
+  /* ---- change pw ---- */
+  #changepw-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    background: #0f0f11;
+  }
+
+  .pw-box {
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .alert {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  .alert-warn { background: #2a1f0a; border: 1px solid #6b4d12; color: #e8c84a; }
+
+  /* ---- checkin banner ---- */
+  .checkin-banner {
+    background: #1e1a0a;
+    border: 1px solid #5a4210;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .checkin-banner p { font-size: 0.9rem; color: #e8c84a; }
+  .checkin-banner small { display: block; font-size: 0.78rem; color: #888; margin-top: 2px; }
+
+  @media (max-width: 680px) {
+    .admin-grid { grid-template-columns: 1fr; }
+    .score-row { grid-template-columns: 2rem 1fr 5rem 5rem; }
+    .score-row .score-val:nth-child(5),
+    .score-row .score-val:nth-child(6) { display: none; }
+    .checkin-grid { grid-template-columns: 1fr 1fr; }
+    main { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- LOGIN -->
+<div id="login-view">
+  <div class="login-box">
+    <div class="login-logo">DrinkBoard</div>
+    <div class="login-sub">Track what really matters</div>
+    <div class="login-form">
+      <div class="field"><label>Username</label><input id="l-user" type="text" autocomplete="username" placeholder="enter username"></div>
+      <div class="field"><label>Password</label><input id="l-pass" type="password" autocomplete="current-password" placeholder="enter password"></div>
+      <div class="err-msg" id="l-err"></div>
+      <button class="btn btn-primary" onclick="doLogin()">Sign in</button>
+    </div>
+  </div>
+</div>
+
+<!-- FORCE CHANGE PASSWORD -->
+<div id="changepw-view" style="display:none">
+  <div class="pw-box">
+    <div class="login-logo" style="font-size:2.5rem">Change Password</div>
+    <br>
+    <div class="alert alert-warn">🔒 You must set a new password before continuing.</div>
+    <div class="login-form">
+      <div class="field"><label>New Password</label><input id="np1" type="password" placeholder="new password"></div>
+      <div class="field"><label>Confirm Password</label><input id="np2" type="password" placeholder="confirm password"></div>
+      <div class="err-msg" id="pw-err"></div>
+      <button class="btn btn-primary" onclick="doChangePw()">Set Password &amp; Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+  <header>
+    <div class="logo">DrinkBoard <span>scoreboard</span></div>
+    <div class="header-right">
+      <div class="user-chip">Signed in as <b id="h-username">—</b></div>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign out</button>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- rendered by JS -->
+  </main>
+</div>
+
+<!-- ADMIN: ADD USER MODAL -->
+<div id="add-user-modal" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <h2>Add User</h2>
+    <p>Create a new account. The user will be required to change their password on first login.</p>
+    <div class="modal-form">
+      <div class="field"><label>Username</label><input id="nu-user" type="text" placeholder="username (no spaces)"></div>
+      <div class="field"><label>Default Password</label><input id="nu-pass" type="text" placeholder="temporary password"></div>
+      <div class="err-msg" id="nu-err"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('add-user-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="doAddUser()">Create User</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN: RESET PW MODAL -->
+<div id="reset-pw-modal" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <h2>Reset Password</h2>
+    <p>Set a temporary password for <b id="reset-target-name">—</b>. They will be required to change it on next login.</p>
+    <div class="modal-form">
+      <div class="field"><label>New Temporary Password</label><input id="rp-pass" type="text" placeholder="temporary password"></div>
+      <div class="err-msg" id="rp-err"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('reset-pw-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="doResetPw()">Reset Password</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DAILY CHECKIN MODAL -->
+<div id="checkin-modal" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <h2>Daily Check-in</h2>
+    <p id="checkin-modal-date">How much did you consume today?</p>
+    <div class="checkin-grid">
+      <div class="checkin-item">
+        <div class="checkin-emoji">🍺</div>
+        <div class="checkin-label">Normal Beer</div>
+        <div class="checkin-counter">
+          <button class="counter-btn" onclick="adj('nb',-1)">−</button>
+          <span class="counter-val" id="cnt-nb">0</span>
+          <button class="counter-btn" onclick="adj('nb',1)">+</button>
+        </div>
+      </div>
+      <div class="checkin-item">
+        <div class="checkin-emoji">🍻</div>
+        <div class="checkin-label">Special Beer</div>
+        <div class="checkin-counter">
+          <button class="counter-btn" onclick="adj('sb',-1)">−</button>
+          <span class="counter-val" id="cnt-sb">0</span>
+          <button class="counter-btn" onclick="adj('sb',1)">+</button>
+        </div>
+      </div>
+      <div class="checkin-item">
+        <div class="checkin-emoji">🥃</div>
+        <div class="checkin-label">Shots</div>
+        <div class="checkin-counter">
+          <button class="counter-btn" onclick="adj('sh',-1)">−</button>
+          <span class="counter-val" id="cnt-sh">0</span>
+          <button class="counter-btn" onclick="adj('sh',1)">+</button>
+        </div>
+      </div>
+      <div class="checkin-item">
+        <div class="checkin-emoji">🍹</div>
+        <div class="checkin-label">Cocktails</div>
+        <div class="checkin-counter">
+          <button class="counter-btn" onclick="adj('co',-1)">−</button>
+          <span class="counter-val" id="cnt-co">0</span>
+          <button class="counter-btn" onclick="adj('co',1)">+</button>
+        </div>
+      </div>
+      <div class="checkin-item" style="grid-column: span 2">
+        <div class="checkin-emoji">🚬</div>
+        <div class="checkin-label">Joints</div>
+        <div class="checkin-counter">
+          <button class="counter-btn" onclick="adj('jo',-1)">−</button>
+          <span class="counter-val" id="cnt-jo">0</span>
+          <button class="counter-btn" onclick="adj('jo',1)">+</button>
+        </div>
+      </div>
+    </div>
+    <div id="checkin-equiv" style="text-align:center; font-size:0.85rem; color:#888; margin-bottom:1rem;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('checkin-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitCheckin()">Save Check-in</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// MULTIPLIERS — mirrors the CSS custom properties above.
+// Change these values to adjust score weights.
+// ============================================================
+const MULT = {
+  nb: 1.0,    // normal beer
+  sb: 1.5,    // special beer
+  sh: 0.75,   // shot
+  co: 1.25,   // cocktail
+  jo: 2.0     // joint
+};
+
+// ============================================================
+// STORAGE HELPERS
+// ============================================================
+const STORE_KEY = 'drinkboard_v1';
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || defaultState(); }
+  catch { return defaultState(); }
+}
+
+function save(state) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+}
+
+function defaultState() {
+  return {
+    users: [
+      { username: 'admin', password: 'admin123', role: 'admin', mustChangePw: false, checkins: [] }
+    ]
+  };
+}
+
+// ============================================================
+// AUTH STATE
+// ============================================================
+let currentUser = null;
+
+function doLogin() {
+  const username = document.getElementById('l-user').value.trim().toLowerCase();
+  const password = document.getElementById('l-pass').value;
+  const state = load();
+  const user = state.users.find(u => u.username === username);
+  if (!user || user.password !== password) {
+    document.getElementById('l-err').textContent = 'Invalid username or password.';
+    return;
+  }
+  document.getElementById('l-err').textContent = '';
+  currentUser = user;
+  if (user.mustChangePw) {
+    show('changepw-view');
+    return;
+  }
+  enterApp();
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('l-user').value = '';
+  document.getElementById('l-pass').value = '';
+  show('login-view');
+}
+
+function doChangePw() {
+  const p1 = document.getElementById('np1').value;
+  const p2 = document.getElementById('np2').value;
+  const err = document.getElementById('pw-err');
+  if (p1.length < 4) { err.textContent = 'Password must be at least 4 characters.'; return; }
+  if (p1 !== p2) { err.textContent = 'Passwords do not match.'; return; }
+  err.textContent = '';
+  const state = load();
+  const u = state.users.find(x => x.username === currentUser.username);
+  u.password = p1;
+  u.mustChangePw = false;
+  save(state);
+  currentUser = u;
+  enterApp();
+}
+
+// ============================================================
+// APP SHELL
+// ============================================================
+function show(viewId) {
+  ['login-view','changepw-view','app'].forEach(id => {
+    document.getElementById(id).style.display = id === viewId ? 'flex' : 'none';
+  });
+  if (viewId === 'app') document.getElementById('app').style.display = 'flex';
+}
+
+function enterApp() {
+  show('app');
+  document.getElementById('h-username').textContent = currentUser.username;
+  if (currentUser.role === 'admin') renderAdmin();
+  else renderUser();
+}
+
+// ============================================================
+// SCORE CALCULATION
+// ============================================================
+function calcScore(checkins) {
+  return checkins.reduce((sum, c) => {
+    return sum + c.nb * MULT.nb + c.sb * MULT.sb + c.sh * MULT.sh + c.co * MULT.co + c.jo * MULT.jo;
+  }, 0);
+}
+
+function calcScoreFromEntry(c) {
+  return c.nb * MULT.nb + c.sb * MULT.sb + c.sh * MULT.sh + c.co * MULT.co + c.jo * MULT.jo;
+}
+
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function fmt(n) { return n.toFixed(1); }
+
+// ============================================================
+// SCOREBOARD RENDER (shared)
+// ============================================================
+function renderScoreboard(state) {
+  const users = state.users.filter(u => u.role !== 'admin');
+  const scored = users.map(u => ({
+    name: u.username,
+    score: calcScore(u.checkins),
+    days: u.checkins.length,
+    last: u.checkins[u.checkins.length - 1]?.date || '—'
+  })).sort((a, b) => b.score - a.score);
+
+  let html = `
+    <div class="score-row header-row">
+      <span>#</span><span>User</span>
+      <span style="text-align:right">Total 🍺eq</span>
+      <span style="text-align:right">Days</span>
+      <span style="text-align:right">Avg/day</span>
+      <span style="text-align:right">Last entry</span>
+    </div>`;
+
+  scored.forEach((u, i) => {
+    const cls = i === 0 ? 'top-1' : i === 1 ? 'top-2' : i === 2 ? 'top-3' : '';
+    const avg = u.days > 0 ? fmt(u.score / u.days) : '0.0';
+    html += `
+      <div class="score-row ${cls}">
+        <div class="rank">${i+1}</div>
+        <div class="user-name">${u.name}</div>
+        <div class="score-val">${fmt(u.score)}</div>
+        <div class="score-val">${u.days}</div>
+        <div class="score-val">${avg}</div>
+        <div class="score-sub">${u.last}</div>
+      </div>`;
+  });
+
+  return html || '<p style="color:#666;font-size:.9rem">No users yet.</p>';
+}
+
+// ============================================================
+// USER VIEW
+// ============================================================
+function renderUser() {
+  const state = load();
+  const u = state.users.find(x => x.username === currentUser.username);
+  const todayKey = today();
+  const checkedIn = u.checkins.some(c => c.date === todayKey);
+
+  const totalScore = calcScore(u.checkins);
+  const days = u.checkins.length;
+  const avg = days > 0 ? fmt(totalScore / days) : '0.0';
+  const best = u.checkins.reduce((max, c) => {
+    const s = calcScoreFromEntry(c);
+    return s > max ? s : max;
+  }, 0);
+
+  let html = `
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab(this,'tab-score')">Scoreboard</button>
+      <button class="tab" onclick="switchTab(this,'tab-history')">My History</button>
+    </div>`;
+
+  /* ---- tab: scoreboard ---- */
+  html += `<div id="tab-score">`;
+
+  if (!checkedIn) {
+    html += `
+      <div class="checkin-banner">
+        <div>
+          <p>🎯 Daily check-in pending</p>
+          <small>Don't forget to log today's intake!</small>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openCheckin()">Check in</button>
+      </div>`;
+  }
+
+  html += `
+    <div class="summary-bar">
+      <div class="summary-card"><div class="summary-label">Total 🍺 eq</div><div class="summary-val gold">${fmt(totalScore)}</div></div>
+      <div class="summary-card"><div class="summary-label">Days logged</div><div class="summary-val">${days}</div></div>
+      <div class="summary-card"><div class="summary-label">Daily avg</div><div class="summary-val">${avg}</div></div>
+      <div class="summary-card"><div class="summary-label">Best day</div><div class="summary-val">${fmt(best)}</div></div>
+    </div>
+    <div class="section-title">Scoreboard</div>
+    <div class="scoreboard">${renderScoreboard(state)}</div>
+  </div>`;
+
+  /* ---- tab: history ---- */
+  html += `<div id="tab-history" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div class="section-title" style="margin:0">My History</div>
+      <button class="btn btn-primary btn-sm" onclick="openCheckin()">+ Check in today</button>
+    </div>
+    <div class="card">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Date</th><th>🍺</th><th>🍻</th><th>🥃</th><th>🍹</th><th>🚬</th><th>🍺eq</th>
+          </tr>
+        </thead>
+        <tbody>`;
+
+  const sorted = [...u.checkins].sort((a,b) => b.date.localeCompare(a.date));
+  if (sorted.length === 0) {
+    html += `<tr><td colspan="7" style="color:#555;text-align:center;padding:1.5rem">No check-ins yet.</td></tr>`;
+  } else {
+    sorted.forEach(c => {
+      const eq = fmt(calcScoreFromEntry(c));
+      html += `<tr>
+        <td>${c.date}</td>
+        <td>${c.nb}</td><td>${c.sb}</td><td>${c.sh}</td><td>${c.co}</td><td>${c.jo}</td>
+        <td class="gold">${eq}</td>
+      </tr>`;
+    });
+  }
+
+  html += `</tbody></table></div></div>`;
+
+  document.getElementById('main-content').innerHTML = html;
+}
+
+// ============================================================
+// ADMIN VIEW
+// ============================================================
+function renderAdmin() {
+  const state = load();
+  const nonAdminUsers = state.users.filter(u => u.role !== 'admin');
+
+  let userListHtml = '';
+  if (nonAdminUsers.length === 0) {
+    userListHtml = '<p style="color:#555;font-size:.875rem">No users yet. Add one →</p>';
+  } else {
+    nonAdminUsers.forEach(u => {
+      const score = calcScore(u.checkins);
+      const days = u.checkins.length;
+      const checkedToday = u.checkins.some(c => c.date === today());
+      userListHtml += `
+        <div class="user-list-item">
+          <div>
+            <div class="name">${u.username} ${u.mustChangePw ? '<span style="font-size:.7rem;color:#e8a;margin-left:4px">needs pw change</span>' : ''}</div>
+            <div class="meta">${fmt(score)} 🍺eq · ${days} days · ${checkedToday ? '✅ checked in today' : '⏳ not checked in'}</div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-ghost btn-sm" onclick="openResetPw('${u.username}')">Reset PW</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.username}')">Delete</button>
+          </div>
+        </div>`;
+    });
+  }
+
+  const html = `
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab(this,'atab-score')">Scoreboard</button>
+      <button class="tab" onclick="switchTab(this,'atab-users')">Manage Users</button>
+    </div>
+
+    <div id="atab-score">
+      <div class="section-title">Scoreboard</div>
+      <div class="scoreboard">${renderScoreboard(state)}</div>
+    </div>
+
+    <div id="atab-users" style="display:none">
+      <div class="admin-grid">
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+            <div class="section-title" style="margin:0">Users</div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('add-user-modal')">+ Add User</button>
+          </div>
+          <div class="user-list">${userListHtml}</div>
+        </div>
+        <div>
+          <div class="section-title">Multipliers</div>
+          <div class="card">
+            <p style="font-size:.8rem;color:#666;margin-bottom:1rem">Current conversion rates to standard beer equivalents. Edit the <code style="background:#111;padding:2px 6px;border-radius:4px;font-size:.8rem">MULT</code> object at the top of the &lt;script&gt; tag to change.</p>
+            <table class="history-table">
+              <thead><tr><th>Item</th><th>Multiplier</th></tr></thead>
+              <tbody>
+                <tr><td>🍺 Normal beer</td><td class="gold">${MULT.nb}×</td></tr>
+                <tr><td>🍻 Special beer</td><td class="gold">${MULT.sb}×</td></tr>
+                <tr><td>🥃 Shot</td><td class="gold">${MULT.sh}×</td></tr>
+                <tr><td>🍹 Cocktail</td><td class="gold">${MULT.co}×</td></tr>
+                <tr><td>🚬 Joint</td><td class="gold">${MULT.jo}×</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById('main-content').innerHTML = html;
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(el, targetId) {
+  const tabArea = el.closest('.tabs');
+  tabArea.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+
+  // hide all sibling tab panels (they follow .tabs in the DOM)
+  let sibling = tabArea.nextElementSibling;
+  while (sibling) {
+    if (sibling.id && sibling.id.startsWith('tab') || sibling.id && sibling.id.startsWith('atab')) {
+      sibling.style.display = sibling.id === targetId ? 'block' : 'none';
+    }
+    sibling = sibling.nextElementSibling;
+  }
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+function doAddUser() {
+  const username = document.getElementById('nu-user').value.trim().toLowerCase();
+  const password = document.getElementById('nu-pass').value;
+  const err = document.getElementById('nu-err');
+  if (!username || username.includes(' ')) { err.textContent = 'Username required, no spaces.'; return; }
+  if (password.length < 3) { err.textContent = 'Password too short.'; return; }
+  const state = load();
+  if (state.users.find(u => u.username === username)) { err.textContent = 'Username already exists.'; return; }
+  state.users.push({ username, password, role: 'user', mustChangePw: true, checkins: [] });
+  save(state);
+  err.textContent = '';
+  document.getElementById('nu-user').value = '';
+  document.getElementById('nu-pass').value = '';
+  closeModal('add-user-modal');
+  showToast(`User "${username}" created!`);
+  renderAdmin();
+}
+
+let resetTarget = null;
+
+function openResetPw(username) {
+  resetTarget = username;
+  document.getElementById('reset-target-name').textContent = username;
+  document.getElementById('rp-pass').value = '';
+  document.getElementById('rp-err').textContent = '';
+  openModal('reset-pw-modal');
+}
+
+function doResetPw() {
+  const pw = document.getElementById('rp-pass').value;
+  if (pw.length < 3) { document.getElementById('rp-err').textContent = 'Too short.'; return; }
+  const state = load();
+  const u = state.users.find(x => x.username === resetTarget);
+  u.password = pw;
+  u.mustChangePw = true;
+  save(state);
+  closeModal('reset-pw-modal');
+  showToast(`Password reset for "${resetTarget}"`);
+  renderAdmin();
+}
+
+function deleteUser(username) {
+  if (!confirm(`Delete user "${username}"? All their data will be lost.`)) return;
+  const state = load();
+  state.users = state.users.filter(u => u.username !== username);
+  save(state);
+  showToast(`User "${username}" deleted.`);
+  renderAdmin();
+}
+
+// ============================================================
+// DAILY CHECK-IN
+// ============================================================
+const counts = { nb: 0, sb: 0, sh: 0, co: 0, jo: 0 };
+
+function adj(key, delta) {
+  counts[key] = Math.max(0, counts[key] + delta);
+  document.getElementById('cnt-' + key).textContent = counts[key];
+  updateEquiv();
+}
+
+function updateEquiv() {
+  const eq = counts.nb * MULT.nb + counts.sb * MULT.sb + counts.sh * MULT.sh + counts.co * MULT.co + counts.jo * MULT.jo;
+  document.getElementById('checkin-equiv').textContent = `= ${eq.toFixed(2)} standard beer equivalents`;
+}
+
+function openCheckin() {
+  const state = load();
+  const u = state.users.find(x => x.username === currentUser.username);
+  const todayKey = today();
+  const existing = u.checkins.find(c => c.date === todayKey);
+
+  Object.keys(counts).forEach(k => counts[k] = existing ? existing[k] : 0);
+  ['nb','sb','sh','co','jo'].forEach(k => { document.getElementById('cnt-' + k).textContent = counts[k]; });
+  updateEquiv();
+
+  const d = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('checkin-modal-date').textContent = `${d} — ${existing ? 'updating existing entry' : 'new entry'}`;
+  openModal('checkin-modal');
+}
+
+function submitCheckin() {
+  const state = load();
+  const u = state.users.find(x => x.username === currentUser.username);
+  const todayKey = today();
+  const idx = u.checkins.findIndex(c => c.date === todayKey);
+  const entry = { date: todayKey, nb: counts.nb, sb: counts.sb, sh: counts.sh, co: counts.co, jo: counts.jo };
+  if (idx >= 0) u.checkins[idx] = entry;
+  else u.checkins.push(entry);
+  save(state);
+  currentUser = u;
+  closeModal('checkin-modal');
+  showToast('Check-in saved! 🍺');
+  renderUser();
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ============================================================
+// KEY BINDINGS
+// ============================================================
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('login-view').style.display !== 'none') doLogin();
+    if (document.getElementById('changepw-view').style.display !== 'none') doChangePw();
+  }
+  if (e.key === 'Escape') {
+    ['add-user-modal','reset-pw-modal','checkin-modal'].forEach(id => closeModal(id));
+  }
+});
+
+// ============================================================
+// BOOT
+// ============================================================
+show('login-view');
+
+// ============================================================
+// PWA SERVICE WORKER REGISTRATION
+// ============================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js').then(reg => {
+      console.log('Service Worker registered successfully', reg);
+    }).catch(err => {
+      console.log('Service Worker registration failed:', err);
+    });
+  });
+}
+</script>
+</body>
+</html>
