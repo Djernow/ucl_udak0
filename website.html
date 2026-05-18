@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="true">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="DrinkBoard">
+<meta name="apple-mobile-web-app-title" content="UDAKO CL">
 <meta name="theme-color" content="#e8c84a">
 <link rel="manifest" href="/manifest.json">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23e8c84a' width='192' height='192'/><text x='50%' y='50%' font-size='120' font-weight='bold' text-anchor='middle' dy='.3em' fill='%230f0f11' font-family='Arial'>DB</text></svg>">
-<title>DrinkBoard</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23e8c84a' width='192' height='192'/><text x='50%' y='50%' font-size='90' font-weight='bold' text-anchor='middle' dy='.3em' fill='%230f0f11' font-family='Arial'>UCL</text></svg>">
+<title>UDAKO champions league</title>
 <style>
   /* ============================================================
      DEVELOPER CONFIG — CHANGE MULTIPLIERS HERE
@@ -462,8 +462,8 @@
 <!-- LOGIN -->
 <div id="login-view">
   <div class="login-box">
-    <div class="login-logo">DrinkBoard</div>
-    <div class="login-sub">Track what really matters</div>
+    <div class="login-logo">UDAKO</div>
+    <div class="login-sub">Champions League</div>
     <div class="login-form">
       <div class="field"><label>Username</label><input id="l-user" type="text" autocomplete="username" placeholder="enter username"></div>
       <div class="field"><label>Password</label><input id="l-pass" type="password" autocomplete="current-password" placeholder="enter password"></div>
@@ -491,7 +491,7 @@
 <!-- MAIN APP -->
 <div id="app" style="display:none">
   <header>
-    <div class="logo">DrinkBoard <span>scoreboard</span></div>
+    <div class="logo">UDAKO <span>champions league</span></div>
     <div class="header-right">
       <div class="user-chip">Signed in as <b id="h-username">—</b></div>
       <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign out</button>
@@ -612,7 +612,7 @@ const MULT = {
 // ============================================================
 // STORAGE HELPERS
 // ============================================================
-const STORE_KEY = 'drinkboard_v1';
+const STORE_KEY = 'udako-cl-v1';
 
 function load() {
   try { return JSON.parse(localStorage.getItem(STORE_KEY)) || defaultState(); }

@@ -1,7 +1,7 @@
-// Service Worker for DrinkBoard PWA
+// Service Worker for UDAKO CL PWA
 // Enables offline support and app caching
 
-const CACHE_NAME = 'drinkboard-v1';
+const CACHE_NAME = 'udako-cl-v1';
 const urlsToCache = [
   '/',
   '/index.html',

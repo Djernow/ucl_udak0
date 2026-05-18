@@ -1,4 +1,4 @@
-# DrinkBoard — PWA Setup & Android Installation
+# UDAKO CL — PWA Setup & Android Installation
 
 ## What's New
 
@@ -17,7 +17,7 @@ Your website is now a **Progressive Web App (PWA)** — installable on Android, 
 2. Wait 2–3 seconds
 3. Look for the **"Install app"** prompt at the bottom or in the menu (⋮ → "Install app")
 4. Tap **Install**
-5. App appears on your home screen!
+5. App appears on your home screen as **UDAKO CL**!
 
 ### Option 2: Manual Add to Home Screen
 1. Open `https://udako.libertronics.org` in Chrome
@@ -65,7 +65,7 @@ The service worker caches the main files on first visit. After that:
 When you update `website.html`, `manifest.json`, or `service-worker.js`:
 1. Users will get the new version on their next visit
 2. The old cache automatically clears
-3. **Manually:** Users can clear app data in Android Settings → Apps → DrinkBoard → Storage → Clear Cache
+3. **Manually:** Users can clear app data in Android Settings → Apps → UDAKO CL → Storage → Clear Cache
 
 ## Testing Offline (Chrome DevTools)
 
@@ -83,7 +83,7 @@ When you update `website.html`, `manifest.json`, or `service-worker.js`:
 
 **Changes not showing up?**
 - Force refresh: `Ctrl+Shift+R` (or `Cmd+Shift+R` on Mac)
-- Clear app cache: Android Settings → Apps → DrinkBoard → Storage → Clear Cache
+- Clear app cache: Android Settings → Apps → UDAKO CL → Storage → Clear Cache
 - Uninstall and reinstall the app
 
 **Service Worker errors in console?**
@@ -120,4 +120,4 @@ Ensure your TrueNAS dataset has all these files:
 
 ---
 
-**Happy tracking!** 🍺
+**Let the games begin!** 🏆
