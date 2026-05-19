@@ -1,15 +1,38 @@
 version: "3.9"
 services:
-  static-site:
+  # Backend API (Flask)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_PATH=/data/udako.db
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+    volumes:
+      - /mnt/immich/Jarno_app/udako/data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Frontend (Apache httpd)
+  frontend:
     image: httpd:alpine
     restart: unless-stopped
     ports:
       - "50995:80"
     volumes:
       - /mnt/immich/Jarno_app/udako:/usr/local/apache2/htdocs:ro
+    depends_on:
+      - backend
 
 # Notes:
-# - Paste this file into the TrueNAS SCALE Apps → Launch Docker Image → Custom Compose YAML field
-#   or upload it when creating a custom application.
-# - Adjust the host path if your dataset is at a different location.
-# - Ensure `website.html` is present at /mnt/immich/Jarno_app/udako and readable by the container.
+# - Backend stores data in /mnt/immich/Jarno_app/udako/data/udako.db
+# - Frontend serves HTML/CSS/JS from /mnt/immich/Jarno_app/udako
+# - API available at http://backend:5000/api/*
+# - Frontend calls API at /api/* (proxied by Cloudflare or reverse proxy)
