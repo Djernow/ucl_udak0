@@ -193,8 +193,11 @@ def login():
     user = cursor.fetchone()
     db.close()
 
+    if not user:
+        return jsonify({'error': 'Invalid username or password'}), 401
+
     pw_hash = user['password_hash'] or user['password']
-    if not user or not pw_hash or not check_password_hash(pw_hash, password):
+    if not pw_hash or not check_password_hash(pw_hash, password):
         return jsonify({'error': 'Invalid username or password'}), 401
     
     session['user_id'] = user['id']
