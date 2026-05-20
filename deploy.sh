@@ -21,12 +21,14 @@ echo ""
 echo "🔍 Checking required files..."
 REQUIRED_FILES=(
     "website.html"
+    "index.html"
     "manifest.json"
     "service-worker.js"
     "app.py"
     "requirements.txt"
     "Dockerfile.backend"
     "docker-compose.yaml"
+    "httpd.conf"
     "httpd-proxy.conf"
 )
 
@@ -63,6 +65,7 @@ cp -v "$SCRIPT_DIR/app.py" "$DATASET_PATH/"
 cp -v "$SCRIPT_DIR/requirements.txt" "$DATASET_PATH/"
 cp -v "$SCRIPT_DIR/Dockerfile.backend" "$DATASET_PATH/"
 cp -v "$SCRIPT_DIR/docker-compose.yaml" "$DATASET_PATH/"
+cp -v "$SCRIPT_DIR/httpd.conf" "$DATASET_PATH/"
 cp -v "$SCRIPT_DIR/httpd-proxy.conf" "$DATASET_PATH/"
 
 # Set correct permissions
@@ -75,6 +78,7 @@ chmod 644 "$DATASET_PATH/app.py"
 chmod 644 "$DATASET_PATH/requirements.txt"
 chmod 644 "$DATASET_PATH/Dockerfile.backend"
 chmod 644 "$DATASET_PATH/docker-compose.yaml"
+chmod 644 "$DATASET_PATH/httpd.conf"
 chmod 644 "$DATASET_PATH/httpd-proxy.conf"
 
 # Verify all files were deployed
