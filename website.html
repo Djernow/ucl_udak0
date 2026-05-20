@@ -837,6 +837,7 @@ function buildMonthlyStats(checkins) {
   const monthIndex = now.getMonth();
   const monthKey = `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
   const totalDays = daysInMonth(year, monthIndex);
+  const daysSoFar = now.getDate();
 
   let totalScore = 0;
   let daysWith = 0;
@@ -857,8 +858,8 @@ function buildMonthlyStats(checkins) {
     }
   });
 
-  const daysWithout = Math.max(0, totalDays - daysWith);
-  const avgMonth = totalDays > 0 ? totalScore / totalDays : 0;
+  const daysWithout = Math.max(0, daysSoFar - daysWith);
+  const avgMonth = daysSoFar > 0 ? totalScore / daysSoFar : 0;
   const label = now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 
   return {
