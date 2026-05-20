@@ -27,7 +27,7 @@ services:
       - "50995:80"
     volumes:
       - /home/jali/Documents/nextcloud/laptop/vrije_tijd/ucl_udak0:/usr/local/apache2/htdocs:ro
-      - /home/jali/Documents/nextcloud/laptop/vrije_tijd/ucl_udak0/httpd-proxy.conf:/usr/local/apache2/conf.d/proxy.conf:ro
+      - /home/jali/Documents/nextcloud/laptop/vrije_tijd/ucl_udak0/httpd-proxy.conf:/usr/local/apache2/conf/httpd.conf:ro
     depends_on:
       - backend
     networks:
