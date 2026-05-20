@@ -734,7 +734,10 @@ function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function fmt(n) { return n.toFixed(1); }
+function fmt(n) {
+  const val = typeof n === 'number' ? n : Number(n);
+  return Number.isFinite(val) ? val.toFixed(1) : '0.0';
+}
 
 // ============================================================
 // USER VIEW
@@ -1113,7 +1116,24 @@ document.addEventListener('keydown', e => {
 // ============================================================
 // BOOT
 // ============================================================
-show('login-view');
+async function bootstrap() {
+  try {
+    const data = await apiCall('/auth/me');
+    currentUser = data.user;
+
+    if (currentUser.must_change_pw) {
+      show('changepw-view');
+      return;
+    }
+
+    enterApp();
+  } catch (err) {
+    currentUser = null;
+    show('login-view');
+  }
+}
+
+bootstrap();
 
 // ============================================================
 // PWA SERVICE WORKER REGISTRATION
