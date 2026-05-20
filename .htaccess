@@ -1,0 +1,16 @@
+# Disable directory listing
+Options -Indexes
+
+# Set website.html as the default index
+DirectoryIndex website.html index.html
+
+# Enable mod_rewrite
+RewriteEngine On
+RewriteBase /
+
+# Don't rewrite if it's a real file or directory
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Rewrite all requests to website.html for SPA routing
+RewriteRule ^(.*)$ /website.html [L]
