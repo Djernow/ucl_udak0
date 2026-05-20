@@ -199,6 +199,7 @@ def login():
     if not pw_hash or not check_password_hash(pw_hash, password):
         return jsonify({'error': 'Invalid username or password'}), 401
     
+    session.clear()
     session['user_id'] = user['id']
     session['username'] = username
     session['role'] = user['role']
@@ -215,7 +216,15 @@ def login():
 @app.route('/api/auth/logout', methods=['POST'])
 def logout():
     session.clear()
-    return jsonify({'success': True}), 200
+    response = jsonify({'success': True})
+    response.delete_cookie(
+        app.config.get('SESSION_COOKIE_NAME', 'session'),
+        path='/',
+        samesite=app.config.get('SESSION_COOKIE_SAMESITE', 'Lax'),
+        secure=app.config.get('SESSION_COOKIE_SECURE', True),
+        httponly=app.config.get('SESSION_COOKIE_HTTPONLY', True)
+    )
+    return response, 200
 
 @app.route('/api/auth/me', methods=['GET'])
 @require_auth
