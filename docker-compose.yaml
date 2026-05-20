@@ -2,7 +2,7 @@ services:
   # Backend API (Flask)
   backend:
     build:
-      context: /home/jali/Documents/nextcloud/laptop/vrije_tijd/ucl_udak0
+      context: /mnt/immich/Jarno_app/udako
       dockerfile: Dockerfile.backend
     image: udako-backend:latest
     container_name: udako-backend
@@ -12,7 +12,7 @@ services:
       - DATABASE_PATH=/data/udako.db
       - SECRET_KEY=${SECRET_KEY:-dev-key-change-in-production}
     volumes:
-      - /home/jali/Documents/nextcloud/laptop/vrije_tijd/ucl_udak0/data:/data
+      - /mnt/immich/Jarno_app/udako/data:/data
     networks:
       - udako-net
     expose:
@@ -26,8 +26,9 @@ services:
     ports:
       - "50995:80"
     volumes:
-      - /home/jali/Documents/nextcloud/laptop/vrije_tijd/ucl_udak0:/usr/local/apache2/htdocs:ro
-      - /home/jali/Documents/nextcloud/laptop/vrije_tijd/ucl_udak0/httpd-proxy.conf:/usr/local/apache2/conf/httpd.conf:ro
+      - /mnt/immich/Jarno_app/udako:/usr/local/apache2/htdocs:ro
+      - /mnt/immich/Jarno_app/udako/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+      - /mnt/immich/Jarno_app/udako/httpd-proxy.conf:/usr/local/apache2/conf/extra/httpd-proxy.conf:ro
     depends_on:
       - backend
     networks:
