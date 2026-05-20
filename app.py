@@ -1,29 +1,20 @@
-"""
-UDAKO Champions League Backend
-Flask + SQLite API for persistent scoreboard tracking
-"""
-
 import os
-import json
+import sqlite3
 from datetime import datetime
 from functools import wraps
-import sqlite3
 from flask import Flask, request, jsonify, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# ============================================================
-# Configuration
-# ============================================================
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SECURE'] = True  # Set to False if not using HTTPS
+app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 DATABASE = os.environ.get('DATABASE_PATH', '/data/udako.db')
 
 # ============================================================
-# Database helpers
+# DATABASE INITIALIZATION
 # ============================================================
 def get_db():
     """Get database connection"""
@@ -32,11 +23,11 @@ def get_db():
     return db
 
 def init_db():
-    """Initialize database schema"""
+    """Initialize database schema if not exists."""
     db = get_db()
     cursor = db.cursor()
     
-    # Users table
+    # Create users table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,8 +73,11 @@ def init_db():
     
     db.close()
 
+# Initialize DB on startup
+init_db()
+
 # ============================================================
-# Auth helpers
+# DECORATORS
 # ============================================================
 def require_auth(f):
     """Decorator: require user to be logged in"""
@@ -114,7 +108,51 @@ def require_admin(f):
     return decorated
 
 # ============================================================
-# Auth endpoints
+# HELPER FUNCTIONS
+# ============================================================
+def get_user_by_id(user_id):
+    db = get_db()
+    user = db.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+    db.close()
+    return user
+
+def get_user_by_username(username):
+    db = get_db()
+    user = db.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+    db.close()
+    return user
+
+def user_to_dict(user):
+    return {
+        'id': user['id'],
+        'username': user['username'],
+        'role': user['role'],
+        'must_change_pw': bool(user['must_change_pw']),
+        'created_at': user['created_at']
+    }
+
+def checkin_to_dict(row):
+    return {
+        'id': row['id'],
+        'user_id': row['user_id'],
+        'date': row['date'],
+        'nb': row['nb'],
+        'sb': row['sb'],
+        'sh': row['sh'],
+        'co': row['co'],
+        'jo': row['jo'],
+        'created_at': row['created_at']
+    }
+
+# ============================================================
+# HEALTH CHECK
+# ============================================================
+@app.route('/api/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'ok'}), 200
+
+# ============================================================
+# AUTHENTICATION ENDPOINTS
 # ============================================================
 @app.route('/api/auth/login', methods=['POST'])
 def login():
@@ -149,278 +187,280 @@ def login():
     })
 
 @app.route('/api/auth/logout', methods=['POST'])
-@require_auth
 def logout():
-    """Logout user"""
     session.clear()
-    return jsonify({'success': True})
+    return jsonify({'success': True}), 200
 
 @app.route('/api/auth/me', methods=['GET'])
 @require_auth
-def get_me():
-    """Get current user info"""
-    return jsonify({
-        'user': {
-            'username': session.get('username'),
-            'role': session.get('role')
-        }
-    })
+def get_current_user():
+    user = get_user_by_id(session['user_id'])
+    if not user:
+        session.clear()
+        return jsonify({'error': 'User not found'}), 404
+    
+    return jsonify({'user': user_to_dict(user)}), 200
 
 @app.route('/api/auth/change-password', methods=['POST'])
 @require_auth
 def change_password():
-    """Change user password"""
-    data = request.json or {}
-    new_password = data.get('password', '')
+    data = request.get_json() or {}
+    password = data.get('password', '')
     
-    if len(new_password) < 4:
+    if not password or len(password) < 4:
         return jsonify({'error': 'Password must be at least 4 characters'}), 400
     
     db = get_db()
-    cursor = db.cursor()
-    pw_hash = generate_password_hash(new_password)
-    cursor.execute(
-        'UPDATE users SET password = ?, must_change_pw = 0 WHERE id = ?',
+    pw_hash = generate_password_hash(password)
+    db.execute(
+        'UPDATE users SET password_hash = ?, must_change_pw = 0 WHERE id = ?',
         (pw_hash, session['user_id'])
     )
     db.commit()
     db.close()
     
-    return jsonify({'success': True})
+    return jsonify({'success': True}), 200
 
 # ============================================================
-# User management (admin)
+# USER MANAGEMENT ENDPOINTS (ADMIN ONLY)
 # ============================================================
 @app.route('/api/users', methods=['GET'])
 @require_admin
 def get_users():
-    """Get all users (admin only)"""
     db = get_db()
-    cursor = db.cursor()
-    cursor.execute('SELECT id, username, role, must_change_pw FROM users WHERE role != ?', ('admin',))
-    users = cursor.fetchall()
+    users = db.execute('SELECT * FROM users ORDER BY username').fetchall()
     db.close()
     
+    # Enrich with checkin stats
     result = []
-    for u in users:
-        # Get score and check-in count
+    for user in users:
+        u_dict = user_to_dict(user)
+        
+        # Get checkin count and last date
         db = get_db()
-        cursor = db.cursor()
-        cursor.execute('SELECT COUNT(*) as days FROM checkins WHERE user_id = ?', (u['id'],))
-        days = cursor.fetchone()['days']
+        row = db.execute(
+            'SELECT COUNT(*) as days, MAX(date) as last_date FROM checkins WHERE user_id = ?',
+            (user['id'],)
+        ).fetchone()
         db.close()
         
-        result.append({
-            'username': u['username'],
-            'role': u['role'],
-            'must_change_pw': bool(u['must_change_pw']),
-            'days': days
-        })
+        u_dict['days'] = row['days'] or 0
+        u_dict['last_date'] = row['last_date']
+        
+        result.append(u_dict)
     
-    return jsonify({'users': result})
+    return jsonify({'users': result}), 200
 
 @app.route('/api/users/add', methods=['POST'])
 @require_admin
 def add_user():
-    """Add new user (admin only)"""
-    data = request.json or {}
+    data = request.get_json() or {}
     username = data.get('username', '').strip().lower()
     password = data.get('password', '')
     
-    if not username or username.count(' ') > 0:
-        return jsonify({'error': 'Username required, no spaces'}), 400
+    if not username or not password:
+        return jsonify({'error': 'Username and password required'}), 400
+    
+    if ' ' in username:
+        return jsonify({'error': 'Username cannot contain spaces'}), 400
     
     if len(password) < 3:
         return jsonify({'error': 'Password too short'}), 400
     
+    # Check if username exists
+    if get_user_by_username(username):
+        return jsonify({'error': 'User already exists'}), 409
+    
     db = get_db()
-    cursor = db.cursor()
+    pw_hash = generate_password_hash(password)
     
-    # Check if user exists
-    cursor.execute('SELECT id FROM users WHERE username = ?', (username,))
-    if cursor.fetchone():
-        db.close()
-        return jsonify({'error': 'Username already exists'}), 400
-    
-    # Create user
     try:
-        pw_hash = generate_password_hash(password)
-        cursor.execute(
-            'INSERT INTO users (username, password, role, must_change_pw) VALUES (?, ?, ?, ?)',
+        db.execute(
+            'INSERT INTO users (username, password_hash, role, must_change_pw) VALUES (?, ?, ?, ?)',
             (username, pw_hash, 'user', 1)
         )
         db.commit()
         db.close()
-        return jsonify({'success': True, 'message': f'User "{username}" created'})
-    except Exception as e:
+        
+        return jsonify({'success': True, 'message': f'User {username} created'}), 201
+    except sqlite3.IntegrityError:
         db.close()
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/users/delete', methods=['POST'])
-@require_admin
-def delete_user():
-    """Delete user (admin only)"""
-    data = request.json or {}
-    username = data.get('username', '')
-    
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute('DELETE FROM users WHERE username = ? AND role != ?', (username, 'admin'))
-    db.commit()
-    db.close()
-    
-    return jsonify({'success': True, 'message': f'User "{username}" deleted'})
+        return jsonify({'error': 'User already exists'}), 409
 
 @app.route('/api/users/reset-password', methods=['POST'])
 @require_admin
 def reset_password():
-    """Reset user password (admin only)"""
-    data = request.json or {}
-    username = data.get('username', '')
-    new_password = data.get('password', '')
+    data = request.get_json() or {}
+    username = data.get('username', '').strip().lower()
+    password = data.get('password', '')
     
-    if len(new_password) < 3:
-        return jsonify({'error': 'Password too short'}), 400
+    if not username or not password:
+        return jsonify({'error': 'Username and password required'}), 400
+    
+    user = get_user_by_username(username)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
     
     db = get_db()
-    cursor = db.cursor()
-    pw_hash = generate_password_hash(new_password)
-    cursor.execute(
-        'UPDATE users SET password = ?, must_change_pw = 1 WHERE username = ?',
-        (pw_hash, username)
+    pw_hash = generate_password_hash(password)
+    db.execute(
+        'UPDATE users SET password_hash = ?, must_change_pw = 1 WHERE id = ?',
+        (pw_hash, user['id'])
     )
     db.commit()
     db.close()
     
-    return jsonify({'success': True, 'message': f'Password reset for "{username}"'})
+    return jsonify({'success': True, 'message': f'Password reset for {username}'}), 200
+
+@app.route('/api/users/delete', methods=['POST'])
+@require_admin
+def delete_user():
+    data = request.get_json() or {}
+    username = data.get('username', '').strip().lower()
+    
+    user = get_user_by_username(username)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    if user['role'] == 'admin' and session['user_id'] == user['id']:
+        return jsonify({'error': 'Cannot delete own admin account'}), 403
+    
+    db = get_db()
+    # Delete checkins first (cascade)
+    db.execute('DELETE FROM checkins WHERE user_id = ?', (user['id'],))
+    db.execute('DELETE FROM users WHERE id = ?', (user['id'],))
+    db.commit()
+    db.close()
+    
+    return jsonify({'success': True, 'message': f'User {username} deleted'}), 200
 
 # ============================================================
-# Check-ins
+# CHECK-IN ENDPOINTS
 # ============================================================
+@app.route('/api/checkins', methods=['GET'])
+@require_auth
+def get_checkins():
+    db = get_db()
+    checkins = db.execute(
+        'SELECT * FROM checkins WHERE user_id = ? ORDER BY date DESC',
+        (session['user_id'],)
+    ).fetchall()
+    db.close()
+    
+    return jsonify({
+        'checkins': [checkin_to_dict(row) for row in checkins]
+    }), 200
+
 @app.route('/api/checkins', methods=['POST'])
 @require_auth
-def create_checkin():
-    """Create or update check-in for today"""
-    data = request.json or {}
+def create_or_update_checkin():
+    data = request.get_json() or {}
     
-    checkin = {
-        'nb': int(data.get('nb', 0)),
-        'sb': int(data.get('sb', 0)),
-        'sh': int(data.get('sh', 0)),
-        'co': int(data.get('co', 0)),
-        'jo': int(data.get('jo', 0))
-    }
+    # Extract counts
+    nb = data.get('nb', 0)
+    sb = data.get('sb', 0)
+    sh = data.get('sh', 0)
+    co = data.get('co', 0)
+    jo = data.get('jo', 0)
+    
+    # Validate
+    for val in [nb, sb, sh, co, jo]:
+        if not isinstance(val, int) or val < 0:
+            return jsonify({'error': 'Invalid input'}), 400
     
     today = datetime.now().strftime('%Y-%m-%d')
     
     db = get_db()
-    cursor = db.cursor()
     
     # Check if exists
-    cursor.execute(
+    existing = db.execute(
         'SELECT id FROM checkins WHERE user_id = ? AND date = ?',
         (session['user_id'], today)
-    )
-    existing = cursor.fetchone()
+    ).fetchone()
     
     if existing:
         # Update
-        cursor.execute(
-            'UPDATE checkins SET nb=?, sb=?, sh=?, co=?, jo=? WHERE user_id = ? AND date = ?',
-            (checkin['nb'], checkin['sb'], checkin['sh'], checkin['co'], checkin['jo'], session['user_id'], today)
+        db.execute(
+            'UPDATE checkins SET nb=?, sb=?, sh=?, co=?, jo=? WHERE id = ?',
+            (nb, sb, sh, co, jo, existing['id'])
         )
     else:
         # Insert
-        cursor.execute(
+        db.execute(
             'INSERT INTO checkins (user_id, date, nb, sb, sh, co, jo) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            (session['user_id'], today, checkin['nb'], checkin['sb'], checkin['sh'], checkin['co'], checkin['jo'])
+            (session['user_id'], today, nb, sb, sh, co, jo)
         )
     
     db.commit()
     db.close()
     
-    return jsonify({'success': True, 'message': 'Check-in saved'})
-
-@app.route('/api/checkins', methods=['GET'])
-@require_auth
-def get_checkins():
-    """Get user's check-ins"""
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute(
-        'SELECT date, nb, sb, sh, co, jo FROM checkins WHERE user_id = ? ORDER BY date DESC',
-        (session['user_id'],)
-    )
-    checkins = cursor.fetchall()
-    db.close()
-    
-    result = [dict(c) for c in checkins]
-    return jsonify({'checkins': result})
+    return jsonify({'success': True, 'message': 'Check-in saved'}), 200
 
 # ============================================================
-# Scoreboard
+# SCOREBOARD ENDPOINT (PUBLIC)
 # ============================================================
 @app.route('/api/scoreboard', methods=['GET'])
 def get_scoreboard():
-    """Get scoreboard (public)"""
-    db = get_db()
-    cursor = db.cursor()
+    """Public endpoint with ranking and score calculation."""
     
-    # Get all non-admin users with their stats
-    cursor.execute('''
-        SELECT u.id, u.username, 
-               COUNT(c.id) as days,
-               SUM(c.nb * 1.0 + c.sb * 1.5 + c.sh * 0.75 + c.co * 1.25 + c.jo * 2.0) as total_score,
-               MAX(c.date) as last_date
+    db = get_db()
+    
+    # Get all users with checkin stats
+    users_query = '''
+        SELECT 
+            u.id,
+            u.username,
+            COUNT(c.id) as days,
+            MAX(c.date) as last_date,
+            SUM(c.nb * 1.0 + c.sb * 1.5 + c.sh * 0.75 + c.co * 1.25 + c.jo * 2.0) as total_score
         FROM users u
         LEFT JOIN checkins c ON u.id = c.user_id
         WHERE u.role = 'user'
-        GROUP BY u.id
-        ORDER BY total_score DESC, days DESC
-    ''')
+        GROUP BY u.id, u.username
+        ORDER BY total_score DESC, u.username ASC
+    '''
     
-    users = cursor.fetchall()
+    rows = db.execute(users_query).fetchall()
     db.close()
     
-    result = []
-    for i, u in enumerate(users, 1):
-        score = u['total_score'] or 0.0
-        days = u['days'] or 0
+    # Build scoreboard with ranks
+    scoreboard = []
+    for idx, row in enumerate(rows, 1):
+        score = row['total_score'] or 0.0
+        days = row['days'] or 0
         avg = score / days if days > 0 else 0.0
         
-        result.append({
-            'rank': i,
-            'username': u['username'],
+        scoreboard.append({
+            'rank': idx,
+            'username': row['username'],
             'score': round(score, 1),
             'days': days,
             'avg': round(avg, 1),
-            'last_date': u['last_date'] or '—'
+            'last_date': row['last_date'] or '—'
         })
     
-    return jsonify({'scoreboard': result})
+    return jsonify({'scoreboard': scoreboard}), 200
 
 # ============================================================
-# Health check
-# ============================================================
-@app.route('/api/health', methods=['GET'])
-def health():
-    """Health check endpoint"""
-    return jsonify({'status': 'ok'})
-
-# ============================================================
-# Error handlers
+# ERROR HANDLERS
 # ============================================================
 @app.errorhandler(404)
-def not_found(e):
-    return jsonify({'error': 'Not found'}), 404
+def not_found(error):
+    return jsonify({'error': 'Endpoint not found'}), 404
 
 @app.errorhandler(500)
-def server_error(e):
-    return jsonify({'error': 'Server error'}), 500
+def server_error(error):
+    return jsonify({'error': 'Internal server error'}), 500
 
 # ============================================================
-# Main
+# RUN
 # ============================================================
 if __name__ == '__main__':
-    init_db()
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    # Ensure /data directory exists
+    os.makedirs('/data', exist_ok=True)
+    
+    app.run(
+        host='0.0.0.0',
+        port=5000,
+        debug=False
+    )

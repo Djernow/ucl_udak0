@@ -610,25 +610,32 @@ const MULT = {
 };
 
 // ============================================================
-// STORAGE HELPERS
+// API HELPERS
 // ============================================================
-const STORE_KEY = 'udako-cl-v1';
+const API_BASE = '/api';
 
-function load() {
-  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || defaultState(); }
-  catch { return defaultState(); }
-}
-
-function save(state) {
-  localStorage.setItem(STORE_KEY, JSON.stringify(state));
-}
-
-function defaultState() {
-  return {
-    users: [
-      { username: 'admin', password: 'admin123', role: 'admin', mustChangePw: false, checkins: [] }
-    ]
+async function apiCall(endpoint, method = 'GET', body = null) {
+  const options = {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'  // Send cookies for session
   };
+  
+  if (body) options.body = JSON.stringify(body);
+  
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`, options);
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP ${response.status}`);
+    }
+    
+    return data;
+  } catch (err) {
+    console.error(`API Error: ${endpoint}`, err);
+    throw err;
+  }
 }
 
 // ============================================================
@@ -636,45 +643,63 @@ function defaultState() {
 // ============================================================
 let currentUser = null;
 
-function doLogin() {
+async function doLogin() {
   const username = document.getElementById('l-user').value.trim().toLowerCase();
   const password = document.getElementById('l-pass').value;
-  const state = load();
-  const user = state.users.find(u => u.username === username);
-  if (!user || user.password !== password) {
-    document.getElementById('l-err').textContent = 'Invalid username or password.';
-    return;
+  const errEl = document.getElementById('l-err');
+  
+  try {
+    const data = await apiCall('/auth/login', 'POST', { username, password });
+    
+    errEl.textContent = '';
+    currentUser = data.user;
+    
+    if (data.user.must_change_pw) {
+      show('changepw-view');
+      return;
+    }
+    
+    enterApp();
+  } catch (err) {
+    errEl.textContent = 'Invalid username or password.';
   }
-  document.getElementById('l-err').textContent = '';
-  currentUser = user;
-  if (user.mustChangePw) {
-    show('changepw-view');
-    return;
-  }
-  enterApp();
 }
 
-function doLogout() {
+async function doLogout() {
+  try {
+    await apiCall('/auth/logout', 'POST');
+  } catch (err) {
+    console.error('Logout error:', err);
+  }
+  
   currentUser = null;
   document.getElementById('l-user').value = '';
   document.getElementById('l-pass').value = '';
   show('login-view');
 }
 
-function doChangePw() {
+async function doChangePw() {
   const p1 = document.getElementById('np1').value;
   const p2 = document.getElementById('np2').value;
   const err = document.getElementById('pw-err');
-  if (p1.length < 4) { err.textContent = 'Password must be at least 4 characters.'; return; }
-  if (p1 !== p2) { err.textContent = 'Passwords do not match.'; return; }
-  err.textContent = '';
-  const state = load();
-  const u = state.users.find(x => x.username === currentUser.username);
-  u.password = p1;
-  u.mustChangePw = false;
-  save(state);
-  currentUser = u;
-  enterApp();
+  
+  if (p1.length < 4) {
+    err.textContent = 'Password must be at least 4 characters.';
+    return;
+  }
+  
+  if (p1 !== p2) {
+    err.textContent = 'Passwords do not match.';
+    return;
+  }
+  
+  try {
+    await apiCall('/auth/change-password', 'POST', { password: p1 });
+    err.textContent = '';
+    enterApp();
+  } catch (err) {
+    err.textContent = err.message;
+  }
 }
 
 // ============================================================
@@ -687,22 +712,20 @@ function show(viewId) {
   if (viewId === 'app') document.getElementById('app').style.display = 'flex';
 }
 
-function enterApp() {
+async function enterApp() {
   show('app');
   document.getElementById('h-username').textContent = currentUser.username;
-  if (currentUser.role === 'admin') renderAdmin();
-  else renderUser();
+  
+  if (currentUser.role === 'admin') {
+    renderAdmin();
+  } else {
+    renderUser();
+  }
 }
 
 // ============================================================
 // SCORE CALCULATION
 // ============================================================
-function calcScore(checkins) {
-  return checkins.reduce((sum, c) => {
-    return sum + c.nb * MULT.nb + c.sb * MULT.sb + c.sh * MULT.sh + c.co * MULT.co + c.jo * MULT.jo;
-  }, 0);
-}
-
 function calcScoreFromEntry(c) {
   return c.nb * MULT.nb + c.sb * MULT.sb + c.sh * MULT.sh + c.co * MULT.co + c.jo * MULT.jo;
 }
@@ -714,194 +737,215 @@ function today() {
 function fmt(n) { return n.toFixed(1); }
 
 // ============================================================
-// SCOREBOARD RENDER (shared)
-// ============================================================
-function renderScoreboard(state) {
-  const users = state.users.filter(u => u.role !== 'admin');
-  const scored = users.map(u => ({
-    name: u.username,
-    score: calcScore(u.checkins),
-    days: u.checkins.length,
-    last: u.checkins[u.checkins.length - 1]?.date || '—'
-  })).sort((a, b) => b.score - a.score);
-
-  let html = `
-    <div class="score-row header-row">
-      <span>#</span><span>User</span>
-      <span style="text-align:right">Total 🍺eq</span>
-      <span style="text-align:right">Days</span>
-      <span style="text-align:right">Avg/day</span>
-      <span style="text-align:right">Last entry</span>
-    </div>`;
-
-  scored.forEach((u, i) => {
-    const cls = i === 0 ? 'top-1' : i === 1 ? 'top-2' : i === 2 ? 'top-3' : '';
-    const avg = u.days > 0 ? fmt(u.score / u.days) : '0.0';
-    html += `
-      <div class="score-row ${cls}">
-        <div class="rank">${i+1}</div>
-        <div class="user-name">${u.name}</div>
-        <div class="score-val">${fmt(u.score)}</div>
-        <div class="score-val">${u.days}</div>
-        <div class="score-val">${avg}</div>
-        <div class="score-sub">${u.last}</div>
-      </div>`;
-  });
-
-  return html || '<p style="color:#666;font-size:.9rem">No users yet.</p>';
-}
-
-// ============================================================
 // USER VIEW
 // ============================================================
-function renderUser() {
-  const state = load();
-  const u = state.users.find(x => x.username === currentUser.username);
-  const todayKey = today();
-  const checkedIn = u.checkins.some(c => c.date === todayKey);
-
-  const totalScore = calcScore(u.checkins);
-  const days = u.checkins.length;
-  const avg = days > 0 ? fmt(totalScore / days) : '0.0';
-  const best = u.checkins.reduce((max, c) => {
-    const s = calcScoreFromEntry(c);
-    return s > max ? s : max;
-  }, 0);
-
-  let html = `
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab(this,'tab-score')">Scoreboard</button>
-      <button class="tab" onclick="switchTab(this,'tab-history')">My History</button>
-    </div>`;
-
-  /* ---- tab: scoreboard ---- */
-  html += `<div id="tab-score">`;
-
-  if (!checkedIn) {
-    html += `
-      <div class="checkin-banner">
-        <div>
-          <p>🎯 Daily check-in pending</p>
-          <small>Don't forget to log today's intake!</small>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="openCheckin()">Check in</button>
+async function renderUser() {
+  try {
+    // Fetch scoreboard
+    const scoreboardData = await apiCall('/scoreboard');
+    const scoreboard = scoreboardData.scoreboard;
+    
+    // Fetch user checkins
+    const checkinsData = await apiCall('/checkins');
+    const checkins = checkinsData.checkins;
+    
+    const todayKey = today();
+    const checkedIn = checkins.some(c => c.date === todayKey);
+    
+    // Calculate stats
+    const totalScore = checkins.reduce((sum, c) => sum + calcScoreFromEntry(c), 0);
+    const days = checkins.length;
+    const avg = days > 0 ? fmt(totalScore / days) : '0.0';
+    const best = checkins.reduce((max, c) => {
+      const s = calcScoreFromEntry(c);
+      return s > max ? s : max;
+    }, 0);
+    
+    // Render scoreboard HTML
+    let scoreboardHtml = `
+      <div class="score-row header-row">
+        <span>#</span><span>User</span>
+        <span style="text-align:right">Total 🍺eq</span>
+        <span style="text-align:right">Days</span>
+        <span style="text-align:right">Avg/day</span>
+        <span style="text-align:right">Last entry</span>
       </div>`;
-  }
-
-  html += `
-    <div class="summary-bar">
-      <div class="summary-card"><div class="summary-label">Total 🍺 eq</div><div class="summary-val gold">${fmt(totalScore)}</div></div>
-      <div class="summary-card"><div class="summary-label">Days logged</div><div class="summary-val">${days}</div></div>
-      <div class="summary-card"><div class="summary-label">Daily avg</div><div class="summary-val">${avg}</div></div>
-      <div class="summary-card"><div class="summary-label">Best day</div><div class="summary-val">${fmt(best)}</div></div>
-    </div>
-    <div class="section-title">Scoreboard</div>
-    <div class="scoreboard">${renderScoreboard(state)}</div>
-  </div>`;
-
-  /* ---- tab: history ---- */
-  html += `<div id="tab-history" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-      <div class="section-title" style="margin:0">My History</div>
-      <button class="btn btn-primary btn-sm" onclick="openCheckin()">+ Check in today</button>
-    </div>
-    <div class="card">
-      <table class="history-table">
-        <thead>
-          <tr>
-            <th>Date</th><th>🍺</th><th>🍻</th><th>🥃</th><th>🍹</th><th>🚬</th><th>🍺eq</th>
-          </tr>
-        </thead>
-        <tbody>`;
-
-  const sorted = [...u.checkins].sort((a,b) => b.date.localeCompare(a.date));
-  if (sorted.length === 0) {
-    html += `<tr><td colspan="7" style="color:#555;text-align:center;padding:1.5rem">No check-ins yet.</td></tr>`;
-  } else {
-    sorted.forEach(c => {
-      const eq = fmt(calcScoreFromEntry(c));
-      html += `<tr>
-        <td>${c.date}</td>
-        <td>${c.nb}</td><td>${c.sb}</td><td>${c.sh}</td><td>${c.co}</td><td>${c.jo}</td>
-        <td class="gold">${eq}</td>
-      </tr>`;
+    
+    scoreboard.forEach((u, i) => {
+      const cls = i === 0 ? 'top-1' : i === 1 ? 'top-2' : i === 2 ? 'top-3' : '';
+      scoreboardHtml += `
+        <div class="score-row ${cls}">
+          <div class="rank">${u.rank}</div>
+          <div class="user-name">${u.username}</div>
+          <div class="score-val">${fmt(u.score)}</div>
+          <div class="score-val">${u.days}</div>
+          <div class="score-val">${fmt(u.avg)}</div>
+          <div class="score-sub">${u.last_date}</div>
+        </div>`;
     });
+    
+    let html = `
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(this,'tab-score')">Scoreboard</button>
+        <button class="tab" onclick="switchTab(this,'tab-history')">My History</button>
+      </div>
+
+      <div id="tab-score">`;
+    
+    if (!checkedIn) {
+      html += `
+        <div class="checkin-banner">
+          <div>
+            <p>🎯 Daily check-in pending</p>
+            <small>Don't forget to log today's intake!</small>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openCheckin()">Check in</button>
+        </div>`;
+    }
+    
+    html += `
+      <div class="summary-bar">
+        <div class="summary-card"><div class="summary-label">Total 🍺 eq</div><div class="summary-val gold">${fmt(totalScore)}</div></div>
+        <div class="summary-card"><div class="summary-label">Days logged</div><div class="summary-val">${days}</div></div>
+        <div class="summary-card"><div class="summary-label">Daily avg</div><div class="summary-val">${fmt(avg)}</div></div>
+        <div class="summary-card"><div class="summary-label">Best day</div><div class="summary-val">${fmt(best)}</div></div>
+      </div>
+      <div class="section-title">Scoreboard</div>
+      <div class="scoreboard">${scoreboardHtml}</div>
+    </div>
+
+    <div id="tab-history" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <div class="section-title" style="margin:0">My History</div>
+        <button class="btn btn-primary btn-sm" onclick="openCheckin()">+ Check in today</button>
+      </div>
+      <div class="card">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Date</th><th>🍺</th><th>🍻</th><th>🥃</th><th>🍹</th><th>🚬</th><th>🍺eq</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    
+    const sorted = [...checkins].sort((a,b) => b.date.localeCompare(a.date));
+    if (sorted.length === 0) {
+      html += `<tr><td colspan="7" style="color:#555;text-align:center;padding:1.5rem">No check-ins yet.</td></tr>`;
+    } else {
+      sorted.forEach(c => {
+        const eq = fmt(calcScoreFromEntry(c));
+        html += `<tr>
+          <td>${c.date}</td>
+          <td>${c.nb}</td><td>${c.sb}</td><td>${c.sh}</td><td>${c.co}</td><td>${c.jo}</td>
+          <td class="gold">${eq}</td>
+        </tr>`;
+      });
+    }
+    
+    html += `</tbody></table></div></div>`;
+    
+    document.getElementById('main-content').innerHTML = html;
+  } catch (err) {
+    showToast(`Error: ${err.message}`);
   }
-
-  html += `</tbody></table></div></div>`;
-
-  document.getElementById('main-content').innerHTML = html;
 }
 
 // ============================================================
 // ADMIN VIEW
 // ============================================================
-function renderAdmin() {
-  const state = load();
-  const nonAdminUsers = state.users.filter(u => u.role !== 'admin');
-
-  let userListHtml = '';
-  if (nonAdminUsers.length === 0) {
-    userListHtml = '<p style="color:#555;font-size:.875rem">No users yet. Add one →</p>';
-  } else {
-    nonAdminUsers.forEach(u => {
-      const score = calcScore(u.checkins);
-      const days = u.checkins.length;
-      const checkedToday = u.checkins.some(c => c.date === today());
-      userListHtml += `
-        <div class="user-list-item">
-          <div>
-            <div class="name">${u.username} ${u.mustChangePw ? '<span style="font-size:.7rem;color:#e8a;margin-left:4px">needs pw change</span>' : ''}</div>
-            <div class="meta">${fmt(score)} 🍺eq · ${days} days · ${checkedToday ? '✅ checked in today' : '⏳ not checked in'}</div>
-          </div>
-          <div class="actions">
-            <button class="btn btn-ghost btn-sm" onclick="openResetPw('${u.username}')">Reset PW</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.username}')">Delete</button>
-          </div>
+async function renderAdmin() {
+  try {
+    const usersData = await apiCall('/users');
+    const users = usersData.users;
+    
+    const scoreboardData = await apiCall('/scoreboard');
+    const scoreboard = scoreboardData.scoreboard;
+    
+    let scoreboardHtml = `
+      <div class="score-row header-row">
+        <span>#</span><span>User</span>
+        <span style="text-align:right">Total 🍺eq</span>
+        <span style="text-align:right">Days</span>
+        <span style="text-align:right">Avg/day</span>
+        <span style="text-align:right">Last entry</span>
+      </div>`;
+    
+    scoreboard.forEach((u, i) => {
+      const cls = i === 0 ? 'top-1' : i === 1 ? 'top-2' : i === 2 ? 'top-3' : '';
+      scoreboardHtml += `
+        <div class="score-row ${cls}">
+          <div class="rank">${u.rank}</div>
+          <div class="user-name">${u.username}</div>
+          <div class="score-val">${fmt(u.score)}</div>
+          <div class="score-val">${u.days}</div>
+          <div class="score-val">${fmt(u.avg)}</div>
+          <div class="score-sub">${u.last_date}</div>
         </div>`;
     });
-  }
-
-  const html = `
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab(this,'atab-score')">Scoreboard</button>
-      <button class="tab" onclick="switchTab(this,'atab-users')">Manage Users</button>
-    </div>
-
-    <div id="atab-score">
-      <div class="section-title">Scoreboard</div>
-      <div class="scoreboard">${renderScoreboard(state)}</div>
-    </div>
-
-    <div id="atab-users" style="display:none">
-      <div class="admin-grid">
-        <div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-            <div class="section-title" style="margin:0">Users</div>
-            <button class="btn btn-primary btn-sm" onclick="openModal('add-user-modal')">+ Add User</button>
-          </div>
-          <div class="user-list">${userListHtml}</div>
-        </div>
-        <div>
-          <div class="section-title">Multipliers</div>
-          <div class="card">
-            <p style="font-size:.8rem;color:#666;margin-bottom:1rem">Current conversion rates to standard beer equivalents. Edit the <code style="background:#111;padding:2px 6px;border-radius:4px;font-size:.8rem">MULT</code> object at the top of the &lt;script&gt; tag to change.</p>
-            <table class="history-table">
-              <thead><tr><th>Item</th><th>Multiplier</th></tr></thead>
-              <tbody>
-                <tr><td>🍺 Normal beer</td><td class="gold">${MULT.nb}×</td></tr>
-                <tr><td>🍻 Special beer</td><td class="gold">${MULT.sb}×</td></tr>
-                <tr><td>🥃 Shot</td><td class="gold">${MULT.sh}×</td></tr>
-                <tr><td>🍹 Cocktail</td><td class="gold">${MULT.co}×</td></tr>
-                <tr><td>🚬 Joint</td><td class="gold">${MULT.jo}×</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+    
+    let userListHtml = '';
+    if (users.length === 0) {
+      userListHtml = '<p style="color:#555;font-size:.875rem">No users yet. Add one →</p>';
+    } else {
+      users.forEach(u => {
+        const mustChangePw = u.must_change_pw ? '<span style="font-size:.7rem;color:#e8a;margin-left:4px">needs pw change</span>' : '';
+        userListHtml += `
+          <div class="user-list-item">
+            <div>
+              <div class="name">${u.username} ${mustChangePw}</div>
+              <div class="meta">${u.days} days logged</div>
+            </div>
+            <div class="actions">
+              <button class="btn btn-ghost btn-sm" onclick="openResetPw('${u.username}')">Reset PW</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.username}')">Delete</button>
+            </div>
+          </div>`;
+      });
+    }
+    
+    const html = `
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(this,'atab-score')">Scoreboard</button>
+        <button class="tab" onclick="switchTab(this,'atab-users')">Manage Users</button>
       </div>
-    </div>`;
 
-  document.getElementById('main-content').innerHTML = html;
+      <div id="atab-score">
+        <div class="section-title">Scoreboard</div>
+        <div class="scoreboard">${scoreboardHtml}</div>
+      </div>
+
+      <div id="atab-users" style="display:none">
+        <div class="admin-grid">
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+              <div class="section-title" style="margin:0">Users</div>
+              <button class="btn btn-primary btn-sm" onclick="openModal('add-user-modal')">+ Add User</button>
+            </div>
+            <div class="user-list">${userListHtml}</div>
+          </div>
+          <div>
+            <div class="section-title">Multipliers</div>
+            <div class="card">
+              <p style="font-size:.8rem;color:#666;margin-bottom:1rem">Current conversion rates to standard beer equivalents. Edit the <code style="background:#111;padding:2px 6px;border-radius:4px;font-size:.8rem">MULT</code> object at the top of the &lt;script&gt; tag to change.</p>
+              <table class="history-table">
+                <thead><tr><th>Item</th><th>Multiplier</th></tr></thead>
+                <tbody>
+                  <tr><td>🍺 Normal beer</td><td class="gold">${MULT.nb}×</td></tr>
+                  <tr><td>🍻 Special beer</td><td class="gold">${MULT.sb}×</td></tr>
+                  <tr><td>🥃 Shot</td><td class="gold">${MULT.sh}×</td></tr>
+                  <tr><td>🍹 Cocktail</td><td class="gold">${MULT.co}×</td></tr>
+                  <tr><td>🚬 Joint</td><td class="gold">${MULT.jo}×</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    
+    document.getElementById('main-content').innerHTML = html;
+  } catch (err) {
+    showToast(`Error: ${err.message}`);
+  }
 }
 
 // ============================================================
@@ -912,10 +956,9 @@ function switchTab(el, targetId) {
   tabArea.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
 
-  // hide all sibling tab panels (they follow .tabs in the DOM)
   let sibling = tabArea.nextElementSibling;
   while (sibling) {
-    if (sibling.id && sibling.id.startsWith('tab') || sibling.id && sibling.id.startsWith('atab')) {
+    if (sibling.id && (sibling.id.startsWith('tab') || sibling.id.startsWith('atab'))) {
       sibling.style.display = sibling.id === targetId ? 'block' : 'none';
     }
     sibling = sibling.nextElementSibling;
@@ -928,22 +971,32 @@ function switchTab(el, targetId) {
 function openModal(id) { document.getElementById(id).style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-function doAddUser() {
+async function doAddUser() {
   const username = document.getElementById('nu-user').value.trim().toLowerCase();
   const password = document.getElementById('nu-pass').value;
   const err = document.getElementById('nu-err');
-  if (!username || username.includes(' ')) { err.textContent = 'Username required, no spaces.'; return; }
-  if (password.length < 3) { err.textContent = 'Password too short.'; return; }
-  const state = load();
-  if (state.users.find(u => u.username === username)) { err.textContent = 'Username already exists.'; return; }
-  state.users.push({ username, password, role: 'user', mustChangePw: true, checkins: [] });
-  save(state);
-  err.textContent = '';
-  document.getElementById('nu-user').value = '';
-  document.getElementById('nu-pass').value = '';
-  closeModal('add-user-modal');
-  showToast(`User "${username}" created!`);
-  renderAdmin();
+  
+  if (!username || username.includes(' ')) {
+    err.textContent = 'Username required, no spaces.';
+    return;
+  }
+  
+  if (password.length < 3) {
+    err.textContent = 'Password too short.';
+    return;
+  }
+  
+  try {
+    await apiCall('/users/add', 'POST', { username, password });
+    err.textContent = '';
+    document.getElementById('nu-user').value = '';
+    document.getElementById('nu-pass').value = '';
+    closeModal('add-user-modal');
+    showToast(`User "${username}" created!`);
+    renderAdmin();
+  } catch (e) {
+    err.textContent = e.message;
+  }
 }
 
 let resetTarget = null;
@@ -956,26 +1009,33 @@ function openResetPw(username) {
   openModal('reset-pw-modal');
 }
 
-function doResetPw() {
+async function doResetPw() {
   const pw = document.getElementById('rp-pass').value;
-  if (pw.length < 3) { document.getElementById('rp-err').textContent = 'Too short.'; return; }
-  const state = load();
-  const u = state.users.find(x => x.username === resetTarget);
-  u.password = pw;
-  u.mustChangePw = true;
-  save(state);
-  closeModal('reset-pw-modal');
-  showToast(`Password reset for "${resetTarget}"`);
-  renderAdmin();
+  if (pw.length < 3) {
+    document.getElementById('rp-err').textContent = 'Too short.';
+    return;
+  }
+  
+  try {
+    await apiCall('/users/reset-password', 'POST', { username: resetTarget, password: pw });
+    closeModal('reset-pw-modal');
+    showToast(`Password reset for "${resetTarget}"`);
+    renderAdmin();
+  } catch (e) {
+    document.getElementById('rp-err').textContent = e.message;
+  }
 }
 
-function deleteUser(username) {
+async function deleteUser(username) {
   if (!confirm(`Delete user "${username}"? All their data will be lost.`)) return;
-  const state = load();
-  state.users = state.users.filter(u => u.username !== username);
-  save(state);
-  showToast(`User "${username}" deleted.`);
-  renderAdmin();
+  
+  try {
+    await apiCall('/users/delete', 'POST', { username });
+    showToast(`User "${username}" deleted.`);
+    renderAdmin();
+  } catch (e) {
+    showToast(`Error: ${e.message}`);
+  }
 }
 
 // ============================================================
@@ -994,34 +1054,35 @@ function updateEquiv() {
   document.getElementById('checkin-equiv').textContent = `= ${eq.toFixed(2)} standard beer equivalents`;
 }
 
-function openCheckin() {
-  const state = load();
-  const u = state.users.find(x => x.username === currentUser.username);
-  const todayKey = today();
-  const existing = u.checkins.find(c => c.date === todayKey);
+async function openCheckin() {
+  try {
+    const checkinsData = await apiCall('/checkins');
+    const checkins = checkinsData.checkins;
+    
+    const todayKey = today();
+    const existing = checkins.find(c => c.date === todayKey);
 
-  Object.keys(counts).forEach(k => counts[k] = existing ? existing[k] : 0);
-  ['nb','sb','sh','co','jo'].forEach(k => { document.getElementById('cnt-' + k).textContent = counts[k]; });
-  updateEquiv();
+    Object.keys(counts).forEach(k => counts[k] = existing ? existing[k] : 0);
+    ['nb','sb','sh','co','jo'].forEach(k => { document.getElementById('cnt-' + k).textContent = counts[k]; });
+    updateEquiv();
 
-  const d = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-  document.getElementById('checkin-modal-date').textContent = `${d} — ${existing ? 'updating existing entry' : 'new entry'}`;
-  openModal('checkin-modal');
+    const d = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    document.getElementById('checkin-modal-date').textContent = `${d} — ${existing ? 'updating existing entry' : 'new entry'}`;
+    openModal('checkin-modal');
+  } catch (err) {
+    showToast(`Error: ${err.message}`);
+  }
 }
 
-function submitCheckin() {
-  const state = load();
-  const u = state.users.find(x => x.username === currentUser.username);
-  const todayKey = today();
-  const idx = u.checkins.findIndex(c => c.date === todayKey);
-  const entry = { date: todayKey, nb: counts.nb, sb: counts.sb, sh: counts.sh, co: counts.co, jo: counts.jo };
-  if (idx >= 0) u.checkins[idx] = entry;
-  else u.checkins.push(entry);
-  save(state);
-  currentUser = u;
-  closeModal('checkin-modal');
-  showToast('Check-in saved! 🍺');
-  renderUser();
+async function submitCheckin() {
+  try {
+    await apiCall('/checkins', 'POST', counts);
+    closeModal('checkin-modal');
+    showToast('Check-in saved! 🍺');
+    renderUser();
+  } catch (err) {
+    showToast(`Error: ${err.message}`);
+  }
 }
 
 // ============================================================

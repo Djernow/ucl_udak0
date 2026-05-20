@@ -1,135 +1,141 @@
 #!/bin/bash
-# UDAKO CL Deployment Script
-# Pulls/copies files to TrueNAS dataset and restarts Docker container
+# UDAKO Champions League - TrueNAS SCALE Deployment Script
+# Deploy application files to the dataset and verify container setup
 
 set -e
 
-# ============================================================
-# Configuration — Edit these values
-# ============================================================
 DATASET_PATH="/mnt/immich/Jarno_app/udako"
-CONTAINER_NAME="static-site-1"  # Change if your container name differs
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DATA_PATH="$DATASET_PATH/data"
 
-# ============================================================
-# Colors for output
-# ============================================================
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+# Get script directory to find files relative to where script runs
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# ============================================================
-# Helper functions
-# ============================================================
-log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+echo "======================================================"
+echo "UDAKO CL - Deployment Script"
+echo "======================================================"
+echo "Script directory: $SCRIPT_DIR"
+echo "Target dataset: $DATASET_PATH"
+echo ""
 
-# ============================================================
-# Pre-flight checks
-# ============================================================
-log_info "Running pre-flight checks..."
-
-if [ ! -d "$REPO_DIR" ]; then
-  log_error "Repository directory not found: $REPO_DIR"
-  exit 1
-fi
-
-if [ ! -f "$REPO_DIR/manifest.json" ]; then
-  log_error "manifest.json not found in repo. Make sure you're in the correct directory."
-  exit 1
-fi
-
-if [ ! -d "$DATASET_PATH" ]; then
-  log_error "Dataset path does not exist: $DATASET_PATH"
-  log_info "Create it first: mkdir -p $DATASET_PATH"
-  exit 1
-fi
-
-log_info "✓ Pre-flight checks passed"
-
-# ============================================================
-# Copy files to dataset
-# ============================================================
-log_info "Copying files to $DATASET_PATH..."
-
-FILES_TO_COPY=(
-  "website.html"
-  "manifest.json"
-  "service-worker.js"
+# Verify all required files exist locally
+echo "🔍 Checking required files..."
+REQUIRED_FILES=(
+    "website.html"
+    "manifest.json"
+    "service-worker.js"
+    "app.py"
+    "requirements.txt"
+    "Dockerfile.backend"
+    "docker-compose.yaml"
+    "httpd-proxy.conf"
 )
 
-for file in "${FILES_TO_COPY[@]}"; do
-  if [ -f "$REPO_DIR/$file" ]; then
-    cp "$REPO_DIR/$file" "$DATASET_PATH/$file"
-    log_info "✓ Copied $file"
-  else
-    log_warn "File not found: $file (skipping)"
-  fi
+for FILE in "${REQUIRED_FILES[@]}"; do
+    if [ ! -f "$SCRIPT_DIR/$FILE" ]; then
+        echo "❌ Missing file: $FILE"
+        exit 1
+    fi
+    echo "   ✓ Found $FILE"
 done
+echo ""
 
-# Copy as index.html if not already present
-if [ ! -f "$DATASET_PATH/index.html" ]; then
-  cp "$REPO_DIR/website.html" "$DATASET_PATH/index.html"
-  log_info "✓ Created index.html symlink"
+# Check if dataset exists
+if [ ! -d "$DATASET_PATH" ]; then
+    echo "❌ Dataset not found at $DATASET_PATH"
+    echo "   Create it in TrueNAS first: Datasets → Immich → Jarno_app → udako"
+    exit 1
 fi
 
-# ============================================================
-# Set permissions
-# ============================================================
-log_info "Setting permissions on $DATASET_PATH..."
+echo "✓ Dataset exists at $DATASET_PATH"
 
-sudo chown -R root:root "$DATASET_PATH"
-sudo chmod -R 755 "$DATASET_PATH"
-sudo chmod 644 "$DATASET_PATH"/*.{json,js,html} 2>/dev/null || true
+# Create data directory if not exists
+mkdir -p "$DATA_PATH"
+chmod 755 "$DATA_PATH"
+echo "✓ Data directory ready at $DATA_PATH"
+echo ""
 
-log_info "✓ Permissions set"
+# Copy application files
+echo "📋 Copying application files to $DATASET_PATH..."
+cp -v "$SCRIPT_DIR/website.html" "$DATASET_PATH/"
+cp -v "$SCRIPT_DIR/manifest.json" "$DATASET_PATH/"
+cp -v "$SCRIPT_DIR/service-worker.js" "$DATASET_PATH/"
+cp -v "$SCRIPT_DIR/app.py" "$DATASET_PATH/"
+cp -v "$SCRIPT_DIR/requirements.txt" "$DATASET_PATH/"
+cp -v "$SCRIPT_DIR/Dockerfile.backend" "$DATASET_PATH/"
+cp -v "$SCRIPT_DIR/docker-compose.yaml" "$DATASET_PATH/"
+cp -v "$SCRIPT_DIR/httpd-proxy.conf" "$DATASET_PATH/"
 
-# ============================================================
-# Create .htaccess if not present
-# ============================================================
-if [ ! -f "$DATASET_PATH/.htaccess" ]; then
-  log_info "Creating .htaccess for default index..."
-  echo "DirectoryIndex index.html" | sudo tee "$DATASET_PATH/.htaccess" > /dev/null
-  sudo chmod 644 "$DATASET_PATH/.htaccess"
-  log_info "✓ .htaccess created"
-else
-  log_info "✓ .htaccess already exists"
-fi
+# Set correct permissions
+echo ""
+echo "🔒 Setting file permissions..."
+chmod 644 "$DATASET_PATH/website.html"
+chmod 644 "$DATASET_PATH/manifest.json"
+chmod 644 "$DATASET_PATH/service-worker.js"
+chmod 644 "$DATASET_PATH/app.py"
+chmod 644 "$DATASET_PATH/requirements.txt"
+chmod 644 "$DATASET_PATH/Dockerfile.backend"
+chmod 644 "$DATASET_PATH/docker-compose.yaml"
+chmod 644 "$DATASET_PATH/httpd-proxy.conf"
 
-# ============================================================
-# Verify files in container
-# ============================================================
-log_info "Verifying files in container..."
-
-if command -v docker &> /dev/null; then
-  if docker ps --filter "name=$CONTAINER_NAME" --format '{{.Names}}' | grep -q "$CONTAINER_NAME"; then
-    log_info "Checking container filesystem..."
-    docker exec "$CONTAINER_NAME" ls -lh /usr/local/apache2/htdocs/ || log_warn "Could not verify container files"
-  else
-    log_warn "Container '$CONTAINER_NAME' not running. Skipping container verification."
-    log_info "Start the container with: docker start $CONTAINER_NAME"
-  fi
-else
-  log_warn "Docker not found. Skipping container check."
-fi
-
-# ============================================================
-# Summary
-# ============================================================
-log_info "✅ Deployment complete!"
-log_info ""
-log_info "Summary:"
-log_info "  Files copied to: $DATASET_PATH"
-log_info "  Access URL: https://udako.libertronics.org"
-log_info ""
-log_info "Next steps:"
-log_info "  1. Ensure container is running: docker start $CONTAINER_NAME"
-log_info "  2. Test in browser: https://udako.libertronics.org"
-log_info "  3. On Android: Open Chrome → Install app from prompt"
-log_info ""
-log_info "Troubleshooting:"
-log_info "  - Check container logs: docker logs $CONTAINER_NAME"
-log_info "  - Verify permissions: ls -la $DATASET_PATH"
-log_info "  - Test directly: curl -i http://127.0.0.1:50995/"
+# Verify all files were deployed
+echo ""
+echo "✅ Verifying deployment..."
+for FILE in "${REQUIRED_FILES[@]}"; do
+    if [ ! -f "$DATASET_PATH/$FILE" ]; then
+        echo "❌ Deployment failed: $FILE not found in $DATASET_PATH"
+        exit 1
+    fi
+    echo "   ✓ $FILE"
+done
+echo "✅ All deployment files copied successfully!"
+echo ""
+echo "📁 Deployment Summary:"
+ls -lh "$DATASET_PATH/" | grep -E "\.(html|json|js|py|txt|yaml|conf)$"
+echo ""
+echo "📊 Data directory:"
+ls -lh "$DATA_PATH/" 2>/dev/null || echo "   (empty, will be created on first run)"
+echo ""
+echo "======================================================"
+echo "NEXT STEPS:"
+echo "======================================================"
+echo ""
+echo "1. In TrueNAS SCALE, go to: Apps → Installed Applications"
+echo ""
+echo "2. If no UDAKO app exists yet:"
+echo "   - Click 'Launch Docker Image'"
+echo "   - Select 'Custom Docker Compose YAML'"
+echo "   - Paste contents of $DATASET_PATH/docker-compose.yaml"
+echo "   - Set environment:"
+echo "     • SECRET_KEY: (change to secure random string)"
+echo "   - Save and launch"
+echo ""
+echo "3. If UDAKO app already exists:"
+echo "   - Update the Docker Compose YAML with new version"
+echo "   - Redeploy the application"
+echo ""
+echo "4. Access the application:"
+echo "   - HTTP: http://127.0.0.1:50995/"
+echo "   - HTTPS: https://udako.libertronics.org/"
+echo ""
+echo "5. Default admin credentials:"
+echo "   - Username: admin"
+echo "   - Password: admin123"
+echo "   - ⚠️  Change password immediately on first login!"
+echo ""
+echo "======================================================"
+echo "TROUBLESHOOTING:"
+echo "======================================================"
+echo ""
+echo "Check Flask backend logs:"
+echo "  docker logs udako-backend 2>&1 | tail -50"
+echo ""
+echo "Verify files deployed:"
+echo "  ls -la $DATASET_PATH/"
+echo ""
+echo "Check database:"
+echo "  ls -lh $DATA_PATH/udako.db"
+echo ""
+echo "Test API health:"
+echo "  curl http://127.0.0.1:5000/api/health"
+echo ""
+echo "======================================================"

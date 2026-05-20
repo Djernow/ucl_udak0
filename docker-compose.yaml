@@ -1,38 +1,48 @@
-version: "3.9"
 services:
   # Backend API (Flask)
   backend:
     build:
-      context: .
+      context: /mnt/immich/Jarno_app/udako
       dockerfile: Dockerfile.backend
+    image: udako-backend:latest
+    container_name: udako-backend
     restart: unless-stopped
-    ports:
-      - "5000:5000"
     environment:
       - FLASK_ENV=production
       - DATABASE_PATH=/data/udako.db
-      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - SECRET_KEY=${SECRET_KEY:-dev-key-change-in-production}
     volumes:
       - /mnt/immich/Jarno_app/udako/data:/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+    networks:
+      - udako-net
+    expose:
+      - "5000"
 
-  # Frontend (Apache httpd)
+  # Frontend (Apache httpd with proxy to backend)
   frontend:
     image: httpd:alpine
+    container_name: udako-frontend
     restart: unless-stopped
     ports:
       - "50995:80"
     volumes:
       - /mnt/immich/Jarno_app/udako:/usr/local/apache2/htdocs:ro
+      - /mnt/immich/Jarno_app/udako/httpd-proxy.conf:/usr/local/apache2/conf.d/proxy.conf:ro
     depends_on:
       - backend
+    networks:
+      - udako-net
 
-# Notes:
-# - Backend stores data in /mnt/immich/Jarno_app/udako/data/udako.db
-# - Frontend serves HTML/CSS/JS from /mnt/immich/Jarno_app/udako
-# - API available at http://backend:5000/api/*
-# - Frontend calls API at /api/* (proxied by Cloudflare or reverse proxy)
+networks:
+  udako-net:
+    driver: bridge
+
+# ============================================================
+# SETUP NOTES:
+# ============================================================
+# 1. Paste this into TrueNAS SCALE: Apps → Launch Docker Image → Custom Compose YAML
+# 2. Mount /mnt/immich/Jarno_app/udako dataset where HTML/app files live
+# 3. Backend runs on http://backend:5000 (internal)
+# 4. Frontend on port 50995 proxies /api/* requests to backend
+# 5. Database persisted in /data/udako.db (mounted volume)
+# 6. Change SECRET_KEY in production via environment variable
