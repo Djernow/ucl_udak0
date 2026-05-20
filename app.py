@@ -32,7 +32,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
+            password_hash TEXT NOT NULL,
             role TEXT NOT NULL DEFAULT 'user',
             must_change_pw INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -58,13 +58,24 @@ def init_db():
     
     db.commit()
     
+    # Migrate legacy schema: password -> password_hash
+    try:
+        cursor.execute('PRAGMA table_info(users)')
+        columns = [row[1] for row in cursor.fetchall()]
+        if 'password_hash' not in columns and 'password' in columns:
+            cursor.execute('ALTER TABLE users ADD COLUMN password_hash TEXT')
+            cursor.execute('UPDATE users SET password_hash = password WHERE password_hash IS NULL')
+            db.commit()
+    except Exception:
+        pass
+
     # Add default admin if not exists
     try:
         cursor.execute('SELECT * FROM users WHERE username = ?', ('admin',))
         if not cursor.fetchone():
             pw_hash = generate_password_hash('admin123')
             cursor.execute(
-                'INSERT INTO users (username, password, role, must_change_pw) VALUES (?, ?, ?, ?)',
+                'INSERT INTO users (username, password_hash, role, must_change_pw) VALUES (?, ?, ?, ?)',
                 ('admin', pw_hash, 'admin', 0)
             )
             db.commit()
@@ -166,11 +177,15 @@ def login():
     
     db = get_db()
     cursor = db.cursor()
-    cursor.execute('SELECT id, password, role, must_change_pw FROM users WHERE username = ?', (username,))
+    cursor.execute(
+        'SELECT id, password_hash, password, role, must_change_pw FROM users WHERE username = ?',
+        (username,)
+    )
     user = cursor.fetchone()
     db.close()
-    
-    if not user or not check_password_hash(user['password'], password):
+
+    pw_hash = user['password_hash'] or user['password']
+    if not user or not pw_hash or not check_password_hash(pw_hash, password):
         return jsonify({'error': 'Invalid username or password'}), 401
     
     session['user_id'] = user['id']
