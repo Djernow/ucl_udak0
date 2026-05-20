@@ -22,14 +22,13 @@ def get_db():
     db.row_factory = sqlite3.Row
     return db
 
-def get_password_column(db):
+def get_password_columns(db):
     cursor = db.execute('PRAGMA table_info(users)')
     columns = [row[1] for row in cursor.fetchall()]
-    if 'password_hash' in columns:
-        return 'password_hash'
-    if 'password' in columns:
-        return 'password'
-    return None
+    return {
+        'password_hash': 'password_hash' in columns,
+        'password': 'password' in columns
+    }
 
 def init_db():
     """Initialize database schema if not exists."""
@@ -239,15 +238,22 @@ def change_password():
     
     db = get_db()
     pw_hash = generate_password_hash(password)
-    pw_column = get_password_column(db)
-    if not pw_column:
+    pw_columns = get_password_columns(db)
+    if not pw_columns['password_hash'] and not pw_columns['password']:
         db.close()
         return jsonify({'error': 'Password column not found'}), 500
 
-    db.execute(
-        f'UPDATE users SET {pw_column} = ?, must_change_pw = 0 WHERE id = ?',
-        (pw_hash, session['user_id'])
-    )
+    if pw_columns['password_hash'] and pw_columns['password']:
+        db.execute(
+            'UPDATE users SET password_hash = ?, password = ?, must_change_pw = 0 WHERE id = ?',
+            (pw_hash, pw_hash, session['user_id'])
+        )
+    else:
+        column = 'password_hash' if pw_columns['password_hash'] else 'password'
+        db.execute(
+            f'UPDATE users SET {column} = ?, must_change_pw = 0 WHERE id = ?',
+            (pw_hash, session['user_id'])
+        )
     db.commit()
     db.close()
     
@@ -305,16 +311,23 @@ def add_user():
     
     db = get_db()
     pw_hash = generate_password_hash(password)
-    pw_column = get_password_column(db)
-    if not pw_column:
+    pw_columns = get_password_columns(db)
+    if not pw_columns['password_hash'] and not pw_columns['password']:
         db.close()
         return jsonify({'error': 'Password column not found'}), 500
     
     try:
-        db.execute(
-            f'INSERT INTO users (username, {pw_column}, role, must_change_pw) VALUES (?, ?, ?, ?)',
-            (username, pw_hash, 'user', 1)
-        )
+        if pw_columns['password_hash'] and pw_columns['password']:
+            db.execute(
+                'INSERT INTO users (username, password_hash, password, role, must_change_pw) VALUES (?, ?, ?, ?, ?)',
+                (username, pw_hash, pw_hash, 'user', 1)
+            )
+        else:
+            column = 'password_hash' if pw_columns['password_hash'] else 'password'
+            db.execute(
+                f'INSERT INTO users (username, {column}, role, must_change_pw) VALUES (?, ?, ?, ?)',
+                (username, pw_hash, 'user', 1)
+            )
         db.commit()
         db.close()
         
@@ -339,15 +352,22 @@ def reset_password():
     
     db = get_db()
     pw_hash = generate_password_hash(password)
-    pw_column = get_password_column(db)
-    if not pw_column:
+    pw_columns = get_password_columns(db)
+    if not pw_columns['password_hash'] and not pw_columns['password']:
         db.close()
         return jsonify({'error': 'Password column not found'}), 500
 
-    db.execute(
-        f'UPDATE users SET {pw_column} = ?, must_change_pw = 1 WHERE id = ?',
-        (pw_hash, user['id'])
-    )
+    if pw_columns['password_hash'] and pw_columns['password']:
+        db.execute(
+            'UPDATE users SET password_hash = ?, password = ?, must_change_pw = 1 WHERE id = ?',
+            (pw_hash, pw_hash, user['id'])
+        )
+    else:
+        column = 'password_hash' if pw_columns['password_hash'] else 'password'
+        db.execute(
+            f'UPDATE users SET {column} = ?, must_change_pw = 1 WHERE id = ?',
+            (pw_hash, user['id'])
+        )
     db.commit()
     db.close()
     
