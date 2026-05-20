@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from flask import Flask, request, jsonify, session
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -410,10 +410,14 @@ def delete_user():
 @app.route('/api/checkins', methods=['GET'])
 @require_auth
 def get_checkins():
+    today_date = datetime.now().date()
+    year_start = f"{today_date.year}-01-01"
+    year_end = f"{today_date.year}-12-31"
+
     db = get_db()
     checkins = db.execute(
-        'SELECT * FROM checkins WHERE user_id = ? ORDER BY date DESC',
-        (session['user_id'],)
+        'SELECT * FROM checkins WHERE user_id = ? AND date BETWEEN ? AND ? ORDER BY date DESC',
+        (session['user_id'], year_start, year_end)
     ).fetchall()
     db.close()
     
@@ -438,14 +442,31 @@ def create_or_update_checkin():
         if not isinstance(val, int) or val < 0:
             return jsonify({'error': 'Invalid input'}), 400
     
-    today = datetime.now().strftime('%Y-%m-%d')
+    requested_date = data.get('date')
+    today_date = datetime.now().date()
+    yesterday_date = today_date - timedelta(days=1)
+    allowed_dates = {today_date.strftime('%Y-%m-%d')}
+    if yesterday_date.year == today_date.year:
+        allowed_dates.add(yesterday_date.strftime('%Y-%m-%d'))
+
+    if requested_date:
+        try:
+            datetime.strptime(requested_date, '%Y-%m-%d')
+        except ValueError:
+            return jsonify({'error': 'Invalid date format'}), 400
+
+        if requested_date not in allowed_dates:
+            return jsonify({'error': 'Only today or yesterday is allowed'}), 400
+        target_date = requested_date
+    else:
+        target_date = today_date.strftime('%Y-%m-%d')
     
     db = get_db()
     
     # Check if exists
     existing = db.execute(
         'SELECT id FROM checkins WHERE user_id = ? AND date = ?',
-        (session['user_id'], today)
+        (session['user_id'], target_date)
     ).fetchone()
     
     if existing:
@@ -458,7 +479,7 @@ def create_or_update_checkin():
         # Insert
         db.execute(
             'INSERT INTO checkins (user_id, date, nb, sb, sh, co, jo) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            (session['user_id'], today, nb, sb, sh, co, jo)
+            (session['user_id'], target_date, nb, sb, sh, co, jo)
         )
     
     db.commit()
@@ -472,7 +493,11 @@ def create_or_update_checkin():
 @app.route('/api/scoreboard', methods=['GET'])
 def get_scoreboard():
     """Public endpoint with ranking and score calculation."""
-    
+
+    today_date = datetime.now().date()
+    year_start = f"{today_date.year}-01-01"
+    year_end = f"{today_date.year}-12-31"
+
     db = get_db()
     
     # Get all users with checkin stats
@@ -484,13 +509,13 @@ def get_scoreboard():
             MAX(c.date) as last_date,
             SUM(c.nb * 1.0 + c.sb * 1.5 + c.sh * 0.75 + c.co * 1.25 + c.jo * 2.0) as total_score
         FROM users u
-        LEFT JOIN checkins c ON u.id = c.user_id
+        LEFT JOIN checkins c ON u.id = c.user_id AND c.date BETWEEN ? AND ?
         WHERE u.role = 'user'
         GROUP BY u.id, u.username
         ORDER BY total_score DESC, u.username ASC
     '''
-    
-    rows = db.execute(users_query).fetchall()
+
+    rows = db.execute(users_query, (year_start, year_end)).fetchall()
     db.close()
     
     # Build scoreboard with ranks

@@ -731,12 +731,161 @@ function calcScoreFromEntry(c) {
 }
 
 function today() {
-  return new Date().toISOString().slice(0, 10);
+  return dateKeyFromOffset(0);
+}
+
+function dateKeyFromOffset(offsetDays) {
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
+  d.setDate(d.getDate() + offsetDays);
+  return d.toISOString().slice(0, 10);
+}
+
+function currentYear() {
+  return new Date().getFullYear();
+}
+
+function formatDateLabel(dateKey) {
+  const todayKey = dateKeyFromOffset(0);
+  const yesterdayKey = dateKeyFromOffset(-1);
+  if (dateKey === todayKey) return 'Today';
+  if (dateKey === yesterdayKey) return 'Yesterday';
+  const d = new Date(`${dateKey}T12:00:00`);
+  return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
 function fmt(n) {
   const val = typeof n === 'number' ? n : Number(n);
   return Number.isFinite(val) ? val.toFixed(1) : '0.0';
+}
+
+function daysInYear(year) {
+  const start = new Date(year, 0, 1);
+  const end = new Date(year + 1, 0, 1);
+  return Math.round((end - start) / (24 * 60 * 60 * 1000));
+}
+
+function daysInMonth(year, monthIndex) {
+  const start = new Date(year, monthIndex, 1);
+  const end = new Date(year, monthIndex + 1, 1);
+  return Math.round((end - start) / (24 * 60 * 60 * 1000));
+}
+
+function isLastWeekOfYear() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const lastWeekStart = new Date(year, 11, 25, 0, 0, 0, 0);
+  return now >= lastWeekStart;
+}
+
+function buildWrappedStats(checkins) {
+  const year = currentYear();
+  const totalDays = daysInYear(year);
+
+  let totalScore = 0;
+  let daysWith = 0;
+  let bestDay = null;
+  let bestScore = -1;
+  const totals = { nb: 0, sb: 0, sh: 0, co: 0, jo: 0 };
+
+  checkins.forEach(c => {
+    const dayScore = calcScoreFromEntry(c);
+    totalScore += dayScore;
+
+    const consumed = (c.nb + c.sb + c.sh + c.co + c.jo) > 0;
+    if (consumed) daysWith += 1;
+
+    if (dayScore > bestScore) {
+      bestScore = dayScore;
+      bestDay = c.date;
+    }
+
+    totals.nb += c.nb;
+    totals.sb += c.sb;
+    totals.sh += c.sh;
+    totals.co += c.co;
+    totals.jo += c.jo;
+  });
+
+  const daysWithout = Math.max(0, totalDays - daysWith);
+  const avgConsumed = daysWith > 0 ? totalScore / daysWith : 0;
+
+  const itemEntries = [
+    ['Normal beer', totals.nb],
+    ['Special beer', totals.sb],
+    ['Shot', totals.sh],
+    ['Cocktail', totals.co],
+    ['Joint', totals.jo]
+  ];
+  itemEntries.sort((a, b) => b[1] - a[1]);
+  const topItem = itemEntries[0][1] > 0 ? `${itemEntries[0][0]} (${itemEntries[0][1]})` : '—';
+
+  return {
+    year,
+    totalScore: fmt(totalScore),
+    avgConsumed: fmt(avgConsumed),
+    daysWith,
+    daysWithout,
+    bestDay: bestDay ? `${bestDay} (${fmt(bestScore)} 🍺eq)` : '—',
+    topItem
+  };
+}
+
+function buildMonthlyStats(checkins) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const monthIndex = now.getMonth();
+  const monthKey = `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
+  const totalDays = daysInMonth(year, monthIndex);
+
+  let totalScore = 0;
+  let daysWith = 0;
+  let bestDay = null;
+  let bestScore = -1;
+
+  checkins.forEach(c => {
+    if (!c.date.startsWith(monthKey)) return;
+    const dayScore = calcScoreFromEntry(c);
+    totalScore += dayScore;
+
+    const consumed = (c.nb + c.sb + c.sh + c.co + c.jo) > 0;
+    if (consumed) daysWith += 1;
+
+    if (dayScore > bestScore) {
+      bestScore = dayScore;
+      bestDay = c.date;
+    }
+  });
+
+  const daysWithout = Math.max(0, totalDays - daysWith);
+  const avgMonth = totalDays > 0 ? totalScore / totalDays : 0;
+  const label = now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+  return {
+    label,
+    totalScore: fmt(totalScore),
+    avgMonth: fmt(avgMonth),
+    daysWith,
+    daysWithout,
+    bestDay: bestDay ? `${bestDay} (${fmt(bestScore)} 🍺eq)` : '—'
+  };
+}
+
+function multipliersCardHtml() {
+  return `
+    <div class="card" style="margin:1rem 0 0 0">
+      <div class="section-title" style="margin:0 0 .75rem 0">Multipliers</div>
+      <table class="history-table">
+        <thead><tr><th>Item</th><th>Multiplier</th></tr></thead>
+        <tbody>
+          <tr><td>🍺 Normal beer</td><td class="gold">${MULT.nb}x</td></tr>
+          <tr><td>🍻 Special beer</td><td class="gold">${MULT.sb}x</td></tr>
+          <tr><td>🥃 Shot</td><td class="gold">${MULT.sh}x</td></tr>
+          <tr><td>🍹 Cocktail</td><td class="gold">${MULT.co}x</td></tr>
+          <tr><td>🚬 Joint</td><td class="gold">${MULT.jo}x</td></tr>
+        </tbody>
+      </table>
+    </div>`;
 }
 
 // ============================================================
@@ -815,32 +964,70 @@ async function renderUser() {
       </div>
       <div class="section-title">Scoreboard</div>
       <div class="scoreboard">${scoreboardHtml}</div>
+      ${multipliersCardHtml()}
     </div>
 
-    <div id="tab-history" style="display:none">
+      <div id="tab-history" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
         <div class="section-title" style="margin:0">My History</div>
         <button class="btn btn-primary btn-sm" onclick="openCheckin()">+ Check in today</button>
       </div>
+      ${(() => {
+        const monthStats = buildMonthlyStats(checkins);
+        return `
+          <div class="card" style="margin-bottom:1rem">
+            <div class="section-title" style="margin:0 0 .75rem 0">${monthStats.label} Stats</div>
+            <div class="summary-bar" style="margin:0">
+              <div class="summary-card"><div class="summary-label">Total 🍺 eq</div><div class="summary-val gold">${monthStats.totalScore}</div></div>
+              <div class="summary-card"><div class="summary-label">Avg per day</div><div class="summary-val">${monthStats.avgMonth}</div></div>
+              <div class="summary-card"><div class="summary-label">Days consumed</div><div class="summary-val">${monthStats.daysWith}</div></div>
+              <div class="summary-card"><div class="summary-label">Days not</div><div class="summary-val">${monthStats.daysWithout}</div></div>
+            </div>
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:.75rem;color:#888;font-size:.85rem">
+              <div><b style="color:#e8c84a">Best day</b> ${monthStats.bestDay}</div>
+            </div>
+          </div>`;
+      })()}
+      ${isLastWeekOfYear() ? (() => {
+        const wrapped = buildWrappedStats(checkins);
+        return `
+          <div class="card" style="margin-bottom:1rem">
+            <div class="section-title" style="margin:0 0 .75rem 0">${wrapped.year} Wrapped</div>
+            <div class="summary-bar" style="margin:0">
+              <div class="summary-card"><div class="summary-label">Total 🍺 eq</div><div class="summary-val gold">${wrapped.totalScore}</div></div>
+              <div class="summary-card"><div class="summary-label">Avg per day</div><div class="summary-val">${wrapped.avgConsumed}</div></div>
+              <div class="summary-card"><div class="summary-label">Days consumed</div><div class="summary-val">${wrapped.daysWith}</div></div>
+              <div class="summary-card"><div class="summary-label">Days not</div><div class="summary-val">${wrapped.daysWithout}</div></div>
+            </div>
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:.75rem;color:#888;font-size:.85rem">
+              <div><b style="color:#e8c84a">Best day</b> ${wrapped.bestDay}</div>
+              <div><b style="color:#e8c84a">Top item</b> ${wrapped.topItem}</div>
+            </div>
+          </div>`;
+      })() : ''}
       <div class="card">
         <table class="history-table">
           <thead>
             <tr>
-              <th>Date</th><th>🍺</th><th>🍻</th><th>🥃</th><th>🍹</th><th>🚬</th><th>🍺eq</th>
+              <th>Date</th><th>🍺</th><th>🍻</th><th>🥃</th><th>🍹</th><th>🚬</th><th>🍺eq</th><th></th>
             </tr>
           </thead>
           <tbody>`;
     
     const sorted = [...checkins].sort((a,b) => b.date.localeCompare(a.date));
     if (sorted.length === 0) {
-      html += `<tr><td colspan="7" style="color:#555;text-align:center;padding:1.5rem">No check-ins yet.</td></tr>`;
+      html += `<tr><td colspan="8" style="color:#555;text-align:center;padding:1.5rem">No check-ins yet.</td></tr>`;
     } else {
+      const yesterdayKey = dateKeyFromOffset(-1);
+      const yearPrefix = `${currentYear()}-`;
       sorted.forEach(c => {
         const eq = fmt(calcScoreFromEntry(c));
+        const canEdit = c.date === yesterdayKey && yesterdayKey.startsWith(yearPrefix);
         html += `<tr>
           <td>${c.date}</td>
           <td>${c.nb}</td><td>${c.sb}</td><td>${c.sh}</td><td>${c.co}</td><td>${c.jo}</td>
           <td class="gold">${eq}</td>
+          <td>${canEdit ? `<button class="btn btn-ghost btn-sm" onclick="openCheckin('${c.date}')">Edit</button>` : ''}</td>
         </tr>`;
       });
     }
@@ -915,6 +1102,7 @@ async function renderAdmin() {
       <div id="atab-score">
         <div class="section-title">Scoreboard</div>
         <div class="scoreboard">${scoreboardHtml}</div>
+        ${multipliersCardHtml()}
       </div>
 
       <div id="atab-users" style="display:none">
@@ -1045,6 +1233,7 @@ async function deleteUser(username) {
 // DAILY CHECK-IN
 // ============================================================
 const counts = { nb: 0, sb: 0, sh: 0, co: 0, jo: 0 };
+let checkinTargetDate = null;
 
 function adj(key, delta) {
   counts[key] = Math.max(0, counts[key] + delta);
@@ -1057,20 +1246,21 @@ function updateEquiv() {
   document.getElementById('checkin-equiv').textContent = `= ${eq.toFixed(2)} standard beer equivalents`;
 }
 
-async function openCheckin() {
+async function openCheckin(dateKey = null) {
   try {
     const checkinsData = await apiCall('/checkins');
     const checkins = checkinsData.checkins;
-    
-    const todayKey = today();
-    const existing = checkins.find(c => c.date === todayKey);
+
+    const targetDate = dateKey || today();
+    const existing = checkins.find(c => c.date === targetDate);
+    checkinTargetDate = targetDate;
 
     Object.keys(counts).forEach(k => counts[k] = existing ? existing[k] : 0);
     ['nb','sb','sh','co','jo'].forEach(k => { document.getElementById('cnt-' + k).textContent = counts[k]; });
     updateEquiv();
 
-    const d = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-    document.getElementById('checkin-modal-date').textContent = `${d} — ${existing ? 'updating existing entry' : 'new entry'}`;
+    const label = formatDateLabel(targetDate);
+    document.getElementById('checkin-modal-date').textContent = `${label} — ${existing ? 'updating existing entry' : 'new entry'}`;
     openModal('checkin-modal');
   } catch (err) {
     showToast(`Error: ${err.message}`);
@@ -1079,7 +1269,8 @@ async function openCheckin() {
 
 async function submitCheckin() {
   try {
-    await apiCall('/checkins', 'POST', counts);
+    const payload = { ...counts, date: checkinTargetDate || today() };
+    await apiCall('/checkins', 'POST', payload);
     closeModal('checkin-modal');
     showToast('Check-in saved! 🍺');
     renderUser();
