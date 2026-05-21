@@ -57,6 +57,7 @@ def init_db():
             sb INTEGER DEFAULT 0,
             sh INTEGER DEFAULT 0,
             co INTEGER DEFAULT 0,
+            wi INTEGER DEFAULT 0,
             jo INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -73,6 +74,16 @@ def init_db():
         if 'password_hash' not in columns and 'password' in columns:
             cursor.execute('ALTER TABLE users ADD COLUMN password_hash TEXT')
             cursor.execute('UPDATE users SET password_hash = password WHERE password_hash IS NULL')
+            db.commit()
+    except Exception:
+        pass
+
+    # Ensure new columns exist for older databases
+    try:
+        cursor.execute('PRAGMA table_info(checkins)')
+        columns = [row[1] for row in cursor.fetchall()]
+        if 'wi' not in columns:
+            cursor.execute('ALTER TABLE checkins ADD COLUMN wi INTEGER DEFAULT 0')
             db.commit()
     except Exception:
         pass
@@ -159,6 +170,7 @@ def checkin_to_dict(row):
         'sb': row['sb'],
         'sh': row['sh'],
         'co': row['co'],
+        'wi': row['wi'],
         'jo': row['jo'],
         'created_at': row['created_at']
     }
@@ -435,10 +447,11 @@ def create_or_update_checkin():
     sb = data.get('sb', 0)
     sh = data.get('sh', 0)
     co = data.get('co', 0)
+    wi = data.get('wi', 0)
     jo = data.get('jo', 0)
     
     # Validate
-    for val in [nb, sb, sh, co, jo]:
+    for val in [nb, sb, sh, co, wi, jo]:
         if not isinstance(val, int) or val < 0:
             return jsonify({'error': 'Invalid input'}), 400
     
@@ -472,14 +485,14 @@ def create_or_update_checkin():
     if existing:
         # Update
         db.execute(
-            'UPDATE checkins SET nb=?, sb=?, sh=?, co=?, jo=? WHERE id = ?',
-            (nb, sb, sh, co, jo, existing['id'])
+            'UPDATE checkins SET nb=?, sb=?, sh=?, co=?, wi=?, jo=? WHERE id = ?',
+            (nb, sb, sh, co, wi, jo, existing['id'])
         )
     else:
         # Insert
         db.execute(
-            'INSERT INTO checkins (user_id, date, nb, sb, sh, co, jo) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            (session['user_id'], target_date, nb, sb, sh, co, jo)
+            'INSERT INTO checkins (user_id, date, nb, sb, sh, co, wi, jo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            (session['user_id'], target_date, nb, sb, sh, co, wi, jo)
         )
     
     db.commit()
@@ -494,20 +507,37 @@ def create_or_update_checkin():
 def get_scoreboard():
     """Public endpoint with ranking and score calculation."""
 
+    mode = (request.args.get('mode') or 'champions').strip().lower()
+    if mode not in {'champions', 'europa', 'conference'}:
+        return jsonify({'error': 'Invalid mode'}), 400
+
     today_date = datetime.now().date()
     year_start = f"{today_date.year}-01-01"
     year_end = f"{today_date.year}-12-31"
 
     db = get_db()
+
+    if mode == 'europa':
+        score_expr = 'c.nb * 1.0 + c.sb * 1.5 + c.sh * 0.75 + c.co * 1.25 + c.wi * 1.5'
+        day_expr = '(c.nb + c.sb + c.sh + c.co + c.wi) > 0'
+    elif mode == 'conference':
+        score_expr = 'c.jo * 1.0'
+        day_expr = 'c.jo > 0'
+    else:
+        score_expr = 'c.nb * 1.0 + c.sb * 1.5 + c.sh * 0.75 + c.co * 1.25 + c.wi * 1.5 + c.jo * 1.25'
+        day_expr = '(c.nb + c.sb + c.sh + c.co + c.wi + c.jo) > 0'
+
+    day_case = f'CASE WHEN c.id IS NOT NULL AND {day_expr} THEN 1 ELSE 0 END'
+    last_case = f'CASE WHEN c.id IS NOT NULL AND {day_expr} THEN c.date ELSE NULL END'
     
     # Get all users with checkin stats
-    users_query = '''
+    users_query = f'''
         SELECT 
             u.id,
             u.username,
-            COUNT(c.id) as days,
-            MAX(c.date) as last_date,
-            SUM(c.nb * 1.0 + c.sb * 1.5 + c.sh * 0.75 + c.co * 1.25 + c.jo * 2.0) as total_score
+            SUM({day_case}) as days,
+            MAX({last_case}) as last_date,
+            SUM(CASE WHEN c.id IS NOT NULL THEN {score_expr} ELSE 0 END) as total_score
         FROM users u
         LEFT JOIN checkins c ON u.id = c.user_id AND c.date BETWEEN ? AND ?
         WHERE u.role = 'user'
