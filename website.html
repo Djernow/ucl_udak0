@@ -414,6 +414,20 @@
   .history-table tr:last-child td { border-bottom: none; }
   .history-table .gold { color: #e8c84a; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; }
 
+  /* ---- download ---- */
+  .download-cta {
+    margin-top: 2rem;
+  }
+
+  .download-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .download-actions a { text-decoration: none; }
+
   /* ---- change pw ---- */
   #changepw-view {
     display: flex;
@@ -636,6 +650,11 @@ const MULT = {
   co: 1.25,   // cocktail
   wi: 1.5,    // wine
   jo: 1.25    // joint
+};
+
+const DOWNLOAD_LINKS = {
+  apple: 'https://udako.libertronics.org/downloads/udako-ios.ipa',
+  android: 'https://udako.libertronics.org/downloads/udako-android.apk'
 };
 
 // ============================================================
@@ -961,6 +980,17 @@ function buildScoreboardHtml(scoreboard, totalLabel) {
   return html;
 }
 
+function downloadButtonsHtml() {
+  return `
+    <div class="card download-cta">
+      <div class="section-title" style="margin:0 0 .75rem 0">Get the app</div>
+      <div class="download-actions">
+        <a class="btn btn-ghost" href="${DOWNLOAD_LINKS.apple}" target="_blank" rel="noopener"> Download for Apple</a>
+        <a class="btn btn-primary" href="${DOWNLOAD_LINKS.android}" target="_blank" rel="noopener">Android APK</a>
+      </div>
+    </div>`;
+}
+
 // ============================================================
 // USER VIEW
 // ============================================================
@@ -1130,6 +1160,8 @@ async function renderUser() {
           </table>
         </div>
       </div>`;
+
+    html += downloadButtonsHtml();
     
     document.getElementById('main-content').innerHTML = html;
   } catch (err) {
@@ -1233,7 +1265,8 @@ async function renderAdmin() {
             </div>
           </div>
         </div>
-      </div>`;
+      </div>
+      ${downloadButtonsHtml()}`;
     
     document.getElementById('main-content').innerHTML = html;
   } catch (err) {

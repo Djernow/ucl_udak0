@@ -6,12 +6,21 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "jsEngine": "hermes",
-    "newArchEnabled": true,
     "plugins": [],
+    "ios": {
+      "bundleIdentifier": "org.libertronics.udako"
+    },
+    "android": {
+      "package": "org.libertronics.udako"
+    },
+    "splash": {
+      "backgroundColor": "#0f0f11"
+    },
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "ce16d833-60f9-4f65-8c38-b4e248d574ba"
       }
-    }
+    },
+    "owner": "djernow"
   }
 }
