@@ -8,7 +8,10 @@
     "jsEngine": "hermes",
     "plugins": [],
     "ios": {
-      "bundleIdentifier": "org.libertronics.udako"
+      "bundleIdentifier": "org.libertronics.udako",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "org.libertronics.udako"
