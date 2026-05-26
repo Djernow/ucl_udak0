@@ -505,6 +505,16 @@
   .checkin-banner p { font-size: 0.9rem; color: #e8c84a; }
   .checkin-banner small { display: block; font-size: 0.78rem; color: #888; margin-top: 2px; }
 
+  /* ---- announcement ---- */
+  .announcement-banner {
+    background: #1a1111;
+    border: 1px solid #5a2a2a;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 1.25rem;
+  }
+  .announcement-banner p { font-size: 0.9rem; color: #e8c84a; }
+
   @media (max-width: 680px) {
     .admin-grid { grid-template-columns: 1fr; }
     .score-row { grid-template-columns: 2rem 1fr 4.5rem 4.5rem; gap: 8px; }
@@ -1155,6 +1165,8 @@ async function renderUser() {
     // Fetch user checkins
     const checkinsData = await apiCall('/checkins');
     const checkins = checkinsData.checkins;
+    const allTimeData = await apiCall('/checkins?scope=all');
+    const allTimeCheckins = allTimeData.checkins;
     
     const todayKey = today();
     const checkedIn = checkins.some(c => c.date === todayKey);
@@ -1168,6 +1180,7 @@ async function renderUser() {
       return s > max ? s : max;
     }, 0);
     const totals = buildConsumptionTotals(checkins);
+    const allTimeTotals = buildConsumptionTotals(allTimeCheckins);
     const combinedTotals = sumScoreboardTotals(champions);
     
     const championsHtml = buildScoreboardHtml(champions, 'Total 🍺eq', 'user-champions');
@@ -1185,6 +1198,16 @@ async function renderUser() {
 
       <div id="tab-score">`;
     
+    const seasonStart = new Date('2026-06-11T00:00:00');
+    const announcementEnd = new Date(seasonStart);
+    announcementEnd.setDate(announcementEnd.getDate() + 7);
+    if (new Date() <= announcementEnd) {
+      html += `
+        <div class="announcement-banner">
+          <p>Training is almost done, get ready for ultimate drinking league starting on 11 june.</p>
+        </div>`;
+    }
+
     if (!checkedIn) {
       html += `
         <div class="checkin-banner">
@@ -1309,7 +1332,23 @@ async function renderUser() {
           </table>
         </div>
         <div class="card" style="margin-top:1rem">
-          <div class="section-title" style="margin:0 0 .75rem 0">All Users Combined</div>
+          <div class="section-title" style="margin:0 0 .75rem 0">All Time (You)</div>
+          <table class="history-table">
+            <thead>
+              <tr><th>Item</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>🍺 Normal beer</td><td class="gold">${allTimeTotals.nb}</td></tr>
+              <tr><td>🍻 Special beer</td><td class="gold">${allTimeTotals.sb}</td></tr>
+              <tr><td>🥃 Shot</td><td class="gold">${allTimeTotals.sh}</td></tr>
+              <tr><td>🍹 Cocktail</td><td class="gold">${allTimeTotals.co}</td></tr>
+              <tr><td>🍷 Wine</td><td class="gold">${allTimeTotals.wi}</td></tr>
+              <tr><td>🚬 Joint</td><td class="gold">${allTimeTotals.jo}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card" style="margin-top:1rem">
+          <div class="section-title" style="margin:0 0 .75rem 0">Users combined</div>
           <table class="history-table">
             <thead>
               <tr><th>Item</th><th>Total</th></tr>

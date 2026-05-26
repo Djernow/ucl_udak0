@@ -12,6 +12,17 @@ app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 DATABASE = os.environ.get('DATABASE_PATH', '/data/udako.db')
+SEASON_START_MONTH = 6
+SEASON_START_DAY = 11
+
+# ============================================================
+# SEASON HELPERS
+# ============================================================
+def current_season_start(today):
+    start_this_year = datetime(today.year, SEASON_START_MONTH, SEASON_START_DAY).date()
+    if today >= start_this_year:
+        return start_this_year
+    return datetime(today.year - 1, SEASON_START_MONTH, SEASON_START_DAY).date()
 
 # ============================================================
 # DATABASE INITIALIZATION
@@ -423,14 +434,22 @@ def delete_user():
 @require_auth
 def get_checkins():
     today_date = datetime.now().date()
-    year_start = f"{today_date.year}-01-01"
-    year_end = f"{today_date.year}-12-31"
+    scope = (request.args.get('scope') or '').strip().lower()
+    season_start = current_season_start(today_date)
+    range_start = season_start.strftime('%Y-%m-%d')
+    range_end = today_date.strftime('%Y-%m-%d')
 
     db = get_db()
-    checkins = db.execute(
-        'SELECT * FROM checkins WHERE user_id = ? AND date BETWEEN ? AND ? ORDER BY date DESC',
-        (session['user_id'], year_start, year_end)
-    ).fetchall()
+    if scope == 'all':
+        checkins = db.execute(
+            'SELECT * FROM checkins WHERE user_id = ? ORDER BY date DESC',
+            (session['user_id'],)
+        ).fetchall()
+    else:
+        checkins = db.execute(
+            'SELECT * FROM checkins WHERE user_id = ? AND date BETWEEN ? AND ? ORDER BY date DESC',
+            (session['user_id'], range_start, range_end)
+        ).fetchall()
     db.close()
     
     return jsonify({
@@ -512,8 +531,9 @@ def get_scoreboard():
         return jsonify({'error': 'Invalid mode'}), 400
 
     today_date = datetime.now().date()
-    year_start = f"{today_date.year}-01-01"
-    year_end = f"{today_date.year}-12-31"
+    season_start = current_season_start(today_date)
+    range_start = season_start.strftime('%Y-%m-%d')
+    range_end = today_date.strftime('%Y-%m-%d')
 
     db = get_db()
 
@@ -551,7 +571,7 @@ def get_scoreboard():
         ORDER BY total_score DESC, u.username ASC
     '''
 
-    rows = db.execute(users_query, (year_start, year_end)).fetchall()
+    rows = db.execute(users_query, (range_start, range_end)).fetchall()
     db.close()
     
     # Build scoreboard with ranks
