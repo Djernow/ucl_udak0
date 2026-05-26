@@ -537,7 +537,13 @@ def get_scoreboard():
             u.username,
             SUM({day_case}) as days,
             MAX({last_case}) as last_date,
-            SUM(CASE WHEN c.id IS NOT NULL THEN {score_expr} ELSE 0 END) as total_score
+            SUM(CASE WHEN c.id IS NOT NULL THEN {score_expr} ELSE 0 END) as total_score,
+            SUM(CASE WHEN c.id IS NOT NULL THEN c.nb ELSE 0 END) as total_nb,
+            SUM(CASE WHEN c.id IS NOT NULL THEN c.sb ELSE 0 END) as total_sb,
+            SUM(CASE WHEN c.id IS NOT NULL THEN c.sh ELSE 0 END) as total_sh,
+            SUM(CASE WHEN c.id IS NOT NULL THEN c.co ELSE 0 END) as total_co,
+            SUM(CASE WHEN c.id IS NOT NULL THEN c.wi ELSE 0 END) as total_wi,
+            SUM(CASE WHEN c.id IS NOT NULL THEN c.jo ELSE 0 END) as total_jo
         FROM users u
         LEFT JOIN checkins c ON u.id = c.user_id AND c.date BETWEEN ? AND ?
         WHERE u.role = 'user'
@@ -561,7 +567,15 @@ def get_scoreboard():
             'score': round(score, 1),
             'days': days,
             'avg': round(avg, 1),
-            'last_date': row['last_date'] or '—'
+            'last_date': row['last_date'] or '—',
+            'totals': {
+                'nb': int(row['total_nb'] or 0),
+                'sb': int(row['total_sb'] or 0),
+                'sh': int(row['total_sh'] or 0),
+                'co': int(row['total_co'] or 0),
+                'wi': int(row['total_wi'] or 0),
+                'jo': int(row['total_jo'] or 0)
+            }
         })
     
     return jsonify({'scoreboard': scoreboard}), 200

@@ -212,6 +212,45 @@
   .top-3 .rank { color: #c07840; }
 
   .user-name { font-weight: 500; font-size: 0.95rem; }
+  .user-name-btn {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+    border-bottom: 1px dashed #4a4848;
+  }
+  .user-name-btn:hover { color: #e8c84a; border-bottom-color: #e8c84a66; }
+
+  .score-detail-row {
+    display: none;
+    margin: -4px 0 8px 0;
+    padding-left: calc(2.5rem + 12px);
+  }
+
+  .score-detail-card {
+    background: #111012;
+    border: 1px solid #2a2828;
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+
+  .score-detail-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #777;
+    margin-bottom: 6px;
+  }
+
+  .history-table.compact th,
+  .history-table.compact td {
+    padding: 6px 10px;
+  }
+
+  .history-table.compact th { font-size: 0.7rem; }
   .score-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: #e8c84a; text-align: right; }
   .score-sub { font-size: 0.75rem; color: #555; text-align: right; }
 
@@ -471,6 +510,7 @@
     .score-row { grid-template-columns: 2rem 1fr 4.5rem 4.5rem; gap: 8px; }
     .score-row .score-val:nth-child(5),
     .score-row .score-val:nth-child(6) { display: none; }
+    .score-detail-row { padding-left: calc(2rem + 8px); }
     .checkin-grid { grid-template-columns: 1fr 1fr; }
     main { padding: 1rem; }
   }
@@ -484,6 +524,7 @@
     .card { padding: 1.25rem; }
     .score-row { padding: 12px; gap: 8px; }
     .score-row .user-name { font-size: 0.9rem; }
+    .score-row .user-name-btn { font-size: 0.9rem; }
     .score-val { font-size: 1.05rem; }
   }
 </style>
@@ -805,7 +846,7 @@ function formatDateLabel(dateKey) {
 
 function fmt(n) {
   const val = typeof n === 'number' ? n : Number(n);
-  return Number.isFinite(val) ? val.toFixed(1) : '0.0';
+  return Number.isFinite(val) ? val.toFixed(2) : '0.00';
 }
 
 function daysInYear(year) {
@@ -954,7 +995,34 @@ function buildConsumptionTotals(checkins) {
   return totals;
 }
 
-function buildScoreboardHtml(scoreboard, totalLabel) {
+function buildScoreDetailsHtml(username, totals = {}) {
+  const nb = totals.nb || 0;
+  const sb = totals.sb || 0;
+  const sh = totals.sh || 0;
+  const co = totals.co || 0;
+  const wi = totals.wi || 0;
+  const jo = totals.jo || 0;
+
+  return `
+      <div class="score-detail-card">
+        <div class="score-detail-title">${username} - consumption</div>
+        <table class="history-table compact">
+          <thead>
+            <tr><th>Item</th><th>Total</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>🍺 Normal beer</td><td class="gold">${nb}</td></tr>
+            <tr><td>🍻 Special beer</td><td class="gold">${sb}</td></tr>
+            <tr><td>🥃 Shot</td><td class="gold">${sh}</td></tr>
+            <tr><td>🍹 Cocktail</td><td class="gold">${co}</td></tr>
+            <tr><td>🍷 Wine</td><td class="gold">${wi}</td></tr>
+            <tr><td>🚬 Joint</td><td class="gold">${jo}</td></tr>
+          </tbody>
+        </table>
+      </div>`;
+}
+
+function buildScoreboardHtml(scoreboard, totalLabel, boardKey) {
   let html = `
       <div class="score-row header-row">
         <span>#</span><span>User</span>
@@ -966,18 +1034,44 @@ function buildScoreboardHtml(scoreboard, totalLabel) {
 
   scoreboard.forEach((u, i) => {
     const cls = i === 0 ? 'top-1' : i === 1 ? 'top-2' : i === 2 ? 'top-3' : '';
+    const detailId = `score-detail-${boardKey}-${i}`;
     html += `
         <div class="score-row ${cls}">
           <div class="rank">${u.rank}</div>
-          <div class="user-name">${u.username}</div>
+          <div class="user-name"><button class="user-name-btn" type="button" onclick="toggleScoreDetails(this, '${detailId}')" aria-expanded="false">${u.username}</button></div>
           <div class="score-val">${fmt(u.score)}</div>
           <div class="score-val">${u.days}</div>
           <div class="score-val">${fmt(u.avg)}</div>
           <div class="score-sub">${u.last_date}</div>
+        </div>
+        <div id="${detailId}" class="score-detail-row">
+          ${buildScoreDetailsHtml(u.username, u.totals)}
         </div>`;
   });
 
   return html;
+}
+
+function toggleScoreDetails(button, detailId) {
+  const scoreboard = button.closest('.scoreboard');
+  if (!scoreboard) return;
+
+  const detail = document.getElementById(detailId);
+  if (!detail) return;
+
+  const shouldOpen = detail.style.display !== 'block';
+
+  scoreboard.querySelectorAll('.score-detail-row').forEach(row => {
+    row.style.display = 'none';
+  });
+  scoreboard.querySelectorAll('.user-name-btn').forEach(btn => {
+    btn.setAttribute('aria-expanded', 'false');
+  });
+
+  if (shouldOpen) {
+    detail.style.display = 'block';
+    button.setAttribute('aria-expanded', 'true');
+  }
 }
 
 function downloadButtonsHtml() {
@@ -1014,16 +1108,16 @@ async function renderUser() {
     // Calculate stats
     const totalScore = checkins.reduce((sum, c) => sum + calcScoreFromEntry(c), 0);
     const days = checkins.length;
-    const avg = days > 0 ? fmt(totalScore / days) : '0.0';
+    const avg = days > 0 ? fmt(totalScore / days) : '0.00';
     const best = checkins.reduce((max, c) => {
       const s = calcScoreFromEntry(c);
       return s > max ? s : max;
     }, 0);
     const totals = buildConsumptionTotals(checkins);
     
-    const championsHtml = buildScoreboardHtml(champions, 'Total 🍺eq');
-    const europaHtml = buildScoreboardHtml(europa, 'Total 🍺eq');
-    const conferenceHtml = buildScoreboardHtml(conference, 'Total 🚬');
+    const championsHtml = buildScoreboardHtml(champions, 'Total 🍺eq', 'user-champions');
+    const europaHtml = buildScoreboardHtml(europa, 'Total 🍺eq', 'user-europa');
+    const conferenceHtml = buildScoreboardHtml(conference, 'Total 🚬', 'user-conference');
     
     let html = `
       <div class="tabs">
@@ -1184,9 +1278,9 @@ async function renderAdmin() {
     const europa = europaData.scoreboard;
     const conference = conferenceData.scoreboard;
     
-    const championsHtml = buildScoreboardHtml(champions, 'Total 🍺eq');
-    const europaHtml = buildScoreboardHtml(europa, 'Total 🍺eq');
-    const conferenceHtml = buildScoreboardHtml(conference, 'Total 🚬');
+    const championsHtml = buildScoreboardHtml(champions, 'Total 🍺eq', 'admin-champions');
+    const europaHtml = buildScoreboardHtml(europa, 'Total 🍺eq', 'admin-europa');
+    const conferenceHtml = buildScoreboardHtml(conference, 'Total 🚬', 'admin-conference');
     
     let userListHtml = '';
     if (users.length === 0) {
