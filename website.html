@@ -995,6 +995,20 @@ function buildConsumptionTotals(checkins) {
   return totals;
 }
 
+function sumScoreboardTotals(scoreboard) {
+  const totals = { nb: 0, sb: 0, sh: 0, co: 0, wi: 0, jo: 0 };
+  scoreboard.forEach(u => {
+    const t = u.totals || {};
+    totals.nb += t.nb || 0;
+    totals.sb += t.sb || 0;
+    totals.sh += t.sh || 0;
+    totals.co += t.co || 0;
+    totals.wi += t.wi || 0;
+    totals.jo += t.jo || 0;
+  });
+  return totals;
+}
+
 function buildScoreDetailsHtml(username, totals = {}) {
   const nb = totals.nb || 0;
   const sb = totals.sb || 0;
@@ -1038,13 +1052,13 @@ function buildScoreboardHtml(scoreboard, totalLabel, boardKey) {
     html += `
         <div class="score-row ${cls}">
           <div class="rank">${u.rank}</div>
-          <div class="user-name"><button class="user-name-btn" type="button" onclick="toggleScoreDetails(this, '${detailId}')" aria-expanded="false">${u.username}</button></div>
+          <div class="user-name"><button class="user-name-btn" type="button" onmouseenter="cancelHideScoreDetails('${detailId}'); showScoreDetails(this, '${detailId}')" onmouseleave="scheduleHideScoreDetails(this, '${detailId}')" ontouchstart="holdScoreDetails(this, '${detailId}', event)" ontouchend="releaseScoreDetails(this, '${detailId}', event)" ontouchcancel="releaseScoreDetails(this, '${detailId}', event)" aria-expanded="false">${u.username}</button></div>
           <div class="score-val">${fmt(u.score)}</div>
           <div class="score-val">${u.days}</div>
           <div class="score-val">${fmt(u.avg)}</div>
           <div class="score-sub">${u.last_date}</div>
         </div>
-        <div id="${detailId}" class="score-detail-row">
+        <div id="${detailId}" class="score-detail-row" onmouseenter="cancelHideScoreDetails('${detailId}')" onmouseleave="hideScoreDetails(null, '${detailId}')">
           ${buildScoreDetailsHtml(u.username, u.totals)}
         </div>`;
   });
@@ -1052,14 +1066,15 @@ function buildScoreboardHtml(scoreboard, totalLabel, boardKey) {
   return html;
 }
 
-function toggleScoreDetails(button, detailId) {
+const scoreDetailHoldTimers = new Map();
+const scoreDetailHideTimers = new Map();
+
+function showScoreDetails(button, detailId) {
   const scoreboard = button.closest('.scoreboard');
   if (!scoreboard) return;
 
   const detail = document.getElementById(detailId);
   if (!detail) return;
-
-  const shouldOpen = detail.style.display !== 'block';
 
   scoreboard.querySelectorAll('.score-detail-row').forEach(row => {
     row.style.display = 'none';
@@ -1068,10 +1083,49 @@ function toggleScoreDetails(button, detailId) {
     btn.setAttribute('aria-expanded', 'false');
   });
 
-  if (shouldOpen) {
-    detail.style.display = 'block';
-    button.setAttribute('aria-expanded', 'true');
+  detail.style.display = 'block';
+  button.setAttribute('aria-expanded', 'true');
+}
+
+function hideScoreDetails(button, detailId) {
+  const detail = document.getElementById(detailId);
+  if (!detail) return;
+  detail.style.display = 'none';
+  if (button) {
+    button.setAttribute('aria-expanded', 'false');
+  } else {
+    const scoreboard = detail.closest('.scoreboard');
+    if (scoreboard) {
+      scoreboard.querySelectorAll('.user-name-btn').forEach(btn => {
+        btn.setAttribute('aria-expanded', 'false');
+      });
+    }
   }
+}
+
+function scheduleHideScoreDetails(button, detailId) {
+  clearTimeout(scoreDetailHideTimers.get(detailId));
+  const timer = setTimeout(() => hideScoreDetails(button, detailId), 120);
+  scoreDetailHideTimers.set(detailId, timer);
+}
+
+function cancelHideScoreDetails(detailId) {
+  clearTimeout(scoreDetailHideTimers.get(detailId));
+  scoreDetailHideTimers.delete(detailId);
+}
+
+function holdScoreDetails(button, detailId, event) {
+  if (event) event.preventDefault();
+  clearTimeout(scoreDetailHoldTimers.get(detailId));
+  const timer = setTimeout(() => showScoreDetails(button, detailId), 450);
+  scoreDetailHoldTimers.set(detailId, timer);
+}
+
+function releaseScoreDetails(button, detailId, event) {
+  if (event) event.preventDefault();
+  clearTimeout(scoreDetailHoldTimers.get(detailId));
+  scoreDetailHoldTimers.delete(detailId);
+  hideScoreDetails(button, detailId);
 }
 
 function downloadButtonsHtml() {
@@ -1114,6 +1168,7 @@ async function renderUser() {
       return s > max ? s : max;
     }, 0);
     const totals = buildConsumptionTotals(checkins);
+    const combinedTotals = sumScoreboardTotals(champions);
     
     const championsHtml = buildScoreboardHtml(champions, 'Total 🍺eq', 'user-champions');
     const europaHtml = buildScoreboardHtml(europa, 'Total 🍺eq', 'user-europa');
@@ -1253,10 +1308,24 @@ async function renderUser() {
             </tbody>
           </table>
         </div>
+        <div class="card" style="margin-top:1rem">
+          <div class="section-title" style="margin:0 0 .75rem 0">All Users Combined</div>
+          <table class="history-table">
+            <thead>
+              <tr><th>Item</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>🍺 Normal beer</td><td class="gold">${combinedTotals.nb}</td></tr>
+              <tr><td>🍻 Special beer</td><td class="gold">${combinedTotals.sb}</td></tr>
+              <tr><td>🥃 Shot</td><td class="gold">${combinedTotals.sh}</td></tr>
+              <tr><td>🍹 Cocktail</td><td class="gold">${combinedTotals.co}</td></tr>
+              <tr><td>🍷 Wine</td><td class="gold">${combinedTotals.wi}</td></tr>
+              <tr><td>🚬 Joint</td><td class="gold">${combinedTotals.jo}</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>`;
 
-    html += downloadButtonsHtml();
-    
     document.getElementById('main-content').innerHTML = html;
   } catch (err) {
     showToast(`Error: ${err.message}`);
