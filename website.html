@@ -1646,6 +1646,56 @@ document.addEventListener('keydown', e => {
 // ============================================================
 // BOOT
 // ============================================================
+let swRegistration = null;
+let reminderTimeoutId = null;
+let reminderIntervalId = null;
+
+function isStandaloneMode() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function scheduleDailyReminder(reg) {
+  if (!reg || Notification.permission !== 'granted') return;
+
+  if (reminderTimeoutId) clearTimeout(reminderTimeoutId);
+  if (reminderIntervalId) clearInterval(reminderIntervalId);
+
+  const now = new Date();
+  const next = new Date();
+  next.setHours(21, 0, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+
+  const msUntilNext = next.getTime() - now.getTime();
+  reminderTimeoutId = setTimeout(() => {
+    reg.showNotification('did you drink yet?', {
+      tag: 'daily-9pm',
+      renotify: false
+    });
+    reminderIntervalId = setInterval(() => {
+      reg.showNotification('did you drink yet?', {
+        tag: 'daily-9pm',
+        renotify: false
+      });
+    }, 24 * 60 * 60 * 1000);
+  }, msUntilNext);
+}
+
+function initDailyReminder() {
+  if (!swRegistration || !isStandaloneMode() || !('Notification' in window)) return;
+
+  if (Notification.permission === 'granted') {
+    scheduleDailyReminder(swRegistration);
+    return;
+  }
+
+  if (Notification.permission === 'default') {
+    Notification.requestPermission().then(result => {
+      if (result === 'granted') scheduleDailyReminder(swRegistration);
+    });
+  }
+}
+
+
 async function bootstrap() {
   try {
     const data = await apiCall('/auth/me');
@@ -1657,6 +1707,7 @@ async function bootstrap() {
     }
 
     enterApp();
+    initDailyReminder();
   } catch (err) {
     currentUser = null;
     show('login-view');
@@ -1671,6 +1722,8 @@ bootstrap();
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js').then(reg => {
+      swRegistration = reg;
+      initDailyReminder();
       console.log('Service Worker registered successfully', reg);
     }).catch(err => {
       console.log('Service Worker registration failed:', err);

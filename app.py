@@ -10,6 +10,7 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-produ
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=3650)
 
 DATABASE = os.environ.get('DATABASE_PATH', '/data/udako.db')
 SEASON_START_MONTH = 6
@@ -73,6 +74,19 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             UNIQUE(user_id, date)
+        )
+    ''')
+
+    # Push subscriptions
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS push_subscriptions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            endpoint TEXT UNIQUE NOT NULL,
+            p256dh TEXT NOT NULL,
+            auth TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     ''')
     
@@ -186,6 +200,17 @@ def checkin_to_dict(row):
         'created_at': row['created_at']
     }
 
+def vapid_configured():
+    return bool(VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY)
+
+def send_webpush(subscription, payload):
+    webpush(
+        subscription_info=subscription,
+        data=payload,
+        vapid_private_key=VAPID_PRIVATE_KEY,
+        vapid_claims=VAPID_CLAIMS
+    )
+
 # ============================================================
 # HEALTH CHECK
 # ============================================================
@@ -223,6 +248,7 @@ def login():
         return jsonify({'error': 'Invalid username or password'}), 401
     
     session.clear()
+    session.permanent = True
     session['user_id'] = user['id']
     session['username'] = username
     session['role'] = user['role']
