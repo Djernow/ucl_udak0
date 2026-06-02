@@ -121,6 +121,43 @@
     padding: 1.5rem;
   }
 
+  .daily-quote-card {
+    margin: 0 0 1rem 0;
+    border-color: #e8c84a55;
+    background: linear-gradient(180deg, #201b12 0%, #18171a 100%);
+  }
+
+  .daily-quote-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #b9a35f;
+    margin-bottom: 0.65rem;
+  }
+
+  .daily-quote-text {
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: #f4efe4;
+    margin-bottom: 0.75rem;
+  }
+
+  .daily-quote-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    color: #a99a6b;
+    font-size: 0.85rem;
+  }
+
+  .daily-quote-meta span {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #111012;
+    border: 1px solid #2a2828;
+  }
+
   /* ---- sections ---- */
   .section-title {
     font-family: 'Bebas Neue', sans-serif;
@@ -859,6 +896,15 @@ function fmt(n) {
   return Number.isFinite(val) ? val.toFixed(2) : '0.00';
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function daysInYear(year) {
   const start = new Date(year, 0, 1);
   const end = new Date(year + 1, 0, 1);
@@ -972,6 +1018,30 @@ function buildMonthlyStats(checkins) {
     daysWithout,
     bestDay: bestDay ? `${bestDay} (${fmt(bestScore)} 🍺eq)` : '—'
   };
+}
+
+function dailyQuoteHtml(quotes) {
+  if (!Array.isArray(quotes) || quotes.length === 0) return '';
+
+  const dateKey = today();
+  const seed = Array.from(dateKey).reduce((hash, char) => ((hash * 31) + char.charCodeAt(0)) >>> 0, 0);
+  const quote = quotes[seed % quotes.length];
+  if (!quote || !quote.quote) return '';
+
+  const quoteText = escapeHtml(quote.quote);
+  const author = quote.author ? escapeHtml(quote.author) : '';
+  const category = quote.category ? escapeHtml(quote.category) : '';
+
+  return `
+    <div class="card daily-quote-card">
+      <div class="daily-quote-label">Daily quote</div>
+      <div class="daily-quote-text">${quoteText}</div>
+      <div class="daily-quote-meta">
+        ${author ? `<span>— ${author}</span>` : ''}
+        ${category ? `<span>${category}</span>` : ''}
+        <span>${dateKey}</span>
+      </div>
+    </div>`;
 }
 
 function multipliersCardHtml() {
@@ -1382,9 +1452,11 @@ async function renderAdmin() {
     const championsData = await apiCall('/scoreboard?mode=champions');
     const europaData = await apiCall('/scoreboard?mode=europa');
     const conferenceData = await apiCall('/scoreboard?mode=conference');
+    const quotesData = await apiCall('/quotes');
     const champions = championsData.scoreboard;
     const europa = europaData.scoreboard;
     const conference = conferenceData.scoreboard;
+    const quoteBlock = dailyQuoteHtml(quotesData.quotes);
     
     const championsHtml = buildScoreboardHtml(champions, 'Total 🍺eq', 'admin-champions');
     const europaHtml = buildScoreboardHtml(europa, 'Total 🍺eq', 'admin-europa');
@@ -1419,6 +1491,7 @@ async function renderAdmin() {
       </div>
 
       <div id="atab-score">
+        ${quoteBlock}
         <div class="section-title">Champions League</div>
         <div class="scoreboard-scroll">
           <div class="scoreboard">${championsHtml}</div>

@@ -89,6 +89,19 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     ''')
+
+    # Quotes table for reusable random quotes
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS quotes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            quote TEXT NOT NULL,
+            author TEXT,
+            category TEXT,
+            is_active INTEGER DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
     
     db.commit()
     
@@ -200,6 +213,17 @@ def checkin_to_dict(row):
         'created_at': row['created_at']
     }
 
+def quote_to_dict(row):
+    return {
+        'id': row['id'],
+        'quote': row['quote'],
+        'author': row['author'],
+        'category': row['category'],
+        'is_active': bool(row['is_active']),
+        'created_at': row['created_at'],
+        'updated_at': row['updated_at']
+    }
+
 def vapid_configured():
     return bool(VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY)
 
@@ -217,6 +241,138 @@ def send_webpush(subscription, payload):
 @app.route('/api/health', methods=['GET'])
 def health():
     return jsonify({'status': 'ok'}), 200
+
+# ============================================================
+# QUOTES ENDPOINTS
+# ============================================================
+@app.route('/api/quotes', methods=['GET'])
+def get_quotes():
+    include_inactive = (request.args.get('include_inactive') or '').strip().lower() in {'1', 'true', 'yes', 'on'}
+
+    db = get_db()
+    if include_inactive:
+        rows = db.execute('SELECT * FROM quotes ORDER BY created_at DESC, id DESC').fetchall()
+    else:
+        rows = db.execute('SELECT * FROM quotes WHERE is_active = 1 ORDER BY created_at DESC, id DESC').fetchall()
+    db.close()
+
+    return jsonify({'quotes': [quote_to_dict(row) for row in rows]}), 200
+
+@app.route('/api/quotes/random', methods=['GET'])
+def get_random_quote():
+    db = get_db()
+    row = db.execute(
+        'SELECT * FROM quotes WHERE is_active = 1 ORDER BY RANDOM() LIMIT 1'
+    ).fetchone()
+    db.close()
+
+    if not row:
+        return jsonify({'error': 'No active quotes available'}), 404
+
+    return jsonify({'quote': quote_to_dict(row)}), 200
+
+@app.route('/api/quotes/<int:quote_id>', methods=['GET'])
+def get_quote(quote_id):
+    db = get_db()
+    row = db.execute('SELECT * FROM quotes WHERE id = ?', (quote_id,)).fetchone()
+    db.close()
+
+    if not row:
+        return jsonify({'error': 'Quote not found'}), 404
+
+    return jsonify({'quote': quote_to_dict(row)}), 200
+
+@app.route('/api/quotes', methods=['POST'])
+@require_admin
+def add_quote():
+    data = request.get_json() or {}
+    quote = (data.get('quote') or '').strip()
+    author = (data.get('author') or '').strip() or None
+    category = (data.get('category') or '').strip() or None
+    is_active = data.get('is_active', True)
+
+    if not quote:
+        return jsonify({'error': 'Quote text required'}), 400
+
+    if not isinstance(is_active, bool):
+        return jsonify({'error': 'is_active must be a boolean'}), 400
+
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        'INSERT INTO quotes (quote, author, category, is_active) VALUES (?, ?, ?, ?)',
+        (quote, author, category, 1 if is_active else 0)
+    )
+    db.commit()
+    quote_id = cursor.lastrowid
+    row = db.execute('SELECT * FROM quotes WHERE id = ?', (quote_id,)).fetchone()
+    db.close()
+
+    return jsonify({'success': True, 'quote': quote_to_dict(row)}), 201
+
+@app.route('/api/quotes/<int:quote_id>', methods=['PUT'])
+@require_admin
+def update_quote(quote_id):
+    data = request.get_json() or {}
+    db = get_db()
+    row = db.execute('SELECT * FROM quotes WHERE id = ?', (quote_id,)).fetchone()
+
+    if not row:
+        db.close()
+        return jsonify({'error': 'Quote not found'}), 404
+
+    quote = data.get('quote', row['quote'])
+    author = data.get('author', row['author'])
+    category = data.get('category', row['category'])
+    is_active = data.get('is_active', bool(row['is_active']))
+
+    if not isinstance(quote, str) or not quote.strip():
+        db.close()
+        return jsonify({'error': 'Quote text required'}), 400
+
+    if author is not None and not isinstance(author, str):
+        db.close()
+        return jsonify({'error': 'author must be a string or null'}), 400
+
+    if category is not None and not isinstance(category, str):
+        db.close()
+        return jsonify({'error': 'category must be a string or null'}), 400
+
+    if not isinstance(is_active, bool):
+        db.close()
+        return jsonify({'error': 'is_active must be a boolean'}), 400
+
+    db.execute(
+        '''
+        UPDATE quotes
+        SET quote = ?, author = ?, category = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        ''',
+        (quote.strip(), author.strip() if isinstance(author, str) and author.strip() else None,
+         category.strip() if isinstance(category, str) and category.strip() else None,
+         1 if is_active else 0, quote_id)
+    )
+    db.commit()
+    row = db.execute('SELECT * FROM quotes WHERE id = ?', (quote_id,)).fetchone()
+    db.close()
+
+    return jsonify({'success': True, 'quote': quote_to_dict(row)}), 200
+
+@app.route('/api/quotes/<int:quote_id>', methods=['DELETE'])
+@require_admin
+def delete_quote(quote_id):
+    db = get_db()
+    row = db.execute('SELECT id FROM quotes WHERE id = ?', (quote_id,)).fetchone()
+
+    if not row:
+        db.close()
+        return jsonify({'error': 'Quote not found'}), 404
+
+    db.execute('DELETE FROM quotes WHERE id = ?', (quote_id,))
+    db.commit()
+    db.close()
+
+    return jsonify({'success': True}), 200
 
 # ============================================================
 # AUTHENTICATION ENDPOINTS
