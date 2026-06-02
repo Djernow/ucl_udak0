@@ -1020,17 +1020,13 @@ function buildMonthlyStats(checkins) {
   };
 }
 
-function dailyQuoteHtml(quotes) {
-  if (!Array.isArray(quotes) || quotes.length === 0) return '';
-
-  const dateKey = today();
-  const seed = Array.from(dateKey).reduce((hash, char) => ((hash * 31) + char.charCodeAt(0)) >>> 0, 0);
-  const quote = quotes[seed % quotes.length];
+function dailyQuoteHtml(quote) {
   if (!quote || !quote.quote) return '';
 
   const quoteText = escapeHtml(quote.quote);
   const author = quote.author ? escapeHtml(quote.author) : '';
   const category = quote.category ? escapeHtml(quote.category) : '';
+  const sourceDate = today();
 
   return `
     <div class="card daily-quote-card">
@@ -1039,7 +1035,7 @@ function dailyQuoteHtml(quotes) {
       <div class="daily-quote-meta">
         ${author ? `<span>— ${author}</span>` : ''}
         ${category ? `<span>${category}</span>` : ''}
-        <span>${dateKey}</span>
+        <span>${sourceDate}</span>
       </div>
     </div>`;
 }
@@ -1452,11 +1448,17 @@ async function renderAdmin() {
     const championsData = await apiCall('/scoreboard?mode=champions');
     const europaData = await apiCall('/scoreboard?mode=europa');
     const conferenceData = await apiCall('/scoreboard?mode=conference');
-    const quotesData = await apiCall('/quotes');
     const champions = championsData.scoreboard;
     const europa = europaData.scoreboard;
     const conference = conferenceData.scoreboard;
-    const quoteBlock = dailyQuoteHtml(quotesData.quotes);
+    let quoteBlock = '';
+    try {
+      const quoteData = await apiCall('/quotes/today');
+      quoteBlock = dailyQuoteHtml(quoteData.quote);
+    } catch (quoteErr) {
+      quoteBlock = '';
+      console.warn('Daily quote unavailable:', quoteErr.message);
+    }
     
     const championsHtml = buildScoreboardHtml(champions, 'Total 🍺eq', 'admin-champions');
     const europaHtml = buildScoreboardHtml(europa, 'Total 🍺eq', 'admin-europa');
