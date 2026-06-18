@@ -1,7 +1,7 @@
 // UDAKO CL Service Worker
 // Enables offline functionality and caching for PWA
 
-const CACHE_NAME = 'udako-cl-v1';
+const CACHE_NAME = 'udako-cl-v12';
 const urlsToCache = [
   '/',
   '/website.html',
@@ -14,9 +14,18 @@ const urlsToCache = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      // Cache essential files
+      // Force cache-busting requests during install to bypass HTTP cache
+      const freshRequests = urlsToCache.map(url => {
+        return fetch(new Request(url, { cache: 'reload' }))
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Request for ${url} failed with status ${response.status}`);
+            }
+            return cache.put(url, response);
+          });
+      });
       return Promise.all([
-        cache.addAll(urlsToCache),
+        Promise.all(freshRequests),
         self.skipWaiting()
       ]);
     })
@@ -82,20 +91,5 @@ self.addEventListener('fetch', event => {
           });
         });
       })
-  );
-});
-
-// ============================================================
-// NOTIFICATION CLICK
-// ============================================================
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      if (clientList.length > 0) {
-        return clientList[0].focus();
-      }
-      return clients.openWindow('/');
-    })
   );
 });

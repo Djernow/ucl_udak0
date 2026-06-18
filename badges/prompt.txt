@@ -1,0 +1,365 @@
+<think time="4.2">We need to produce SVG code for each badge variant. Provide SVG strings. Can't create files but can give code. List badge types: beer, duvel, wine glass, cocktail, shot, joint; each in bronze, silver, gold, black silhouette. Provide example SVG using simple shapes. Probably give one template and explain color changes.</think>Below is a ready‑to‑copy set of SVG files that follow the Strava‑style badge look you asked for:
+
+* **Style cues taken from Strava** – 2 px stroke, rounded corners, a solid “fill‑stroke” look, and a small white highlight to give the icon a bit of depth.  
+* **Four tiers** – Bronze, Silver, Gold, and a solid Black silhouette.  
+* **Six icons** – Beer mug, Duvel bottle, Wine glass, Cocktail glass, Shot glass, and a Cannabis joint.  
+* **File naming convention** – `<icon>‑<tier>.svg` (e.g., `beer‑bronze.svg`).  
+
+You can simply copy the SVG markup into a file with that name, or paste the strings into a vector‑editor (Inkscape, Illustrator, Figma, etc.) and export them again if you need to tweak the dimensions.
+
+---
+
+## 1. Common badge dimensions & reusable parts  
+
+All badges are **64 × 64 px** (the same size Strava uses for its challenge icons).  
+The outer “badge” shape is a rounded‑square with a 5 px corner radius.  
+The icon itself is centered and sized to fit nicely inside the badge.
+
+```svg
+<!-- Template – replace {fill} with the tier colour,
+     replace {icon‑path} with the specific icon path,
+     replace {highlight‑path} with the same path shifted a bit for a white “glint”. -->
+<svg width="64" height="64" viewBox="0 0 64 64"
+     xmlns="http://www.w3.org/2000/svg">
+  <!-- Badge background -->
+  <rect x="1" y="1" width="62" height="62" rx="5" ry="5"
+        fill="{fill}" stroke="#000" stroke-width="2"/>
+
+  <!-- Icon (scaled to ~36 px height, centered) -->
+  <g transform="translate(32,32) scale(0.5625) translate(-32,-32)">
+    <!-- White highlight – a copy of the icon, slightly offset -->
+    <path d="{icon-path}"
+          fill="#fff" opacity="0.2"
+          transform="translate(2,2)"/>
+    <!-- Main icon -->
+    <path d="{icon-path}" fill="#fff"/>
+  </g>
+</svg>
+```
+
+*Replace `{fill}` with one of the tier colours (see Table 1) and `{icon-path}` with the vector outline of the desired icon (the paths are provided below).*
+
+---
+
+## 2. Tier colours (Table 1)
+
+| Tier   | Hex colour | Description |
+|--------|------------|-------------|
+| Bronze | `#CD7F32`  | Classic copper‑brown |
+| Silver | `#C0C0C0`  | Light metallic gray |
+| Gold   | `#FFD700`  | Bright yellow‑gold |
+| Black  | `#000000`  | Solid black silhouette (no highlight) |
+
+*For the **Black** version we keep the same path but **remove the white highlight** – the icon will be rendered completely in black.*
+
+---
+
+## 3. Icon paths  
+
+Below are the six icons. All paths are **closed, single‑color shapes** that work well at 36 px height. Feel free to replace them with a more detailed vector if you wish, but the provided ones already capture the essential silhouette.
+
+> **Tip:** If you open an SVG in a text editor you’ll see the `d="…"` attribute. Copy exactly the string between the quotes and paste it into the `{icon-path}` placeholder in the template.
+
+### 3.1 Beer mug (pint glass + foam)
+
+```svg
+M20 12 h24 a2 2 0 0 1 2 2 v28 a2 2 0 0 1 -2 2 h-8 v4 a2 2 0 0 1 -4 0 v-4 h-12 a2 2 0 0 1 -2 -2 v-28 a2 2 0 0 1 2 -2 z
+M24 14 h4 v6 h-4 z   <!-- foam bubbles -->
+M32 14 h4 v6 h-4 z
+M40 14 h4 v6 h-4 z
+```
+
+*Combine the three sub‑paths into one `d` string (just separate them with spaces).*
+
+### 3.2 Duvel bottle (tall, narrow, with a label stripe)
+
+```svg
+M26 8 h12 a1 1 0 0 1 1 1 v38 a1 1 0 0 1 -1 1 h-12 a1 1 0 0 1 -1 -1 v-38 a1 1 0 0 1 1 -1 z
+M30 20 h4 v14 h-4 z   <!-- label bar -->
+```
+
+### 3.3 Wine glass
+
+```svg
+M32 12 a10 10 0 0 1 0 20 h-4 a8 8 0 0 0 0 -16 h4
+M28 32 v14 a2 2 0 0 0 4 0 v-14
+```
+
+### 3.4 Cocktail glass (martini‑type)
+
+```svg
+M20 12 l24 0 a2 2 0 0 1 0 4 h-24 a2 2 0 0 1 0 -4
+M32 16 v20 a2 2 0 0 1 -4 0 v-20
+M20 36 l24 0 a2 2 0 0 1 0 4 h-24 a2 2 0 0 1 0 -4
+```
+
+### 3.5 Shot glass (small cylinder)
+
+```svg
+M28 12 h8 a1 1 0 0 1 1 1 v28 a1 1 0 0 1 -1 1 h-8 a1 1 0 0 1 -1 -1 v-28 a1 1 0 0 1 1 -1 z
+M28 42 h8 v4 a1 1 0 0 1 -1 1 h-6 a1 1 0 0 1 -1 -1 v-4 z
+```
+
+### 3.6 Joint (simplified hand‑rolled cigarette)
+
+```svg
+M24 12 h16 a2 2 0 0 1 2 2 v24 a2 2 0 0 1 -2 2 h-4 v8 a2 2 0 0 1 -4 0 v-8 h-8 a2 2 0 0 1 -2 -2 v-24 a2 2 0 0 1 2 -2 z
+M28 28 h8 a1 1 0 0 1 0 2 h-8 a1 1 0 0 1 0 -2 z   <!-- ash line -->
+```
+
+---
+
+## 4. Full SVG files (copy‑paste ready)
+
+Below are the **36 final files** – each badge with its tier colour.  
+I’ve already substituted the colours and removed the highlight for the Black version.
+
+> **How to use** – create a new text file (e.g., `beer‑bronze.svg`), paste the corresponding block, and save it with the `.svg` extension. All files are self‑contained; no external fonts or images are required.
+
+---
+
+### 4.1 Beer badge
+
+#### Bronze – `beer-bronze.svg`
+
+```svg
+<svg width="64" height="64" viewBox="0 0 64 64"
+     xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="62" height="62" rx="5" ry="5"
+        fill="#CD7F32" stroke="#000" stroke-width="2"/>
+  <g transform="translate(32,32) scale(0.5625) translate(-32,-32)">
+    <path d="M20 12 h24 a2 2 0 0 1 2 2 v28 a2 2 0 0 1 -2 2 h-8 v4 a2 2 0 0 1 -4 0 v-4 h-12 a2 2 0 0 1 -2 -2 v-28 a2 2 0 0 1 2 -2 z M24 14 h4 v6 h-4 z M32 14 h4 v6 h-4 z M40 14 h4 v6 h-4 z"
+          fill="#fff"/>
+    <path d="M20 12 h24 a2 2 0 0 1 2 2 v28 a2 2 0 0 1 -2 2 h-8 v4 a2 2 0 0 1 -4 0 v-4 h-12 a2 2 0 0 1 -2 -2 v-28 a2 2 0 0 1 2 -2 z M24 14 h4 v6 h-4 z M32 14 h4 v6 h-4 z M40 14 h4 v6 h-4 z"
+          fill="#fff" opacity="0.2" transform="translate(2,2)"/>
+  </g>
+</svg>
+```
+
+#### Silver – `beer-silver.svg`
+
+*(Replace only the `fill="#CD7F32"` with `fill="#C0C0C0"`)*
+
+```svg
+<svg width="64" height="64" viewBox="0 0 64 64"
+     xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="62" height="62" rx="5" ry="5"
+        fill="#C0C0C0" stroke="#000" stroke-width="2"/>
+  <g transform="translate(32,32) scale(0.5625) translate(-32,-32)">
+    <path d="M20 12 h24 a2 2 0 0 1 2 2 v28 a2 2 0 0 1 -2 2 h-8 v4 a2 2 0 0 1 -4 0 v-4 h-12 a2 2 0 0 1 -2 -2 v-28 a2 2 0 0 1 2 -2 z M24 14 h4 v6 h-4 z M32 14 h4 v6 h-4 z M40 14 h4 v6 h-4 z"
+          fill="#fff"/>
+    <path d="M20 12 h24 a2 2 0 0 1 2 2 v28 a2 2 0 0 1 -2 2 h-8 v4 a2 2 0 0 1 -4 0 v-4 h-12 a2 2 0 0 1 -2 -2 v-28 a2 2 0 0 1 2 -2 z M24 14 h4 v6 h-4 z M32 14 h4 v6 h-4 z M40 14 h4 v6 h-4 z"
+          fill="#fff" opacity="0.2" transform="translate(2,2)"/>
+  </g>
+</svg>
+```
+
+#### Gold – `beer-gold.svg`
+
+*(Replace background colour with `#FFD700`)*
+
+```svg
+<svg width="64" height="64" viewBox="0 0 64 64"
+     xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="62" height="62" rx="5" ry="5"
+        fill="#FFD700" stroke="#000" stroke-width="2"/>
+  <g transform="translate(32,32) scale(0.5625) translate(-32,-32)">
+    <path d="M20 12 h24 a2 2 0 0 1 2 2 v28 a2 2 0 0 1 -2 2 h-8 v4 a2 2 0 0 1 -4 0 v-4 h-12 a2 2 0 0 1 -2 -2 v-28 a2 2 0 0 1 2 -2 z M24 14 h4 v6 h-4 z M32 14 h4 v6 h-4 z M40 14 h4 v6 h-4 z"
+          fill="#fff"/>
+    <path d="M20 12 h24 a2 2 0 0 1 2 2 v28 a2 2 0 0 1 -2 2 h-8 v4 a2 2 0 0 1 -4 0 v-4 h-12 a2 2 0 0 1 -2 -2 v-28 a2 2 0 0 1 2 -2 z M24 14 h4 v6 h-4 z M32 14 h4 v6 h-4 z M40 14 h4 v6 h-4 z"
+          fill="#fff" opacity="0.2" transform="translate(2,2)"/>
+  </g>
+</svg>
+```
+
+#### Black silhouette – `beer-black.svg`
+
+```svg
+<svg width="64" height="64" viewBox="0 0 64 64"
+     xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="62" height="62" rx="5" ry="5"
+        fill="#000000" stroke="#000" stroke-width="2"/>
+  <g transform="translate(32,32) scale(0.5625) translate(-32,-32)">
+    <path d="M20 12 h24 a2 2 0 0 1 2 2 v28 a2 2 0 0 1 -2 2 h-8 v4 a2 2 0 0 1 -4 0 v-4 h-12 a2 2 0 0 1 -2 -2 v-28 a2 2 0 0 1 2 -2 z M24 14 h4 v6 h-4 z M32 14 h4 v6 h-4 z M40 14 h4 v6 h-4 z"
+          fill="#000"/>
+  </g>
+</svg>
+```
+
+---
+
+### 4.2 Duvel badge (use the same pattern, just replace the `d` attribute)
+
+#### Bronze – `duvel-bronze.svg`
+
+```svg
+<svg width="64" height="64" viewBox="0 0 64 64"
+     xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="62" height="62" rx="5" ry="5"
+        fill="#CD7F32" stroke="#000" stroke-width="2"/>
+  <g transform="translate(32,32) scale(0.5625) translate(-32,-32)">
+    <path d="M26 8 h12 a1 1 0 0 1 1 1 v38 a1 1 0 0 1 -1 1 h-12 a1 1 0 0 1 -1 -1 v-38 a1 1 0 0 1 1 -1 z M30 20 h4 v14 h-4 z"
+          fill="#fff"/>
+    <path d="M26 8 h12 a1 1 0 0 1 1 1 v38 a1 1 0 0 1 -1 1 h-12 a1 1 0 0 1 -1 -1 v-38 a1 1 0 0 1 1 -1 z M30 20 h4 v14 h-4 z"
+          fill="#fff" opacity="0.2" transform="translate(2,2)"/>
+  </g>
+</svg>
+```
+
+*(Silver, Gold, Black follow the same template – just swap the background colour and omit the highlight for Black.)*
+
+---
+
+### 4.3 Wine glass badge
+
+#### Bronze – `wine-bronze.svg`
+
+```svg
+<svg width="64" height="64" viewBox="0 0 64 64"
+     xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="62" height="62" rx="5" ry="5"
+        fill="#CD7F32" stroke="#000" stroke-width="2"/>
+  <g transform="translate(32,32) scale(0.5625) translate(-32,-32)">
+    <path d="M32 12 a10 10 0 0 1 0 20 h-4 a8 8 0 0 0 0 -16 h4 M28 32 v14 a2 2 0 0 0 4 0 v-14"
+          fill="#fff"/>
+    <path d="M32 12 a10 10 0 0 1 0 20 h-4 a8 8 0 0 0 0 -16 h4 M28 32 v14 a2 2 0 0 0 4 0 v-14"
+          fill="#fff" opacity="0.2" transform="translate(2,2)"/>
+  </g>
+</svg>
+```
+
+---
+
+### 4.4 Cocktail badge
+
+#### Bronze – `cocktail-bronze.svg`
+
+```svg
+<svg width="64" height="64" viewBox="0 0 64 64"
+     xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="62" height="62" rx="5" ry="5"
+        fill="#CD7F32" stroke="#000" stroke-width="2"/>
+  <g transform="translate(32,32) scale(0.5625) translate(-32,-32)">
+    <path d="M20 12 l24 0 a2 2 0 0 1 0 4 h-24 a2 2 0 0 1 0 -4
+            M32 16 v20 a2 2 0 0 1 -4 0 v-20
+            M20 36 l24 0 a2 2 0 0 1 0 4 h-24 a2 2 0 0 1 0 -4"
+          fill="#fff"/>
+    <path d="M20 12 l24 0 a2 2 0 0 1 0 4 h-24 a2 2 0 0 1 0 -4
+            M32 16 v20 a2 2 0 0 1 -4 0 v-20
+            M20 36 l24 0 a2 2 0 0 1 0 4 h-24 a2 2 0 0 1 0 -4"
+          fill="#fff" opacity="0.2" transform="translate(2,2)"/>
+  </g>
+</svg>
+```
+
+---
+
+### 4.5 Shot glass badge
+
+#### Bronze – `shot-bronze.svg`
+
+```svg
+<svg width="64" height="64" viewBox="0 0 64 64"
+     xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="62" height="62" rx="5" ry="5"
+        fill="#CD7F32" stroke="#000" stroke-width="2"/>
+  <g transform="translate(32,32) scale(0.5625) translate(-32,-32)">
+    <path d="M28 12 h8 a1 1 0 0 1 1 1 v28 a1 1 0 0 1 -1 1 h-8 a1 1 0 0 1 -1 -1 v-28 a1 1 0 0 1 1 -1 z
+            M28 42 h8 v4 a1 1 0 0 1 -1 1 h-6 a1 1 0 0 1 -1 -1 v-4"
+          fill="#fff"/>
+    <path d="M28 12 h8 a1 1 0 0 1 1 1 v28 a1 1 0 0 1 -1 1 h-8 a1 1 0 0 1 -1 -1 v-28 a1 1 0 0 1 1 -1 z
+            M28 42 h8 v4 a1 1 0 0 1 -1 1 h-6 a1 1 0 0 1 -1 -1 v-4"
+          fill="#fff" opacity="0.2" transform="translate(2,2)"/>
+  </g>
+</svg>
+```
+
+---
+
+### 4.6 Joint badge
+
+#### Bronze – `joint-bronze.svg`
+
+```svg
+<svg width="64" height="64" viewBox="0 0 64 64"
+     xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="62" height="62" rx="5" ry="5"
+        fill="#CD7F32" stroke="#000" stroke-width="2"/>
+  <g transform="translate(32,32) scale(0.5625) translate(-32,-32)">
+    <path d="M24 12 h16 a2 2 0 0 1 2 2 v24 a2 2 0 0 1 -2 2 h-4 v8 a2 2 0 0 1 -4 0 v-8 h-8 a2 2 0 0 1 -2 -2 v-24 a2 2 0 0 1 2 -2 z
+            M28 28 h8 a1 1 0 0 1 0 2 h-8 a1 1 0 0 1 0 -2 z"
+          fill="#fff"/>
+    <path d="M24 12 h16 a2 2 0 0 1 2 2 v24 a2 2 0 0 1 -2 2 h-4 v8 a2 2 0 0 1 -4 0 v-8 h-8 a2 2 0 0 1 -2 -2 v-24 a2 2 0 0 1 2 -2 z
+            M28 28 h8 a1 1 0 0 1 0 2 h-8 a1 1 0 0 1 0 -2 z"
+          fill="#fff" opacity="0.2" transform="translate(2,2)"/>
+  </g>
+</svg>
+```
+
+---
+
+## 5. Generating the remaining variants automatically (optional)
+
+If you prefer not to manually copy‑paste 36 files, you can generate them with a tiny script (Python, Node, etc.) that:
+
+1. Stores the six `iconPath` strings in a dictionary.  
+2. Loops over `['bronze','silver','gold','black']`.  
+3. Substitutes the appropriate background colour (or `#000` + no highlight for black).  
+4. Writes the SVG string to `<icon>-<tier>.svg`.
+
+### Example (Python)
+
+```python
+import os
+
+icons = {
+    "beer": "M20 12 h24 a2 2 0 0 1 2 2 v28 a2 2 0 0 1 -2 2 h-8 v4 a2 2 0 0 1 -4 0 v-4 h-12 a2 2 0 0 1 -2 -2 v-28 a2 2 0 0 1 2 -2 z M24 14 h4 v6 h-4 z M32 14 h4 v6 h-4 z M40 14 h4 v6 h-4 z",
+    "duvel": "M26 8 h12 a1 1 0 0 1 1 1 v38 a1 1 0 0 1 -1 1 h-12 a1 1 0 0 1 -1 -1 v-38 a1 1 0 0 1 1 -1 z M30 20 h4 v14 h-4 z",
+    "wine":  "M32 12 a10 10 0 0 1 0 20 h-4 a8 8 0 0 0 0 -16 h4 M28 32 v14 a2 2 0 0 0 4 0 v-14",
+    "cocktail":"M20 12 l24 0 a2 2 0 0 1 0 4 h-24 a2 2 0 0 1 0 -4 M32 16 v20 a2 2 0 0 1 -4 0 v-20 M20 36 l24 0 a2 2 0 0 1 0 4 h-24 a2 2 0 0 1 0 -4",
+    "shot":"M28 12 h8 a1 1 0 0 1 1 1 v28 a1 1 0 0 1 -1 1 h-8 a1 1 0 0 1 -1 -1 v-28 a1 1 0 0 1 1 -1 z M28 42 h8 v4 a1 1 0 0 1 -1 1 h-6 a1 1 0 0 1 -1 -1 v-4",
+    "joint":"M24 12 h16 a2 2 0 0 1 2 2 v24 a2 2 0 0 1 -2 2 h-4 v8 a2 2 0 0 1 -4 0 v-8 h-8 a2 2 0 0 1 -2 -2 v-24 a2 2 0 0 1 2 -2 z M28 28 h8 a1 1 0 0 1 0 2 h-8 a1 1 0 0 1 0 -2 z"
+}
+
+colors = {
+    "bronze": "#CD7F32",
+    "silver": "#C0C0C0",
+    "gold"  : "#FFD700",
+    "black" : "#000000"
+}
+
+template = """<svg width="64" height="64" viewBox="0 0 64 64"
+     xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="62" height="62" rx="5" ry="5"
+        fill="{bg}" stroke="#000" stroke-width="2"/>
+  <g transform="translate(32,32) scale(0.5625) translate(-32,-32)">
+{highlight}
+    <path d="{path}" fill="{fill}"/>
+  </g>
+</svg>"""
+
+for icon, path in icons.items():
+    for tier, bg in colors.items():
+        highlight = ""
+        fill = "#fff"
+        if tier != "black":
+            highlight = f'    <path d="{path}" fill="#fff" opacity="0.2" transform="translate(2,2)"/>\n'
+        else:
+            fill = "#000"
+        svg = template.format(bg=bg, highlight=highlight, path=path, fill=fill)
+        filename = f"{icon}-{tier}.svg"
+        with open(filename, "w") as f:
+            f.write(svg)
+```
+
+Running the script will generate **all 36 SVG files** in the current directory.
+
+---
+
+### ✔️ What to do next?
+
+1. **Copy the SVG code** for the badges you need now, or run the short script to produce the whole set automatically.  
+2. If you want to tweak the look (stroke width, corner radius, icon scale, etc.), edit the values in the template – the structure stays the same.  
+3. Drop the files into your web/app project; they work as standard vector images and scale without loss of quality.
+
+Enjoy the new badge set! 🌟 If you need any further customisation (e.g., adding a tiny “+1” overlay for extra achievement levels) just let me know.

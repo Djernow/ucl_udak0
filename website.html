@@ -1,1047 +1,2004 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="true">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="UDAKO CL">
-<meta name="theme-color" content="#e8c84a">
-<link rel="manifest" href="/manifest.json">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23e8c84a' width='192' height='192'/><text x='50%' y='50%' font-size='90' font-weight='bold' text-anchor='middle' dy='.3em' fill='%230f0f11' font-family='Arial'>UCL</text></svg>">
-<title>UDAKO champions league</title>
-<style>
-  /* ============================================================
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="true">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="UDAKO CL">
+  <meta name="theme-color" content="#e8c84a">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23e8c84a' width='192' height='192'/><text x='50%' y='50%' font-size='90' font-weight='bold' text-anchor='middle' dy='.3em' fill='%230f0f11' font-family='Arial'>UCL</text></svg>">
+  <title>UDAKO champions league</title>
+  <style>
+    /* ============================================================
      DEVELOPER CONFIG — CHANGE MULTIPLIERS HERE
      All values represent how many "standard beers" each unit equals
      ============================================================ */
-  :root {
-    --mult-normal-beer:   1.0;   /* 1 normal beer   = 1.0 standard beer  */
-    --mult-special-beer:  1.5;   /* 1 special beer  = 1.5 standard beers */
-    --mult-shot:          0.75;  /* 1 shot          = 0.75 standard beer */
-    --mult-cocktail:      1.25;  /* 1 cocktail      = 1.25 standard beers*/
-    --mult-wine:          1.5;   /* 1 wine          = 1.5 standard beers */
-    --mult-joint:         1.25;  /* 1 joint         = 1.25 standard beers */
-  }
-
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: #0f0f11;
-    color: #e8e4dc;
-    min-height: 100vh;
-    text-size-adjust: 100%;
-    -webkit-text-size-adjust: 100%;
-  }
-
-  /* ---- layout ---- */
-  #app { display: flex; flex-direction: column; min-height: 100vh; }
-
-  header {
-    background: #0f0f11;
-    border-bottom: 1px solid #2a2828;
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 60px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.8rem;
-    letter-spacing: 3px;
-    color: #e8c84a;
-  }
-
-  .logo span { color: #888; font-size: 0.9rem; font-family: 'DM Sans', sans-serif; letter-spacing: 0; margin-left: 0.5rem; vertical-align: middle; }
-
-  .header-right { display: flex; align-items: center; gap: 1rem; }
-
-  .user-chip {
-    background: #1e1d20;
-    border: 1px solid #333;
-    border-radius: 20px;
-    padding: 4px 14px;
-    font-size: 0.85rem;
-    color: #ccc;
-  }
-
-  .user-chip b { color: #e8c84a; }
-
-  main { flex: 1; padding: 2rem; max-width: 1100px; margin: 0 auto; width: 100%; }
-
-  /* ---- buttons ---- */
-  .btn {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 500;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 18px;
-    cursor: pointer;
-    transition: opacity .15s, transform .1s;
-  }
-  .btn:active { transform: scale(0.97); }
-  .btn-primary { background: #e8c84a; color: #0f0f11; }
-  .btn-primary:hover { opacity: 0.88; }
-  .btn-ghost { background: transparent; border: 1px solid #444; color: #ccc; }
-  .btn-ghost:hover { background: #1e1d20; }
-  .btn-danger { background: #8b2020; color: #ffc; }
-  .btn-danger:hover { opacity: 0.85; }
-  .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
-
-  /* ---- forms ---- */
-  .field { display: flex; flex-direction: column; gap: 5px; }
-  .field label { font-size: 0.8rem; color: #999; text-transform: uppercase; letter-spacing: .05em; }
-  .field input {
-    background: #1a1919;
-    border: 1px solid #333;
-    border-radius: 8px;
-    padding: 9px 13px;
-    color: #e8e4dc;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.95rem;
-    outline: none;
-    transition: border-color .15s;
-  }
-  .field input:focus { border-color: #e8c84a; }
-
-  /* ---- cards ---- */
-  .card {
-    background: #18171a;
-    border: 1px solid #2a2828;
-    border-radius: 14px;
-    padding: 1.5rem;
-  }
-
-  .daily-quote-card {
-    margin: 0 0 1rem 0;
-    border-color: #e8c84a55;
-    background: linear-gradient(180deg, #201b12 0%, #18171a 100%);
-  }
-
-  .daily-quote-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: #b9a35f;
-    margin-bottom: 0.65rem;
-  }
-
-  .daily-quote-text {
-    font-size: 1.05rem;
-    line-height: 1.55;
-    color: #f4efe4;
-    margin-bottom: 0.75rem;
-  }
-
-  .daily-quote-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
-    color: #a99a6b;
-    font-size: 0.85rem;
-  }
-
-  .daily-quote-meta span {
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: #111012;
-    border: 1px solid #2a2828;
-  }
-
-  /* ---- sections ---- */
-  .section-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.5rem;
-    letter-spacing: 2px;
-    color: #e8c84a;
-    margin-bottom: 1.25rem;
-  }
-
-  /* ---- login ---- */
-  #login-view {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 2rem;
-    background: #0f0f11;
-  }
-
-  .login-box {
-    width: 100%;
-    max-width: 380px;
-  }
-
-  .login-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 3.5rem;
-    letter-spacing: 6px;
-    color: #e8c84a;
-    text-align: center;
-    margin-bottom: 0.25rem;
-  }
-
-  .login-sub {
-    text-align: center;
-    color: #666;
-    font-size: 0.85rem;
-    margin-bottom: 2rem;
-  }
-
-  .login-form { display: flex; flex-direction: column; gap: 1rem; }
-  .login-form .btn { margin-top: 0.5rem; width: 100%; padding: 11px; font-size: 1rem; }
-  .err-msg { color: #e87a7a; font-size: 0.85rem; text-align: center; min-height: 1.2em; }
-
-  /* ---- scoreboard ---- */
-  .scoreboard { display: flex; flex-direction: column; gap: 8px; }
-
-  .scoreboard-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .scoreboard-scroll::-webkit-scrollbar { height: 8px; }
-  .scoreboard-scroll::-webkit-scrollbar-thumb { background: #2a2828; border-radius: 8px; }
-
-  .score-row {
-    display: grid;
-    grid-template-columns: 2.5rem 1fr 6rem 6rem 6rem 6rem;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 18px;
-    border-radius: 10px;
-    border: 1px solid #2a2828;
-    background: #18171a;
-    transition: background .15s;
-  }
-
-  .score-row.header-row {
-    background: transparent;
-    border-color: transparent;
-    padding-bottom: 4px;
-  }
-
-  .score-row.header-row span {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: #666;
-  }
-
-  .score-row.top-1 { border-color: #e8c84a44; background: #1e1c10; }
-  .score-row.top-2 { border-color: #aaa6; }
-  .score-row.top-3 { border-color: #7b4c1a66; }
-
-  .rank {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.3rem;
-    color: #555;
-    text-align: center;
-  }
-  .top-1 .rank { color: #e8c84a; }
-  .top-2 .rank { color: #b0b0b0; }
-  .top-3 .rank { color: #c07840; }
-
-  .user-name { font-weight: 500; font-size: 0.95rem; }
-  .user-name-btn {
-    font: inherit;
-    color: inherit;
-    background: none;
-    border: none;
-    padding: 0;
-    text-align: left;
-    cursor: pointer;
-    border-bottom: 1px dashed #4a4848;
-  }
-  .user-name-btn:hover { color: #e8c84a; border-bottom-color: #e8c84a66; }
-
-  .score-detail-row {
-    display: none;
-    margin: -4px 0 8px 0;
-    padding-left: calc(2.5rem + 12px);
-  }
-
-  .score-detail-card {
-    background: #111012;
-    border: 1px solid #2a2828;
-    border-radius: 10px;
-    padding: 10px 12px;
-  }
-
-  .score-detail-title {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: #777;
-    margin-bottom: 6px;
-  }
-
-  .history-table.compact th,
-  .history-table.compact td {
-    padding: 6px 10px;
-  }
-
-  .history-table.compact th { font-size: 0.7rem; }
-  .score-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: #e8c84a; text-align: right; }
-  .score-sub { font-size: 0.75rem; color: #555; text-align: right; }
-
-  /* ---- daily checkin ---- */
-  .checkin-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .checkin-item {
-    background: #111012;
-    border: 1px solid #2a2828;
-    border-radius: 10px;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .checkin-label {
-    font-size: 0.8rem;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-  }
-
-  .checkin-emoji { font-size: 1.6rem; }
-
-  .checkin-counter {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 4px;
-  }
-
-  .counter-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: 1px solid #333;
-    background: #1e1d20;
-    color: #e8e4dc;
-    font-size: 1.1rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background .12s;
-    font-family: 'DM Sans', sans-serif;
-  }
-  .counter-btn:hover { background: #2a2828; }
-
-  .counter-val {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.8rem;
-    color: #e8c84a;
-    min-width: 2ch;
-    text-align: center;
-  }
-
-  /* ---- admin panel ---- */
-  .admin-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
-
-  .user-list { display: flex; flex-direction: column; gap: 8px; }
-
-  .user-list-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    background: #111012;
-    border: 1px solid #2a2828;
-    border-radius: 8px;
-    font-size: 0.9rem;
-  }
-
-  .user-list-item .name { font-weight: 500; }
-  .user-list-item .meta { font-size: 0.75rem; color: #666; margin-top: 2px; }
-  .user-list-item .actions { display: flex; gap: 6px; }
-
-  /* ---- tabs ---- */
-  .tabs {
-    display: flex;
-    gap: 4px;
-    border-bottom: 1px solid #2a2828;
-    margin-bottom: 1.5rem;
-  }
-
-  .tab {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 500;
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    color: #666;
-    padding: 10px 16px;
-    cursor: pointer;
-    margin-bottom: -1px;
-    transition: color .15s;
-  }
-  .tab:hover { color: #ccc; }
-  .tab.active { color: #e8c84a; border-bottom-color: #e8c84a; }
-
-  /* ---- modal ---- */
-  .modal-backdrop {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,.75);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 500;
-    padding: 1rem;
-  }
-
-  .modal {
-    background: #18171a;
-    border: 1px solid #333;
-    border-radius: 16px;
-    padding: 2rem;
-    width: 100%;
-    max-width: 440px;
-  }
-
-  .modal h2 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.6rem;
-    letter-spacing: 2px;
-    color: #e8c84a;
-    margin-bottom: 0.25rem;
-  }
-
-  .modal p { font-size: 0.875rem; color: #888; margin-bottom: 1.25rem; }
-
-  .modal-form { display: flex; flex-direction: column; gap: 1rem; }
-  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 0.5rem; }
-
-  /* ---- toast ---- */
-  #toast {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: #e8c84a;
-    color: #0f0f11;
-    font-weight: 600;
-    font-size: 0.875rem;
-    padding: 10px 22px;
-    border-radius: 100px;
-    z-index: 999;
-    transition: transform .3s ease;
-    white-space: nowrap;
-  }
-  #toast.show { transform: translateX(-50%) translateY(0); }
-
-  /* ---- summary bar ---- */
-  .summary-bar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 10px;
-    margin-bottom: 1.5rem;
-  }
-
-  .summary-card {
-    background: #18171a;
-    border: 1px solid #2a2828;
-    border-radius: 10px;
-    padding: 14px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .summary-label { font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: .05em; }
-  .summary-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: #e8e4dc; }
-  .summary-val.gold { color: #e8c84a; }
-
-  /* ---- history table ---- */
-  .history-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-  .history-table th {
-    text-align: left;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: #666;
-    padding: 6px 12px;
-    border-bottom: 1px solid #2a2828;
-  }
-  .history-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #1e1d20;
-    color: #ccc;
-  }
-  .history-table tr:last-child td { border-bottom: none; }
-  .history-table .gold { color: #e8c84a; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; }
-
-  /* ---- download ---- */
-  .download-cta {
-    margin-top: 2rem;
-  }
-
-  .download-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-  }
-
-  .download-actions a { text-decoration: none; }
-
-  /* ---- change pw ---- */
-  #changepw-view {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 2rem;
-    background: #0f0f11;
-  }
-
-  .pw-box {
-    width: 100%;
-    max-width: 380px;
-  }
-
-  .alert {
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
-  }
-  .alert-warn { background: #2a1f0a; border: 1px solid #6b4d12; color: #e8c84a; }
-
-  /* ---- checkin banner ---- */
-  .checkin-banner {
-    background: #1e1a0a;
-    border: 1px solid #5a4210;
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-  .checkin-banner p { font-size: 0.9rem; color: #e8c84a; }
-  .checkin-banner small { display: block; font-size: 0.78rem; color: #888; margin-top: 2px; }
-
-  /* ---- announcement ---- */
-  .announcement-banner {
-    background: #1a1111;
-    border: 1px solid #5a2a2a;
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 1.25rem;
-  }
-  .announcement-banner p { font-size: 0.9rem; color: #e8c84a; }
-
-  @media (max-width: 680px) {
-    .admin-grid { grid-template-columns: 1fr; }
-    .score-row { grid-template-columns: 2rem 1fr 4.5rem 4.5rem; gap: 8px; }
-    .score-row .score-val:nth-child(5),
-    .score-row .score-val:nth-child(6) { display: none; }
-    .score-detail-row { padding-left: calc(2rem + 8px); }
-    .checkin-grid { grid-template-columns: 1fr 1fr; }
-    main { padding: 1rem; }
-  }
-
-  @media (max-width: 480px) {
-    body { font-size: 1.05rem; }
-    header { height: 54px; padding: 0 1rem; }
-    .logo { font-size: 1.5rem; letter-spacing: 2px; }
-    .user-chip { font-size: 0.8rem; }
-    .btn { padding: 10px 18px; }
-    .card { padding: 1.25rem; }
-    .score-row { padding: 12px; gap: 8px; }
-    .score-row .user-name { font-size: 0.9rem; }
-    .score-row .user-name-btn { font-size: 0.9rem; }
-    .score-val { font-size: 1.05rem; }
-  }
-</style>
+    :root {
+      --mult-normal-beer: 1.0;
+      /* 1 normal beer   = 1.0 standard beer  */
+      --mult-special-beer: 1.5;
+      /* 1 special beer  = 1.5 standard beers */
+      --mult-shot: 0.75;
+      /* 1 shot          = 0.75 standard beer */
+      --mult-cocktail: 1.25;
+      /* 1 cocktail      = 1.25 standard beers*/
+      --mult-wine: 1.5;
+      /* 1 wine          = 1.5 standard beers */
+      --mult-joint: 1.25;
+      /* 1 joint         = 1.25 standard beers */
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap');
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #0f0f11;
+      color: #e8e4dc;
+      min-height: 100vh;
+      text-size-adjust: 100%;
+      -webkit-text-size-adjust: 100%;
+      overflow-x: hidden;
+      overscroll-behavior-y: contain;
+    }
+
+    .counter-btn, .btn, .tab {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ---- layout ---- */
+    #app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #0f0f11;
+      border-bottom: 1px solid #2a2828;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: 3px;
+      color: #e8c84a;
+    }
+
+    .logo span {
+      color: #888;
+      font-size: 0.9rem;
+      font-family: 'DM Sans', sans-serif;
+      letter-spacing: 0;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-chip {
+      background: #1e1d20;
+      border: 1px solid #333;
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.85rem;
+      color: #ccc;
+    }
+
+    .user-chip b {
+      color: #e8c84a;
+    }
+
+    main {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ---- buttons ---- */
+    .btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: #e8c84a;
+      color: #0f0f11;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.88;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid #444;
+      color: #ccc;
+    }
+
+    .btn-ghost:hover {
+      background: #1e1d20;
+    }
+
+    .btn-danger {
+      background: #8b2020;
+      color: #ffc;
+    }
+
+    .btn-danger:hover {
+      opacity: 0.85;
+    }
+
+    .btn-sm {
+      padding: 5px 12px;
+      font-size: 0.8rem;
+    }
+
+    /* ---- forms ---- */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .field label {
+      font-size: 0.8rem;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .field input {
+      background: #1a1919;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 9px 13px;
+      color: #e8e4dc;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .field input:focus {
+      border-color: #e8c84a;
+    }
+
+    .field select,
+    .field textarea {
+      background: #1a1919;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 9px 13px;
+      color: #e8e4dc;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .field select:focus,
+    .field textarea:focus {
+      border-color: #e8c84a;
+    }
+
+    .field textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    /* ---- cards ---- */
+    .card {
+      background: #18171a;
+      border: 1px solid #2a2828;
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+
+    .daily-quote-card {
+      margin: 0 0 1rem 0;
+      border-color: #e8c84a55;
+      background: linear-gradient(180deg, #201b12 0%, #18171a 100%);
+    }
+
+    .daily-quote-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #b9a35f;
+      margin-bottom: 0.65rem;
+    }
+
+    .daily-quote-text {
+      font-size: 1.05rem;
+      line-height: 1.55;
+      color: #f4efe4;
+      margin-bottom: 0.75rem;
+    }
+
+    .daily-quote-author {
+      color: #b9a35f;
+      font-size: 0.95em;
+      white-space: nowrap;
+    }
+
+    .daily-quote-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      color: #a99a6b;
+      font-size: 0.85rem;
+    }
+
+    .daily-quote-meta span {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #111012;
+      border: 1px solid #2a2828;
+    }
+
+    .photo-panel {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .photo-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .photo-form-grid .span-2 {
+      grid-column: span 2;
+    }
+
+    .photo-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    .photo-card {
+      overflow: hidden;
+      padding: 0;
+      background: #111012;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .photo-card a {
+      display: block;
+      background: #0c0c0d;
+    }
+
+    .photo-thumb {
+      display: block;
+      width: 100%;
+      max-height: min(72vh, 520px);
+      object-fit: contain;
+      background: #0c0c0d;
+    }
+
+    .photo-card-body {
+      padding: 0.9rem 1rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .photo-card-title {
+      font-size: 0.95rem;
+      color: #f4efe4;
+    }
+
+    .photo-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      color: #9a8f66;
+      font-size: 0.8rem;
+    }
+
+    .photo-card-caption {
+      color: #cfc8b8;
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .photo-empty {
+      color: #555;
+      font-size: 0.875rem;
+    }
+
+    .photo-card-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.35rem;
+    }
+
+    /* ---- sections ---- */
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      color: #e8c84a;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ---- login ---- */
+    #login-view {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      background: #0f0f11;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .login-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.5rem;
+      letter-spacing: 6px;
+      color: #e8c84a;
+      text-align: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .login-sub {
+      text-align: center;
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .login-form .btn {
+      margin-top: 0.5rem;
+      width: 100%;
+      padding: 11px;
+      font-size: 1rem;
+    }
+
+    .err-msg {
+      color: #e87a7a;
+      font-size: 0.85rem;
+      text-align: center;
+      min-height: 1.2em;
+    }
+
+    /* ---- scoreboard ---- */
+    .scoreboard {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .scoreboard-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .scoreboard-scroll::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .scoreboard-scroll::-webkit-scrollbar-thumb {
+      background: #2a2828;
+      border-radius: 8px;
+    }
+
+    .score-row {
+      display: grid;
+      grid-template-columns: 2.5rem 1fr 6rem 6rem 6rem 6rem;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      border-radius: 10px;
+      border: 1px solid #2a2828;
+      background: #18171a;
+      transition: background .15s;
+    }
+
+    .score-row.header-row {
+      background: transparent;
+      border-color: transparent;
+      padding-bottom: 4px;
+    }
+
+    .score-row.header-row span {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #666;
+    }
+
+    .score-row.top-1 {
+      border-color: #e8c84a44;
+      background: #1e1c10;
+    }
+
+    .score-row.top-2 {
+      border-color: #aaa6;
+    }
+
+    .score-row.top-3 {
+      border-color: #7b4c1a66;
+    }
+
+    .rank {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      color: #555;
+      text-align: center;
+    }
+
+    .top-1 .rank {
+      color: #e8c84a;
+    }
+
+    .top-2 .rank {
+      color: #b0b0b0;
+    }
+
+    .top-3 .rank {
+      color: #c07840;
+    }
+
+    .user-name {
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .user-name-btn {
+      font: inherit;
+      color: inherit;
+      background: none;
+      border: none;
+      padding: 0;
+      text-align: left;
+      cursor: pointer;
+      border-bottom: 1px dashed #4a4848;
+    }
+
+    .user-name-btn:hover {
+      color: #e8c84a;
+      border-bottom-color: #e8c84a66;
+    }
+
+    .score-detail-row {
+      display: none;
+      margin: -4px 0 8px 0;
+      padding-left: calc(2.5rem + 12px);
+    }
+
+    .score-detail-card {
+      background: #111012;
+      border: 1px solid #2a2828;
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .score-detail-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #777;
+      margin-bottom: 6px;
+    }
+
+    .history-table.compact th,
+    .history-table.compact td {
+      padding: 6px 10px;
+    }
+
+    .history-table.compact th {
+      font-size: 0.7rem;
+    }
+
+    .score-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem;
+      color: #e8c84a;
+      text-align: right;
+    }
+
+    .score-sub {
+      font-size: 0.75rem;
+      color: #555;
+      text-align: right;
+    }
+
+    /* ---- daily checkin ---- */
+    .checkin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .checkin-item {
+      background: #111012;
+      border: 1px solid #2a2828;
+      border-radius: 10px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .checkin-label {
+      font-size: 0.8rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .checkin-emoji {
+      font-size: 1.6rem;
+    }
+
+    .checkin-counter {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .counter-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #1e1d20;
+      color: #e8e4dc;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .12s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .counter-btn:hover {
+      background: #2a2828;
+    }
+
+    .counter-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      color: #e8c84a;
+      min-width: 2ch;
+      text-align: center;
+    }
+
+    /* ---- admin panel ---- */
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .user-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .user-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #111012;
+      border: 1px solid #2a2828;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .user-list-item .name {
+      font-weight: 500;
+    }
+
+    .user-list-item .meta {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .user-list-item .actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* ---- tabs ---- */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid #2a2828;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: #666;
+      padding: 10px 16px;
+      cursor: pointer;
+      margin-bottom: -1px;
+      transition: color .15s;
+      flex: 0 0 auto;
+    }
+
+    .tab:hover {
+      color: #ccc;
+    }
+
+    .tab.active {
+      color: #e8c84a;
+      border-bottom-color: #e8c84a;
+    }
+
+    /* ---- modal ---- */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      padding: 1rem;
+    }
+
+    .modal {
+      background: #18171a;
+      border: 1px solid #333;
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .modal h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 2px;
+      color: #e8c84a;
+      margin-bottom: 0.25rem;
+    }
+
+    .modal p {
+      font-size: 0.875rem;
+      color: #888;
+      margin-bottom: 1.25rem;
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 0.5rem;
+    }
+
+    /* ---- toast ---- */
+    #toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #e8c84a;
+      color: #0f0f11;
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 10px 22px;
+      border-radius: 100px;
+      z-index: 999;
+      transition: transform .3s ease;
+      white-space: nowrap;
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ---- achievements ---- */
+    .achievement-section {
+      background: #18171a;
+      border: 1px solid #2a2828;
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .achievement-section-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #e8c84a;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #2a2828;
+      padding-bottom: 0.5rem;
+    }
+
+    .achievement-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+
+    .achievement-card {
+      background: #100f11;
+      border: 1px solid #222020;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .achievement-card:hover {
+      transform: translateY(-2px);
+      border-color: #e8c84a;
+    }
+
+    .achievement-card img {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 0.75rem;
+    }
+
+    .achievement-tier {
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+      text-transform: capitalize;
+    }
+    
+    .achievement-tier.bronze { color: #cd7f32; }
+    .achievement-tier.silver { color: #c0c0c0; }
+    .achievement-tier.gold { color: #ffd700; }
+    .achievement-tier.black { color: #888888; }
+
+    .achievement-target {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 0.5rem;
+    }
+
+    .achievement-hint {
+      font-size: 0.75rem;
+      color: #ff6b6b;
+      margin-top: 0.25rem;
+      line-height: 1.3;
+    }
+
+    .achievement-unlocked {
+      font-size: 0.75rem;
+      color: #4caf50;
+      font-weight: bold;
+      margin-top: 0.25rem;
+    }
+
+    /* ---- summary bar ---- */
+    .summary-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .summary-card {
+      background: #18171a;
+      border: 1px solid #2a2828;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .summary-label {
+      font-size: 0.75rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .summary-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      color: #e8e4dc;
+    }
+
+    .summary-val.gold {
+      color: #e8c84a;
+    }
+
+    /* ---- history table ---- */
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .history-table th {
+      text-align: left;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: #666;
+      padding: 6px 12px;
+      border-bottom: 1px solid #2a2828;
+    }
+
+    .history-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #1e1d20;
+      color: #ccc;
+    }
+
+    .history-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .history-table .gold {
+      color: #e8c84a;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+    }
+
+
+    /* ---- change pw ---- */
+    #changepw-view {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      background: #0f0f11;
+    }
+
+    .pw-box {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .alert {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .alert-warn {
+      background: #2a1f0a;
+      border: 1px solid #6b4d12;
+      color: #e8c84a;
+    }
+
+    /* ---- checkin banner ---- */
+    .checkin-banner {
+      background: #1e1a0a;
+      border: 1px solid #5a4210;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .checkin-banner p {
+      font-size: 0.9rem;
+      color: #e8c84a;
+    }
+
+    .checkin-banner small {
+      display: block;
+      font-size: 0.78rem;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .checkin-banner.success {
+      background: #0f1c12;
+      border: 1px solid #1c3d25;
+    }
+
+    .checkin-banner.success p {
+      color: #2ecc71;
+    }
+
+    /* ---- announcement ---- */
+    .announcement-banner {
+      background: #1a1111;
+      border: 1px solid #5a2a2a;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 1.25rem;
+    }
+
+    .announcement-banner p {
+      font-size: 0.9rem;
+      color: #e8c84a;
+    }
+
+    /* ---- heatmap ---- */
+    .heatmap-wrapper {
+      background: #18171a;
+      border: 1px solid #2a2828;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+    }
+
+    .heatmap-grid {
+      display: grid;
+      grid-template-rows: repeat(7, 11px);
+      grid-auto-flow: column;
+      grid-auto-columns: 11px;
+      gap: 3px;
+    }
+
+    .heatmap-cell {
+      width: 11px;
+      height: 11px;
+      border-radius: 2px;
+      transition: transform 0.1s ease, outline 0.1s ease;
+      cursor: pointer;
+    }
+
+    .heatmap-cell:hover {
+      transform: scale(1.3);
+      outline: 1px solid #fff;
+      z-index: 10;
+    }
+
+    .heatmap-cell.heatmap-cell-empty {
+      background-color: transparent !important;
+      pointer-events: none;
+      cursor: default;
+    }
+
+    .heatmap-cell.lvl-0 {
+      background-color: #242226;
+    }
+
+    .heatmap-cell.lvl-1 {
+      background-color: #4a3e15;
+    }
+
+    .heatmap-cell.lvl-2 {
+      background-color: #82681e;
+    }
+
+    .heatmap-cell.lvl-3 {
+      background-color: #ba9324;
+    }
+
+    .heatmap-cell.lvl-4 {
+      background-color: #e8c84a;
+    }
+
+    @media (max-width: 680px) {
+      .admin-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .score-row {
+        grid-template-columns: 2rem 1fr 4.2rem 3.2rem 3.8rem;
+        gap: 6px;
+      }
+
+      .score-row > *:nth-child(6) {
+        display: none !important;
+      }
+
+      .score-detail-row {
+        padding-left: calc(2rem + 8px);
+      }
+
+      .checkin-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .photo-form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .photo-form-grid .span-2 {
+        grid-column: span 1;
+      }
+
+      .photo-gallery {
+        grid-template-columns: 1fr;
+      }
+
+      .photo-thumb {
+        max-height: 60vh;
+      }
+
+      header {
+        display: none !important;
+      }
+
+      main {
+        padding: 0 0 2rem 0 !important;
+      }
+
+      .tabs {
+        padding-top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
+        margin-bottom: 1rem !important;
+      }
+
+      #tab-score, #tab-europa, #tab-conference, #tab-history, #tab-stats, #tab-achievements,
+      #atab-score, #atab-europa, #atab-conference, #atab-italy, #atab-users, #atab-achievements {
+        padding: 0 1rem;
+      }
+
+      .instagram-feed-tab {
+        max-width: 100vw !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
+
+      .instagram-feed-tab .section-title {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      .instagram-feed-tab .card {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        padding: 1.25rem 1rem !important;
+      }
+
+      .instagram-feed-tab .photo-feed-container {
+        max-width: 100vw !important;
+        width: 100% !important;
+        gap: 0px;
+      }
+
+      .instagram-feed-tab .ig-card {
+        border-radius: 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-top: 1px solid #1e1d20 !important;
+        border-bottom: 1px solid #1e1d20 !important;
+        background: #0f0f11;
+        margin-bottom: 8px;
+      }
+
+      .logo span {
+        display: none !important;
+      }
+
+      .hide-mobile {
+        display: none !important;
+      }
+
+      .mobile-hide {
+        display: none !important;
+      }
+
+      .history-table th,
+      .history-table td {
+        padding: 8px 6px !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        font-size: 1.05rem;
+      }
+
+      header {
+        height: 54px;
+        padding: 0 1rem;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        letter-spacing: 2px;
+      }
+
+      .user-chip {
+        font-size: 0.8rem;
+      }
+
+      .btn {
+        padding: 10px 18px;
+      }
+
+      .card {
+        padding: 1.25rem;
+      }
+
+      .score-row {
+        padding: 12px;
+        gap: 8px;
+      }
+
+      .score-row .user-name {
+        font-size: 0.9rem;
+      }
+
+      .score-row .user-name-btn {
+        font-size: 0.9rem;
+      }
+
+      .score-val {
+        font-size: 1.05rem;
+      }
+    }
+
+    /* ---- Instagram style photo feed ---- */
+    .photo-feed-container {
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .ig-card {
+      background: #18171a;
+      border: 1px solid #2a2828;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ig-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      gap: 10px;
+      border-bottom: 1px solid #2a2828;
+    }
+
+    .ig-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e8c84a;
+      color: #0f0f11;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+
+    .ig-meta {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .ig-username {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #f4efe4;
+    }
+
+    .ig-time {
+      font-size: 0.75rem;
+      color: #777;
+    }
+
+    .ig-photo-link {
+      display: block;
+      width: 100%;
+      background: #000;
+    }
+
+    .ig-photo {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      display: block;
+    }
+
+    .ig-body {
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ig-caption {
+      font-size: 0.9rem;
+      line-height: 1.4;
+      color: #e8e4dc;
+    }
+
+    .ig-caption-user {
+      font-weight: 600;
+      margin-right: 6px;
+      color: #f4efe4;
+    }
+
+    .ig-filename {
+      font-size: 0.75rem;
+      color: #555;
+    }
+
+    .ig-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
+
+    .ig-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px 0 14px;
+    }
+
+    .ig-like-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-size: 1.6rem;
+      transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      align-items: center;
+      outline: none;
+    }
+
+    .ig-like-btn:hover {
+      transform: scale(1.15);
+    }
+
+    .ig-like-btn:active {
+      transform: scale(0.9);
+    }
+
+    .ig-like-btn.animating {
+      animation: likeBounce 0.3s ease;
+    }
+
+    @keyframes likeBounce {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    .ig-likes-count {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #e8e4dc;
+      user-select: none;
+    }
+
+    .floating-emoji {
+      position: fixed;
+      pointer-events: none;
+      font-size: 1.5rem;
+      z-index: 9999;
+      animation: floatUp 1.0s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translate(-50%, -50%) translate(0, 0) scale(0.5) rotate(0deg);
+        opacity: 0;
+      }
+      15% {
+        opacity: 0.9;
+      }
+      100% {
+        transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(var(--scale)) rotate(var(--rot));
+        opacity: 0;
+      }
+    }
+
+    /* ---- Mobile-friendly Photo Upload ---- */
+    .upload-zone-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .upload-label-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed #444;
+      background: #111012;
+      border-radius: 12px;
+      min-height: 180px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, background-color 0.2s;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .upload-label-zone:hover {
+      border-color: #e8c84a;
+      background: #151417;
+    }
+
+    .upload-icon {
+      font-size: 2.2rem;
+      color: #e8c84a;
+      margin-bottom: 8px;
+      transition: transform 0.2s;
+    }
+
+    .upload-label-zone:hover .upload-icon {
+      transform: scale(1.1);
+    }
+
+    .upload-text-main {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #e8e4dc;
+      margin-bottom: 4px;
+    }
+
+    .upload-text-sub {
+      font-size: 0.75rem;
+      color: #777;
+    }
+
+    /* Target input is hidden */
+    .hidden-file-input {
+      display: none !important;
+    }
+
+    /* Live Preview Overlay */
+    .upload-preview-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 2;
+      display: none;
+    }
+
+    .upload-preview-clear {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 3;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .upload-preview-clear:hover {
+      background: #e8c84a;
+      color: #0f0f11;
+    }
+  </style>
 </head>
+
 <body>
 
-<div id="toast"></div>
+  <div id="toast"></div>
 
-<!-- LOGIN -->
-<div id="login-view">
-  <div class="login-box">
-    <div class="login-logo">UDAKO</div>
-    <div class="login-sub">Champions League</div>
-    <div class="login-form">
-      <div class="field"><label>Username</label><input id="l-user" type="text" autocomplete="username" placeholder="enter username"></div>
-      <div class="field"><label>Password</label><input id="l-pass" type="password" autocomplete="current-password" placeholder="enter password"></div>
-      <div class="err-msg" id="l-err"></div>
-      <button class="btn btn-primary" onclick="doLogin()">Sign in</button>
+  <!-- LOGIN -->
+  <div id="login-view">
+    <div class="login-box">
+      <div class="login-logo">UDAKO</div>
+      <div class="login-sub">Champions League</div>
+      <div class="login-form">
+        <div class="field"><label>Username</label><input id="l-user" type="text" autocomplete="username"
+            placeholder="enter username"></div>
+        <div class="field"><label>Password</label><input id="l-pass" type="password" autocomplete="current-password"
+            placeholder="enter password"></div>
+        <div class="err-msg" id="l-err"></div>
+        <button class="btn btn-primary" onclick="doLogin()">Sign in</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- FORCE CHANGE PASSWORD -->
-<div id="changepw-view" style="display:none">
-  <div class="pw-box">
-    <div class="login-logo" style="font-size:2.5rem">Change Password</div>
-    <br>
-    <div class="alert alert-warn">🔒 You must set a new password before continuing.</div>
-    <div class="login-form">
-      <div class="field"><label>New Password</label><input id="np1" type="password" placeholder="new password"></div>
-      <div class="field"><label>Confirm Password</label><input id="np2" type="password" placeholder="confirm password"></div>
-      <div class="err-msg" id="pw-err"></div>
-      <button class="btn btn-primary" onclick="doChangePw()">Set Password &amp; Continue</button>
+  <!-- FORCE CHANGE PASSWORD -->
+  <div id="changepw-view" style="display:none">
+    <div class="pw-box">
+      <div class="login-logo" style="font-size:2.5rem">Change Password</div>
+      <br>
+      <div class="alert alert-warn">🔒 You must set a new password before continuing.</div>
+      <div class="login-form">
+        <div class="field"><label>New Password</label><input id="np1" type="password" placeholder="new password"></div>
+        <div class="field"><label>Confirm Password</label><input id="np2" type="password"
+            placeholder="confirm password"></div>
+        <div class="err-msg" id="pw-err"></div>
+        <button class="btn btn-primary" onclick="doChangePw()">Set Password &amp; Continue</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- MAIN APP -->
-<div id="app" style="display:none">
-  <header>
-    <div class="logo">UDAKO <span>champions league</span></div>
-    <div class="header-right">
-      <div class="user-chip">Signed in as <b id="h-username">—</b></div>
-      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign out</button>
+  <!-- MAIN APP -->
+  <div id="app" style="display:none">
+    <header>
+      <div class="logo">UDAKO <span>champions league</span></div>
+      <div class="header-right">
+        <div class="user-chip"><span class="hide-mobile">Signed in as </span><b id="h-username">—</b></div>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign out</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <!-- rendered by JS -->
+    </main>
+  </div>
+
+  <!-- ADMIN: ADD USER MODAL -->
+  <div id="add-user-modal" class="modal-backdrop" style="display:none">
+    <div class="modal">
+      <h2>Add User</h2>
+      <p>Create a new account. The user will be required to change their password on first login.</p>
+      <div class="modal-form">
+        <div class="field"><label>Username</label><input id="nu-user" type="text" placeholder="username (no spaces)">
+        </div>
+        <div class="field"><label>Default Password</label><input id="nu-pass" type="text"
+            placeholder="temporary password"></div>
+        <div class="err-msg" id="nu-err"></div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" onclick="closeModal('add-user-modal')">Cancel</button>
+          <button class="btn btn-primary" onclick="doAddUser()">Create User</button>
+        </div>
+      </div>
     </div>
-  </header>
+  </div>
 
-  <main id="main-content">
-    <!-- rendered by JS -->
-  </main>
-</div>
+  <!-- ADMIN: RESET PW MODAL -->
+  <div id="reset-pw-modal" class="modal-backdrop" style="display:none">
+    <div class="modal">
+      <h2>Reset Password</h2>
+      <p>Set a temporary password for <b id="reset-target-name">—</b>. They will be required to change it on next login.
+      </p>
+      <div class="modal-form">
+        <div class="field"><label>New Temporary Password</label><input id="rp-pass" type="text"
+            placeholder="temporary password"></div>
+        <div class="err-msg" id="rp-err"></div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" onclick="closeModal('reset-pw-modal')">Cancel</button>
+          <button class="btn btn-primary" onclick="doResetPw()">Reset Password</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<!-- ADMIN: ADD USER MODAL -->
-<div id="add-user-modal" class="modal-backdrop" style="display:none">
-  <div class="modal">
-    <h2>Add User</h2>
-    <p>Create a new account. The user will be required to change their password on first login.</p>
-    <div class="modal-form">
-      <div class="field"><label>Username</label><input id="nu-user" type="text" placeholder="username (no spaces)"></div>
-      <div class="field"><label>Default Password</label><input id="nu-pass" type="text" placeholder="temporary password"></div>
-      <div class="err-msg" id="nu-err"></div>
+  <!-- DAILY CHECKIN MODAL -->
+  <div id="checkin-modal" class="modal-backdrop" style="display:none">
+    <div class="modal">
+      <h2>Daily Check-in</h2>
+      <p id="checkin-modal-date">How much did you consume today?</p>
+      <div class="checkin-grid">
+        <div class="checkin-item">
+          <div class="checkin-emoji">🍺</div>
+          <div class="checkin-label">Normal Beer</div>
+          <div class="checkin-counter">
+            <button class="counter-btn" onclick="adj('nb',-1)">−</button>
+            <span class="counter-val" id="cnt-nb">0</span>
+            <button class="counter-btn" onclick="adj('nb',1)">+</button>
+          </div>
+        </div>
+        <div class="checkin-item">
+          <div class="checkin-emoji">🍻</div>
+          <div class="checkin-label">Special Beer</div>
+          <div class="checkin-counter">
+            <button class="counter-btn" onclick="adj('sb',-1)">−</button>
+            <span class="counter-val" id="cnt-sb">0</span>
+            <button class="counter-btn" onclick="adj('sb',1)">+</button>
+          </div>
+        </div>
+        <div class="checkin-item">
+          <div class="checkin-emoji">🥃</div>
+          <div class="checkin-label">Shots</div>
+          <div class="checkin-counter">
+            <button class="counter-btn" onclick="adj('sh',-1)">−</button>
+            <span class="counter-val" id="cnt-sh">0</span>
+            <button class="counter-btn" onclick="adj('sh',1)">+</button>
+          </div>
+        </div>
+        <div class="checkin-item">
+          <div class="checkin-emoji">🍹</div>
+          <div class="checkin-label">Cocktails</div>
+          <div class="checkin-counter">
+            <button class="counter-btn" onclick="adj('co',-1)">−</button>
+            <span class="counter-val" id="cnt-co">0</span>
+            <button class="counter-btn" onclick="adj('co',1)">+</button>
+          </div>
+        </div>
+        <div class="checkin-item">
+          <div class="checkin-emoji">🍷</div>
+          <div class="checkin-label">Wine</div>
+          <div class="checkin-counter">
+            <button class="counter-btn" onclick="adj('wi',-1)">−</button>
+            <span class="counter-val" id="cnt-wi">0</span>
+            <button class="counter-btn" onclick="adj('wi',1)">+</button>
+          </div>
+        </div>
+        <div class="checkin-item" style="grid-column: span 2">
+          <div class="checkin-emoji">🚬</div>
+          <div class="checkin-label">Joints</div>
+          <div class="checkin-counter">
+            <button class="counter-btn" onclick="adj('jo',-1)">−</button>
+            <span class="counter-val" id="cnt-jo">0</span>
+            <button class="counter-btn" onclick="adj('jo',1)">+</button>
+          </div>
+        </div>
+      </div>
+      <div id="checkin-equiv" style="text-align:center; font-size:0.85rem; color:#888; margin-bottom:1rem;"></div>
       <div class="modal-actions">
-        <button class="btn btn-ghost" onclick="closeModal('add-user-modal')">Cancel</button>
-        <button class="btn btn-primary" onclick="doAddUser()">Create User</button>
+        <button class="btn btn-ghost" onclick="closeModal('checkin-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitCheckin()">Save Check-in</button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ADMIN: RESET PW MODAL -->
-<div id="reset-pw-modal" class="modal-backdrop" style="display:none">
-  <div class="modal">
-    <h2>Reset Password</h2>
-    <p>Set a temporary password for <b id="reset-target-name">—</b>. They will be required to change it on next login.</p>
-    <div class="modal-form">
-      <div class="field"><label>New Temporary Password</label><input id="rp-pass" type="text" placeholder="temporary password"></div>
-      <div class="err-msg" id="rp-err"></div>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" onclick="closeModal('reset-pw-modal')">Cancel</button>
-        <button class="btn btn-primary" onclick="doResetPw()">Reset Password</button>
-      </div>
-    </div>
-  </div>
-</div>
+  <script>
+    // ============================================================
+    // MULTIPLIERS — mirrors the CSS custom properties above.
+    // Change these values to adjust score weights.
+    // ============================================================
+    const MULT = {
+      nb: 1.0,    // normal beer
+      sb: 1.5,    // special beer
+      sh: 0.75,   // shot
+      co: 1.25,   // cocktail
+      wi: 1.5,    // wine
+      jo: 1.25    // joint
+    };
 
-<!-- DAILY CHECKIN MODAL -->
-<div id="checkin-modal" class="modal-backdrop" style="display:none">
-  <div class="modal">
-    <h2>Daily Check-in</h2>
-    <p id="checkin-modal-date">How much did you consume today?</p>
-    <div class="checkin-grid">
-      <div class="checkin-item">
-        <div class="checkin-emoji">🍺</div>
-        <div class="checkin-label">Normal Beer</div>
-        <div class="checkin-counter">
-          <button class="counter-btn" onclick="adj('nb',-1)">−</button>
-          <span class="counter-val" id="cnt-nb">0</span>
-          <button class="counter-btn" onclick="adj('nb',1)">+</button>
-        </div>
-      </div>
-      <div class="checkin-item">
-        <div class="checkin-emoji">🍻</div>
-        <div class="checkin-label">Special Beer</div>
-        <div class="checkin-counter">
-          <button class="counter-btn" onclick="adj('sb',-1)">−</button>
-          <span class="counter-val" id="cnt-sb">0</span>
-          <button class="counter-btn" onclick="adj('sb',1)">+</button>
-        </div>
-      </div>
-      <div class="checkin-item">
-        <div class="checkin-emoji">🥃</div>
-        <div class="checkin-label">Shots</div>
-        <div class="checkin-counter">
-          <button class="counter-btn" onclick="adj('sh',-1)">−</button>
-          <span class="counter-val" id="cnt-sh">0</span>
-          <button class="counter-btn" onclick="adj('sh',1)">+</button>
-        </div>
-      </div>
-      <div class="checkin-item">
-        <div class="checkin-emoji">🍹</div>
-        <div class="checkin-label">Cocktails</div>
-        <div class="checkin-counter">
-          <button class="counter-btn" onclick="adj('co',-1)">−</button>
-          <span class="counter-val" id="cnt-co">0</span>
-          <button class="counter-btn" onclick="adj('co',1)">+</button>
-        </div>
-      </div>
-      <div class="checkin-item">
-        <div class="checkin-emoji">🍷</div>
-        <div class="checkin-label">Wine</div>
-        <div class="checkin-counter">
-          <button class="counter-btn" onclick="adj('wi',-1)">−</button>
-          <span class="counter-val" id="cnt-wi">0</span>
-          <button class="counter-btn" onclick="adj('wi',1)">+</button>
-        </div>
-      </div>
-      <div class="checkin-item" style="grid-column: span 2">
-        <div class="checkin-emoji">🚬</div>
-        <div class="checkin-label">Joints</div>
-        <div class="checkin-counter">
-          <button class="counter-btn" onclick="adj('jo',-1)">−</button>
-          <span class="counter-val" id="cnt-jo">0</span>
-          <button class="counter-btn" onclick="adj('jo',1)">+</button>
-        </div>
-      </div>
-    </div>
-    <div id="checkin-equiv" style="text-align:center; font-size:0.85rem; color:#888; margin-bottom:1rem;"></div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('checkin-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="submitCheckin()">Save Check-in</button>
-    </div>
-  </div>
-</div>
 
-<script>
-// ============================================================
-// MULTIPLIERS — mirrors the CSS custom properties above.
-// Change these values to adjust score weights.
-// ============================================================
-const MULT = {
-  nb: 1.0,    // normal beer
-  sb: 1.5,    // special beer
-  sh: 0.75,   // shot
-  co: 1.25,   // cocktail
-  wi: 1.5,    // wine
-  jo: 1.25    // joint
-};
+    // ============================================================
+    // API HELPERS
+    // ============================================================
+    const API_BASE = '/api';
 
-const DOWNLOAD_LINKS = {
-  apple: 'https://udako.libertronics.org/downloads/udako-ios.ipa',
-  android: 'https://udako.libertronics.org/downloads/udako-android.apk'
-};
+    async function apiCall(endpoint, method = 'GET', body = null) {
+      const options = {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'  // Send cookies for session
+      };
 
-// ============================================================
-// API HELPERS
-// ============================================================
-const API_BASE = '/api';
+      if (body) options.body = JSON.stringify(body);
 
-async function apiCall(endpoint, method = 'GET', body = null) {
-  const options = {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include'  // Send cookies for session
-  };
-  
-  if (body) options.body = JSON.stringify(body);
-  
-  try {
-    const response = await fetch(`${API_BASE}${endpoint}`, options);
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.error || `HTTP ${response.status}`);
-    }
-    
-    return data;
-  } catch (err) {
-    console.error(`API Error: ${endpoint}`, err);
-    throw err;
-  }
-}
+      try {
+        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        const data = await response.json();
 
-// ============================================================
-// AUTH STATE
-// ============================================================
-let currentUser = null;
+        if (!response.ok) {
+          throw new Error(data.error || `HTTP ${response.status}`);
+        }
 
-async function doLogin() {
-  const username = document.getElementById('l-user').value.trim().toLowerCase();
-  const password = document.getElementById('l-pass').value;
-  const errEl = document.getElementById('l-err');
-  
-  try {
-    const data = await apiCall('/auth/login', 'POST', { username, password });
-    
-    errEl.textContent = '';
-    currentUser = data.user;
-    
-    if (data.user.must_change_pw) {
-      show('changepw-view');
-      return;
-    }
-    
-    enterApp();
-  } catch (err) {
-    errEl.textContent = 'Invalid username or password.';
-  }
-}
-
-async function doLogout() {
-  try {
-    await apiCall('/auth/logout', 'POST');
-  } catch (err) {
-    console.error('Logout error:', err);
-  }
-  
-  currentUser = null;
-  document.getElementById('l-user').value = '';
-  document.getElementById('l-pass').value = '';
-  show('login-view');
-}
-
-async function doChangePw() {
-  const p1 = document.getElementById('np1').value;
-  const p2 = document.getElementById('np2').value;
-  const err = document.getElementById('pw-err');
-  
-  if (p1.length < 4) {
-    err.textContent = 'Password must be at least 4 characters.';
-    return;
-  }
-  
-  if (p1 !== p2) {
-    err.textContent = 'Passwords do not match.';
-    return;
-  }
-  
-  try {
-    await apiCall('/auth/change-password', 'POST', { password: p1 });
-    err.textContent = '';
-    enterApp();
-  } catch (err) {
-    err.textContent = err.message;
-  }
-}
-
-// ============================================================
-// APP SHELL
-// ============================================================
-function show(viewId) {
-  ['login-view','changepw-view','app'].forEach(id => {
-    document.getElementById(id).style.display = id === viewId ? 'flex' : 'none';
-  });
-  if (viewId === 'app') document.getElementById('app').style.display = 'flex';
-}
-
-async function enterApp() {
-  show('app');
-  document.getElementById('h-username').textContent = currentUser.username;
-  
-  if (currentUser.role === 'admin') {
-    renderAdmin();
-  } else {
-    renderUser();
-  }
-}
-
-// ============================================================
-// SCORE CALCULATION
-// ============================================================
-function calcScoreFromEntry(c) {
-  const wine = typeof c.wi === 'number' ? c.wi : 0;
-  return c.nb * MULT.nb + c.sb * MULT.sb + c.sh * MULT.sh + c.co * MULT.co + wine * MULT.wi + c.jo * MULT.jo;
-}
-
-function today() {
-  return dateKeyFromOffset(0);
-}
-
-function dateKeyFromOffset(offsetDays) {
-  const d = new Date();
-  d.setHours(12, 0, 0, 0);
-  d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
-}
-
-function currentYear() {
-  return new Date().getFullYear();
-}
-
-function formatDateLabel(dateKey) {
-  const todayKey = dateKeyFromOffset(0);
-  const yesterdayKey = dateKeyFromOffset(-1);
-  if (dateKey === todayKey) return 'Today';
-  if (dateKey === yesterdayKey) return 'Yesterday';
-  const d = new Date(`${dateKey}T12:00:00`);
-  return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-}
-
-function fmt(n) {
-  const val = typeof n === 'number' ? n : Number(n);
-  return Number.isFinite(val) ? val.toFixed(2) : '0.00';
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function daysInYear(year) {
-  const start = new Date(year, 0, 1);
-  const end = new Date(year + 1, 0, 1);
-  return Math.round((end - start) / (24 * 60 * 60 * 1000));
-}
-
-function daysInMonth(year, monthIndex) {
-  const start = new Date(year, monthIndex, 1);
-  const end = new Date(year, monthIndex + 1, 1);
-  return Math.round((end - start) / (24 * 60 * 60 * 1000));
-}
-
-function isLastWeekOfYear() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const lastWeekStart = new Date(year, 11, 25, 0, 0, 0, 0);
-  return now >= lastWeekStart;
-}
-
-function buildWrappedStats(checkins) {
-  const year = currentYear();
-  const totalDays = daysInYear(year);
-
-  let totalScore = 0;
-  let daysWith = 0;
-  let bestDay = null;
-  let bestScore = -1;
-  const totals = { nb: 0, sb: 0, sh: 0, co: 0, wi: 0, jo: 0 };
-
-  checkins.forEach(c => {
-    const dayScore = calcScoreFromEntry(c);
-    totalScore += dayScore;
-
-    const consumed = (c.nb + c.sb + c.sh + c.co + (c.wi || 0) + c.jo) > 0;
-    if (consumed) daysWith += 1;
-
-    if (dayScore > bestScore) {
-      bestScore = dayScore;
-      bestDay = c.date;
+        return data;
+      } catch (err) {
+        console.error(`API Error: ${endpoint}`, err);
+        throw err;
+      }
     }
 
-    totals.nb += c.nb;
-    totals.sb += c.sb;
-    totals.sh += c.sh;
-    totals.co += c.co;
-    totals.wi += c.wi || 0;
-    totals.jo += c.jo;
-  });
+    // ============================================================
+    // AUTH STATE
+    // ============================================================
+    let currentUser = null;
+    let editingItalyItemId = null;
+    let addingItalyCategory = null;
+    let activeTabId = null;
+    let loadedPhotosOffset = 5;
+    let noMorePhotos = false;
+    let isLoadingPhotos = false;
+    let adminChampionsScoreboard = [];
+    let userChampionsScoreboard = [];
+    let customCatchupDays = 15;
 
-  const daysWithout = Math.max(0, totalDays - daysWith);
-  const avgConsumed = daysWith > 0 ? totalScore / daysWith : 0;
+    async function doLogin() {
+      const username = document.getElementById('l-user').value.trim().toLowerCase();
+      const password = document.getElementById('l-pass').value;
+      const errEl = document.getElementById('l-err');
 
-  const itemEntries = [
-    ['Normal beer', totals.nb],
-    ['Special beer', totals.sb],
-    ['Shot', totals.sh],
-    ['Cocktail', totals.co],
-    ['Wine', totals.wi],
-    ['Joint', totals.jo]
-  ];
-  itemEntries.sort((a, b) => b[1] - a[1]);
-  const topItem = itemEntries[0][1] > 0 ? `${itemEntries[0][0]} (${itemEntries[0][1]})` : '—';
+      try {
+        const data = await apiCall('/auth/login', 'POST', { username, password });
 
-  return {
-    year,
-    totalScore: fmt(totalScore),
-    avgConsumed: fmt(avgConsumed),
-    daysWith,
-    daysWithout,
-    bestDay: bestDay ? `${bestDay} (${fmt(bestScore)} 🍺eq)` : '—',
-    topItem
-  };
-}
+        errEl.textContent = '';
+        currentUser = data.user;
 
-function buildMonthlyStats(checkins) {
-  const now = new Date();
-  const year = now.getFullYear();
-  const monthIndex = now.getMonth();
-  const monthKey = `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
-  const totalDays = daysInMonth(year, monthIndex);
-  const daysSoFar = now.getDate();
+        if (data.user.must_change_pw) {
+          show('changepw-view');
+          return;
+        }
 
-  let totalScore = 0;
-  let daysWith = 0;
-  let bestDay = null;
-  let bestScore = -1;
-
-  checkins.forEach(c => {
-    if (!c.date.startsWith(monthKey)) return;
-    const dayScore = calcScoreFromEntry(c);
-    totalScore += dayScore;
-
-    const consumed = (c.nb + c.sb + c.sh + c.co + (c.wi || 0) + c.jo) > 0;
-    if (consumed) daysWith += 1;
-
-    if (dayScore > bestScore) {
-      bestScore = dayScore;
-      bestDay = c.date;
+        enterApp();
+      } catch (err) {
+        errEl.textContent = 'Invalid username or password.';
+      }
     }
-  });
 
-  const daysWithout = Math.max(0, daysSoFar - daysWith);
-  const avgMonth = daysSoFar > 0 ? totalScore / daysSoFar : 0;
-  const label = now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+    async function doLogout() {
+      try {
+        await apiCall('/auth/logout', 'POST');
+      } catch (err) {
+        console.error('Logout error:', err);
+      }
 
-  return {
-    label,
-    totalScore: fmt(totalScore),
-    avgMonth: fmt(avgMonth),
-    daysWith,
-    daysWithout,
-    bestDay: bestDay ? `${bestDay} (${fmt(bestScore)} 🍺eq)` : '—'
-  };
-}
+      currentUser = null;
+      document.getElementById('l-user').value = '';
+      document.getElementById('l-pass').value = '';
+      show('login-view');
+    }
 
-function dailyQuoteHtml(quote) {
-  if (!quote || !quote.quote) return '';
+    async function doChangePw() {
+      const p1 = document.getElementById('np1').value;
+      const p2 = document.getElementById('np2').value;
+      const err = document.getElementById('pw-err');
 
-  const quoteText = escapeHtml(quote.quote);
-  const author = quote.author ? escapeHtml(quote.author) : '';
-  const category = quote.category ? escapeHtml(quote.category) : '';
-  const sourceDate = today();
+      if (p1.length < 4) {
+        err.textContent = 'Password must be at least 4 characters.';
+        return;
+      }
 
-  return `
+      if (p1 !== p2) {
+        err.textContent = 'Passwords do not match.';
+        return;
+      }
+
+      try {
+        await apiCall('/auth/change-password', 'POST', { password: p1 });
+        err.textContent = '';
+        enterApp();
+      } catch (err) {
+        err.textContent = err.message;
+      }
+    }
+
+    // ============================================================
+    // APP SHELL
+    // ============================================================
+    function show(viewId) {
+      ['login-view', 'changepw-view', 'app'].forEach(id => {
+        document.getElementById(id).style.display = id === viewId ? 'flex' : 'none';
+      });
+      if (viewId === 'app') document.getElementById('app').style.display = 'flex';
+    }
+
+    async function enterApp() {
+      show('app');
+      document.getElementById('h-username').textContent = currentUser.username;
+
+      activeTabId = currentUser.role === 'admin' ? 'atab-score' : 'tab-score';
+
+      if (currentUser.role === 'admin') {
+        renderAdmin();
+      } else {
+        renderUser();
+      }
+
+      if (swRegistration) {
+        subscribeUserToPush(swRegistration);
+      }
+    }
+
+    // ============================================================
+    // SCORE CALCULATION
+    // ============================================================
+    function calcScoreFromEntry(c) {
+      const wine = typeof c.wi === 'number' ? c.wi : 0;
+      return c.nb * MULT.nb + c.sb * MULT.sb + c.sh * MULT.sh + c.co * MULT.co + wine * MULT.wi + c.jo * MULT.jo;
+    }
+
+    function today() {
+      return dateKeyFromOffset(0);
+    }
+
+    function dateKeyFromOffset(offsetDays) {
+      const d = new Date();
+      d.setHours(12, 0, 0, 0);
+      d.setDate(d.getDate() + offsetDays);
+      return d.toISOString().slice(0, 10);
+    }
+
+    function currentYear() {
+      return new Date().getFullYear();
+    }
+
+    function formatDateLabel(dateKey) {
+      const todayKey = dateKeyFromOffset(0);
+      const yesterdayKey = dateKeyFromOffset(-1);
+      if (dateKey === todayKey) return 'Today';
+      if (dateKey === yesterdayKey) return 'Yesterday';
+      const d = new Date(`${dateKey}T12:00:00`);
+      return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+
+    function fmt(n) {
+      const val = typeof n === 'number' ? n : Number(n);
+      return Number.isFinite(val) ? val.toFixed(2) : '0.00';
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function daysInYear(year) {
+      const start = new Date(year, 0, 1);
+      const end = new Date(year + 1, 0, 1);
+      return Math.round((end - start) / (24 * 60 * 60 * 1000));
+    }
+
+    function daysInMonth(year, monthIndex) {
+      const start = new Date(year, monthIndex, 1);
+      const end = new Date(year, monthIndex + 1, 1);
+      return Math.round((end - start) / (24 * 60 * 60 * 1000));
+    }
+
+    function isLastWeekOfYear() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const lastWeekStart = new Date(year, 11, 25, 0, 0, 0, 0);
+      return now >= lastWeekStart;
+    }
+
+    function buildWrappedStats(checkins) {
+      const year = currentYear();
+      const totalDays = daysInYear(year);
+
+      let totalScore = 0;
+      let daysWith = 0;
+      let bestDay = null;
+      let bestScore = -1;
+      const totals = { nb: 0, sb: 0, sh: 0, co: 0, wi: 0, jo: 0 };
+
+      checkins.forEach(c => {
+        const dayScore = calcScoreFromEntry(c);
+        totalScore += dayScore;
+
+        const consumed = (c.nb + c.sb + c.sh + c.co + (c.wi || 0) + c.jo) > 0;
+        if (consumed) daysWith += 1;
+
+        if (dayScore > bestScore) {
+          bestScore = dayScore;
+          bestDay = c.date;
+        }
+
+        totals.nb += c.nb;
+        totals.sb += c.sb;
+        totals.sh += c.sh;
+        totals.co += c.co;
+        totals.wi += c.wi || 0;
+        totals.jo += c.jo;
+      });
+
+      const daysWithout = Math.max(0, totalDays - daysWith);
+      const avgConsumed = daysWith > 0 ? totalScore / daysWith : 0;
+
+      const itemEntries = [
+        ['Normal beer', totals.nb],
+        ['Special beer', totals.sb],
+        ['Shot', totals.sh],
+        ['Cocktail', totals.co],
+        ['Wine', totals.wi],
+        ['Joint', totals.jo]
+      ];
+      itemEntries.sort((a, b) => b[1] - a[1]);
+      const topItem = itemEntries[0][1] > 0 ? `${itemEntries[0][0]} (${itemEntries[0][1]})` : '—';
+
+      return {
+        year,
+        totalScore: fmt(totalScore),
+        avgConsumed: fmt(avgConsumed),
+        daysWith,
+        daysWithout,
+        bestDay: bestDay ? `${bestDay} (${fmt(bestScore)} 🍺eq)` : '—',
+        topItem
+      };
+    }
+
+    function buildMonthlyStats(checkins) {
+      const now = new Date();
+      const year = now.getFullYear();
+      const monthIndex = now.getMonth();
+      const monthKey = `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
+      const totalDays = daysInMonth(year, monthIndex);
+      const daysSoFar = now.getDate();
+
+      let totalScore = 0;
+      let daysWith = 0;
+      let bestDay = null;
+      let bestScore = -1;
+
+      checkins.forEach(c => {
+        if (!c.date.startsWith(monthKey)) return;
+        const dayScore = calcScoreFromEntry(c);
+        totalScore += dayScore;
+
+        const consumed = (c.nb + c.sb + c.sh + c.co + (c.wi || 0) + c.jo) > 0;
+        if (consumed) daysWith += 1;
+
+        if (dayScore > bestScore) {
+          bestScore = dayScore;
+          bestDay = c.date;
+        }
+      });
+
+      const daysWithout = Math.max(0, daysSoFar - daysWith);
+      const avgMonth = daysSoFar > 0 ? totalScore / daysSoFar : 0;
+      const label = now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+      return {
+        label,
+        totalScore: fmt(totalScore),
+        avgMonth: fmt(avgMonth),
+        daysWith,
+        daysWithout,
+        bestDay: bestDay ? `${bestDay} (${fmt(bestScore)} 🍺eq)` : '—'
+      };
+    }
+
+    function dailyQuoteHtml(quote) {
+      if (!quote || !quote.quote) {
+        return `
     <div class="card daily-quote-card">
       <div class="daily-quote-label">Daily quote</div>
-      <div class="daily-quote-text">${quoteText}</div>
+      <div class="daily-quote-text">No quote loaded yet.</div>
       <div class="daily-quote-meta">
-        ${author ? `<span>— ${author}</span>` : ''}
+        <span>${today()}</span>
+      </div>
+    </div>`;
+      }
+
+      const quoteText = escapeHtml(quote.quote);
+      const author = quote.author ? escapeHtml(quote.author) : '';
+      const category = quote.category ? escapeHtml(quote.category) : '';
+      const sourceDate = today();
+
+      return `
+    <div class="card daily-quote-card">
+      <div class="daily-quote-label">Daily quote</div>
+      <div class="daily-quote-text">${quoteText}${author ? ` <span class="daily-quote-author">~ ${author}</span>` : ''}</div>
+      <div class="daily-quote-meta">
         ${category ? `<span>${category}</span>` : ''}
         <span>${sourceDate}</span>
       </div>
     </div>`;
-}
+    }
 
-function multipliersCardHtml() {
-  return `
+    function consumptionPhotosHtml(photos) {
+      if (!photos || photos.length === 0) {
+        return '<div class="photo-empty" style="text-align:center; padding:2rem; color:#666;">No consumption photos yet.</div>';
+      }
+
+      return photos.map(photo => {
+        // Create an initial for avatar
+        const initial = photo.username ? photo.username.charAt(0).toUpperCase() : 'U';
+        const likedByMe = photo.liked_by_me || false;
+
+        return `
+    <div class="ig-card" data-photo-id="${photo.id}">
+      <div class="ig-header">
+        <div class="ig-avatar">${initial}</div>
+        <div class="ig-meta">
+          <div class="ig-username">${escapeHtml(photo.username)}</div>
+          <div class="ig-time">${photo.created_at || ''}</div>
+        </div>
+      </div>
+      <a class="ig-photo-link" href="${photo.image_url}" target="_blank" rel="noopener">
+        <img class="ig-photo" src="${photo.image_url}" alt="${escapeHtml(photo.original_filename || 'Photo')}" loading="lazy">
+      </a>
+      <div class="ig-actions-row">
+        <button class="ig-like-btn ${likedByMe ? 'liked' : ''}" onclick="likePhoto(this, ${photo.id}, event)" aria-label="Like photo">
+          <span class="like-emoji">${likedByMe ? '🍻' : '🍺'}</span>
+        </button>
+        <span class="ig-likes-count">${photo.likes_count || 0} ${photo.likes_count === 1 ? 'like' : 'likes'}</span>
+      </div>
+      <div class="ig-body">
+        ${photo.caption ? `
+        <div class="ig-caption">
+          <span class="ig-caption-user">${escapeHtml(photo.username)}</span>${escapeHtml(photo.caption)}
+        </div>` : ''}
+        <div class="ig-filename">${escapeHtml(photo.original_filename || 'image')}</div>
+        ${(currentUser && (currentUser.role === 'admin' || currentUser.id === photo.uploaded_by_user_id)) ? `
+        <div class="ig-actions">
+          <button class="btn btn-ghost btn-sm" type="button" onclick="deleteConsumptionPhoto(${photo.id})">Delete</button>
+        </div>` : ''}
+      </div>
+    </div>`;
+      }).join('');
+    }
+
+    function multipliersCardHtml() {
+      return `
     <div class="card" style="margin:1rem 0 0 0">
       <div class="section-title" style="margin:0 0 .75rem 0">Multipliers</div>
       <table class="history-table">
@@ -1056,46 +2013,99 @@ function multipliersCardHtml() {
         </tbody>
       </table>
     </div>`;
-}
+    }
 
-function buildConsumptionTotals(checkins) {
-  const totals = { nb: 0, sb: 0, sh: 0, co: 0, wi: 0, jo: 0 };
-  checkins.forEach(c => {
-    totals.nb += c.nb;
-    totals.sb += c.sb;
-    totals.sh += c.sh;
-    totals.co += c.co;
-    totals.wi += c.wi || 0;
-    totals.jo += c.jo;
-  });
-  return totals;
-}
+    function buildConsumptionTotals(checkins) {
+      const totals = { nb: 0, sb: 0, sh: 0, co: 0, wi: 0, jo: 0 };
+      checkins.forEach(c => {
+        totals.nb += c.nb;
+        totals.sb += c.sb;
+        totals.sh += c.sh;
+        totals.co += c.co;
+        totals.wi += c.wi || 0;
+        totals.jo += c.jo;
+      });
+      return totals;
+    }
 
-function sumScoreboardTotals(scoreboard) {
-  const totals = { nb: 0, sb: 0, sh: 0, co: 0, wi: 0, jo: 0 };
-  scoreboard.forEach(u => {
-    const t = u.totals || {};
-    totals.nb += t.nb || 0;
-    totals.sb += t.sb || 0;
-    totals.sh += t.sh || 0;
-    totals.co += t.co || 0;
-    totals.wi += t.wi || 0;
-    totals.jo += t.jo || 0;
-  });
-  return totals;
-}
+    function buildAchievementsHtml(totals) {
+      const items = [
+        { name: "Normal beer", key: "beer", current: totals.nb || 0, emoji: "🍺", isJoint: false },
+        { name: "Special beer", key: "duvel", current: totals.sb || 0, emoji: "🍻", isJoint: false },
+        { name: "Shot", key: "shot", current: totals.sh || 0, emoji: "🥃", isJoint: false },
+        { name: "Cocktail", key: "cocktail", current: totals.co || 0, emoji: "🍹", isJoint: false },
+        { name: "Wine", key: "wine", current: totals.wi || 0, emoji: "🍷", isJoint: false },
+        { name: "Joint", key: "joint", current: totals.jo || 0, emoji: "🚬", isJoint: true }
+      ];
 
-function buildScoreDetailsHtml(username, totals = {}) {
-  const nb = totals.nb || 0;
-  const sb = totals.sb || 0;
-  const sh = totals.sh || 0;
-  const co = totals.co || 0;
-  const wi = totals.wi || 0;
-  const jo = totals.jo || 0;
+      let html = '<div class="section-title">Achievements</div>';
 
-  return `
+      items.forEach(item => {
+        const levels = item.isJoint ? [50, 100, 500] : [100, 500, 1000];
+        const tiersList = ["bronze", "silver", "gold"];
+        
+        html += `
+        <div class="achievement-section">
+          <div class="achievement-section-title">${item.emoji} ${item.name} (Total: ${item.current})</div>
+          <div class="achievement-grid">`;
+
+        for (let i = 0; i < 3; i++) {
+          const target = levels[i];
+          const tier = tiersList[i];
+          const reached = item.current >= target;
+          const badgeSrc = reached ? `/badges/${item.key}-${tier}.svg` : `/badges/${item.key}-black.svg`;
+          
+          let statusHtml = '';
+          if (reached) {
+            statusHtml = `<div class="achievement-unlocked">🏆 Unlocked!</div>`;
+          } else {
+            const verb = item.isJoint ? "smoke" : "drink";
+            const diff = target - item.current;
+            statusHtml = `<div class="achievement-hint">you should ${verb} ${diff} amount to reach this badge</div>`;
+          }
+
+          html += `
+            <div class="achievement-card">
+              <img src="${badgeSrc}" alt="${item.name} ${tier}">
+              <div class="achievement-tier ${tier}">${tier}</div>
+              <div class="achievement-target">Target: ${target}</div>
+              ${statusHtml}
+            </div>`;
+        }
+
+        html += `
+          </div>
+        </div>`;
+      });
+
+      return html;
+    }
+
+    function sumScoreboardTotals(scoreboard) {
+      const totals = { nb: 0, sb: 0, sh: 0, co: 0, wi: 0, jo: 0 };
+      scoreboard.forEach(u => {
+        const t = u.totals || {};
+        totals.nb += t.nb || 0;
+        totals.sb += t.sb || 0;
+        totals.sh += t.sh || 0;
+        totals.co += t.co || 0;
+        totals.wi += t.wi || 0;
+        totals.jo += t.jo || 0;
+      });
+      return totals;
+    }
+
+    function buildScoreDetailsHtml(username, totals = {}) {
+      const nb = totals.nb || 0;
+      const sb = totals.sb || 0;
+      const sh = totals.sh || 0;
+      const co = totals.co || 0;
+      const wi = totals.wi || 0;
+      const jo = totals.jo || 0;
+
+      return `
       <div class="score-detail-card">
-        <div class="score-detail-title">${username} - consumption</div>
+        <div class="score-detail-title">${escapeHtml(username)} - consumption</div>
         <table class="history-table compact">
           <thead>
             <tr><th>Item</th><th>Total</th></tr>
@@ -1110,10 +2120,10 @@ function buildScoreDetailsHtml(username, totals = {}) {
           </tbody>
         </table>
       </div>`;
-}
+    }
 
-function buildScoreboardHtml(scoreboard, totalLabel, boardKey) {
-  let html = `
+    function buildScoreboardHtml(scoreboard, totalLabel, boardKey) {
+      let html = `
       <div class="score-row header-row">
         <span>#</span><span>User</span>
         <span style="text-align:right">${totalLabel}</span>
@@ -1122,13 +2132,13 @@ function buildScoreboardHtml(scoreboard, totalLabel, boardKey) {
         <span style="text-align:right">Last entry</span>
       </div>`;
 
-  scoreboard.forEach((u, i) => {
-    const cls = i === 0 ? 'top-1' : i === 1 ? 'top-2' : i === 2 ? 'top-3' : '';
-    const detailId = `score-detail-${boardKey}-${i}`;
-    html += `
+      scoreboard.forEach((u, i) => {
+        const cls = i === 0 ? 'top-1' : i === 1 ? 'top-2' : i === 2 ? 'top-3' : '';
+        const detailId = `score-detail-${boardKey}-${i}`;
+        html += `
         <div class="score-row ${cls}">
           <div class="rank">${u.rank}</div>
-          <div class="user-name"><button class="user-name-btn" type="button" onmouseenter="cancelHideScoreDetails('${detailId}'); showScoreDetails(this, '${detailId}')" onmouseleave="scheduleHideScoreDetails(this, '${detailId}')" ontouchstart="holdScoreDetails(this, '${detailId}', event)" ontouchend="releaseScoreDetails(this, '${detailId}', event)" ontouchcancel="releaseScoreDetails(this, '${detailId}', event)" aria-expanded="false">${u.username}</button></div>
+          <div class="user-name"><button class="user-name-btn" type="button" onmouseenter="if (window.matchMedia('(hover: hover)').matches) { cancelHideScoreDetails('${detailId}'); showScoreDetails(this, '${detailId}'); }" onmouseleave="if (window.matchMedia('(hover: hover)').matches) { scheduleHideScoreDetails(this, '${detailId}'); }" onclick="toggleScoreDetails(this, '${detailId}')" aria-expanded="false">${escapeHtml(u.username)}</button></div>
           <div class="score-val">${fmt(u.score)}</div>
           <div class="score-val">${u.days}</div>
           <div class="score-val">${fmt(u.avg)}</div>
@@ -1137,145 +2147,155 @@ function buildScoreboardHtml(scoreboard, totalLabel, boardKey) {
         <div id="${detailId}" class="score-detail-row" onmouseenter="cancelHideScoreDetails('${detailId}')" onmouseleave="hideScoreDetails(null, '${detailId}')">
           ${buildScoreDetailsHtml(u.username, u.totals)}
         </div>`;
-  });
+      });
 
-  return html;
-}
+      return html;
+    }
 
-const scoreDetailHoldTimers = new Map();
-const scoreDetailHideTimers = new Map();
+    const scoreDetailHideTimers = new Map();
 
-function showScoreDetails(button, detailId) {
-  const scoreboard = button.closest('.scoreboard');
-  if (!scoreboard) return;
+    function showScoreDetails(button, detailId) {
+      const scoreboard = button.closest('.scoreboard');
+      if (!scoreboard) return;
 
-  const detail = document.getElementById(detailId);
-  if (!detail) return;
+      const detail = document.getElementById(detailId);
+      if (!detail) return;
 
-  scoreboard.querySelectorAll('.score-detail-row').forEach(row => {
-    row.style.display = 'none';
-  });
-  scoreboard.querySelectorAll('.user-name-btn').forEach(btn => {
-    btn.setAttribute('aria-expanded', 'false');
-  });
-
-  detail.style.display = 'block';
-  button.setAttribute('aria-expanded', 'true');
-}
-
-function hideScoreDetails(button, detailId) {
-  const detail = document.getElementById(detailId);
-  if (!detail) return;
-  detail.style.display = 'none';
-  if (button) {
-    button.setAttribute('aria-expanded', 'false');
-  } else {
-    const scoreboard = detail.closest('.scoreboard');
-    if (scoreboard) {
+      scoreboard.querySelectorAll('.score-detail-row').forEach(row => {
+        row.style.display = 'none';
+      });
       scoreboard.querySelectorAll('.user-name-btn').forEach(btn => {
         btn.setAttribute('aria-expanded', 'false');
       });
+
+      detail.style.display = 'block';
+      button.setAttribute('aria-expanded', 'true');
     }
-  }
-}
 
-function scheduleHideScoreDetails(button, detailId) {
-  clearTimeout(scoreDetailHideTimers.get(detailId));
-  const timer = setTimeout(() => hideScoreDetails(button, detailId), 120);
-  scoreDetailHideTimers.set(detailId, timer);
-}
+    function hideScoreDetails(button, detailId) {
+      const detail = document.getElementById(detailId);
+      if (!detail) return;
+      detail.style.display = 'none';
+      if (button) {
+        button.setAttribute('aria-expanded', 'false');
+      } else {
+        const scoreboard = detail.closest('.scoreboard');
+        if (scoreboard) {
+          scoreboard.querySelectorAll('.user-name-btn').forEach(btn => {
+            btn.setAttribute('aria-expanded', 'false');
+          });
+        }
+      }
+    }
 
-function cancelHideScoreDetails(detailId) {
-  clearTimeout(scoreDetailHideTimers.get(detailId));
-  scoreDetailHideTimers.delete(detailId);
-}
+    function scheduleHideScoreDetails(button, detailId) {
+      clearTimeout(scoreDetailHideTimers.get(detailId));
+      const timer = setTimeout(() => hideScoreDetails(button, detailId), 120);
+      scoreDetailHideTimers.set(detailId, timer);
+    }
 
-function holdScoreDetails(button, detailId, event) {
-  if (event) event.preventDefault();
-  clearTimeout(scoreDetailHoldTimers.get(detailId));
-  const timer = setTimeout(() => showScoreDetails(button, detailId), 450);
-  scoreDetailHoldTimers.set(detailId, timer);
-}
+    function cancelHideScoreDetails(detailId) {
+      clearTimeout(scoreDetailHideTimers.get(detailId));
+      scoreDetailHideTimers.delete(detailId);
+    }
 
-function releaseScoreDetails(button, detailId, event) {
-  if (event) event.preventDefault();
-  clearTimeout(scoreDetailHoldTimers.get(detailId));
-  scoreDetailHoldTimers.delete(detailId);
-  hideScoreDetails(button, detailId);
-}
+    function toggleScoreDetails(button, detailId) {
+      const detail = document.getElementById(detailId);
+      if (!detail) return;
+      const isVisible = detail.style.display === 'block';
+      if (isVisible) {
+        hideScoreDetails(button, detailId);
+      } else {
+        showScoreDetails(button, detailId);
+      }
+    }
 
-function downloadButtonsHtml() {
-  return `
-    <div class="card download-cta">
-      <div class="section-title" style="margin:0 0 .75rem 0">Get the app</div>
-      <div class="download-actions">
-        <a class="btn btn-ghost" href="${DOWNLOAD_LINKS.apple}" target="_blank" rel="noopener"> Download for Apple</a>
-        <a class="btn btn-primary" href="${DOWNLOAD_LINKS.android}" target="_blank" rel="noopener">Android APK</a>
-      </div>
-    </div>`;
-}
 
-// ============================================================
-// USER VIEW
-// ============================================================
-async function renderUser() {
-  try {
-    // Fetch scoreboards
-    const championsData = await apiCall('/scoreboard?mode=champions');
-    const europaData = await apiCall('/scoreboard?mode=europa');
-    const conferenceData = await apiCall('/scoreboard?mode=conference');
-    const champions = championsData.scoreboard;
-    const europa = europaData.scoreboard;
-    const conference = conferenceData.scoreboard;
-    
-    // Fetch user checkins
-    const checkinsData = await apiCall('/checkins');
-    const checkins = checkinsData.checkins;
-    const allTimeData = await apiCall('/checkins?scope=all');
-    const allTimeCheckins = allTimeData.checkins;
-    
-    const todayKey = today();
-    const checkedIn = checkins.some(c => c.date === todayKey);
-    
-    // Calculate stats
-    const totalScore = checkins.reduce((sum, c) => sum + calcScoreFromEntry(c), 0);
-    const days = checkins.length;
-    const avg = days > 0 ? fmt(totalScore / days) : '0.00';
-    const best = checkins.reduce((max, c) => {
-      const s = calcScoreFromEntry(c);
-      return s > max ? s : max;
-    }, 0);
-    const totals = buildConsumptionTotals(checkins);
-    const allTimeTotals = buildConsumptionTotals(allTimeCheckins);
-    const combinedTotals = sumScoreboardTotals(champions);
-    
-    const championsHtml = buildScoreboardHtml(champions, 'Total 🍺eq', 'user-champions');
-    const europaHtml = buildScoreboardHtml(europa, 'Total 🍺eq', 'user-europa');
-    const conferenceHtml = buildScoreboardHtml(conference, 'Total 🚬', 'user-conference');
-    
-    let html = `
+    // ============================================================
+    // USER VIEW
+    // ============================================================
+    async function renderUser() {
+      try {
+        // Fetch scoreboards
+        const championsData = await apiCall('/scoreboard?mode=champions');
+        const europaData = await apiCall('/scoreboard?mode=europa');
+        const conferenceData = await apiCall('/scoreboard?mode=conference');
+        const champions = championsData.scoreboard;
+        userChampionsScoreboard = champions;
+        const europa = europaData.scoreboard;
+        const conference = conferenceData.scoreboard;
+        let quoteBlock = '';
+        const quoteData = await apiCall('/quotes/today');
+        quoteBlock = dailyQuoteHtml(quoteData.quote);
+        // Fetch announcements
+        let announcements = [];
+        try {
+          const annData = await apiCall('/announcements');
+          announcements = annData.announcements || [];
+        } catch (annErr) {
+          console.warn('Announcements unavailable:', annErr.message);
+        }
+        // Fetch user checkins
+        const checkinsData = await apiCall('/checkins');
+        const checkins = checkinsData.checkins;
+        const allTimeData = await apiCall('/checkins?scope=all');
+        const allTimeCheckins = allTimeData.checkins;
+
+        let photos = [];
+        try {
+          const photosData = await apiCall('/consumption-photos?limit=5&offset=0');
+          photos = photosData.photos || [];
+        } catch (photoErr) {
+          photos = [];
+          console.warn('Consumption photos unavailable:', photoErr.message);
+        }
+        loadedPhotosOffset = photos.length;
+        noMorePhotos = photos.length < 5;
+        isLoadingPhotos = false;
+
+        const todayKey = today();
+        const checkedIn = checkins.some(c => c.date === todayKey);
+
+        // Calculate stats
+        const totalScore = checkins.reduce((sum, c) => sum + calcScoreFromEntry(c), 0);
+        const days = checkins.length;
+        const avg = days > 0 ? fmt(totalScore / days) : '0.00';
+        const best = checkins.reduce((max, c) => {
+          const s = calcScoreFromEntry(c);
+          return s > max ? s : max;
+        }, 0);
+        const totals = buildConsumptionTotals(checkins);
+        const allTimeTotals = buildConsumptionTotals(allTimeCheckins);
+        const combinedTotals = sumScoreboardTotals(champions);
+
+        const championsHtml = buildScoreboardHtml(champions, 'Total 🍺eq', 'user-champions');
+        const europaHtml = buildScoreboardHtml(europa, 'Total 🍺eq', 'user-europa');
+        const conferenceHtml = buildScoreboardHtml(conference, 'Total 🚬', 'user-conference');
+
+        let html = `
       <div class="tabs">
         <button class="tab active" onclick="switchTab(this,'tab-score')">Champions League</button>
         <button class="tab" onclick="switchTab(this,'tab-europa')">Europa League</button>
         <button class="tab" onclick="switchTab(this,'tab-conference')">Conference League</button>
+        <button class="tab" onclick="switchTab(this,'tab-photos')">Feet pics only</button>
         <button class="tab" onclick="switchTab(this,'tab-history')">My History</button>
         <button class="tab" onclick="switchTab(this,'tab-stats')">Statistics</button>
+        <button class="tab" onclick="switchTab(this,'tab-achievements')">Achievements</button>
       </div>
 
       <div id="tab-score">`;
-    
-    const seasonStart = new Date('2026-06-11T00:00:00');
-    const announcementEnd = new Date(seasonStart);
-    announcementEnd.setDate(announcementEnd.getDate() + 7);
-    if (new Date() <= announcementEnd) {
-      html += `
-        <div class="announcement-banner">
-          <p>Training is almost done, get ready for ultimate drinking league starting on 11 june.</p>
-        </div>`;
-    }
 
-    if (!checkedIn) {
-      html += `
+        if (announcements.length > 0) {
+          announcements.forEach(ann => {
+            html += `
+          <div class="announcement-banner">
+            <p>${escapeHtml(ann.content)}</p>
+          </div>`;
+          });
+        }
+
+        if (!checkedIn) {
+          html += `
         <div class="checkin-banner">
           <div>
             <p>🎯 Daily check-in pending</p>
@@ -1283,9 +2303,19 @@ async function renderUser() {
           </div>
           <button class="btn btn-primary btn-sm" onclick="openCheckin()">Check in</button>
         </div>`;
-    }
-    
-    html += `
+        } else {
+          html += `
+        <div class="checkin-banner success">
+          <div>
+            <p>✅ Daily check-in complete</p>
+            <small>You can update today's intake here if needed.</small>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="openCheckin()">Update</button>
+        </div>`;
+        }
+
+        html += `
+      ${quoteBlock}
       <div class="summary-bar">
         <div class="summary-card"><div class="summary-label">Total 🍺 eq</div><div class="summary-val gold">${fmt(totalScore)}</div></div>
         <div class="summary-card"><div class="summary-label">Days logged</div><div class="summary-val">${days}</div></div>
@@ -1313,14 +2343,49 @@ async function renderUser() {
         </div>
       </div>
 
+      <div id="tab-photos" class="instagram-feed-tab" style="display:none; max-width: 480px; margin: 0 auto;">
+        <div class="section-title">Upload Photo</div>
+        <div class="card" style="padding: 1.25rem;">
+          <form id="photo-upload-form" onsubmit="event.preventDefault(); uploadConsumptionPhoto();" style="display:flex; flex-direction:column; gap:12px;">
+            <div class="upload-zone-wrapper">
+              <label for="cp-file" class="upload-label-zone">
+                <span class="upload-icon">📸</span>
+                <span class="upload-text-main">Tik om een foto te kiezen</span>
+                <span class="upload-text-sub">Camera of fotobibliotheek (JPG, PNG)</span>
+                
+                <img id="upload-preview" class="upload-preview-img" alt="Preview">
+              </label>
+              <button type="button" id="upload-clear-btn" class="upload-preview-clear" onclick="clearUploadPreview(event)">&times;</button>
+              
+              <input id="cp-file" name="photo" type="file" accept="image/*" class="hidden-file-input" onchange="previewUploadImage(this)" required>
+            </div>
+
+            <div class="field">
+              <label for="cp-caption">Onderschrift (Caption)</label>
+              <input id="cp-caption" name="caption" type="text" placeholder="Voeg een onderschrift toe..." autocomplete="off">
+            </div>
+
+            <div style="display:flex; gap:10px; align-items:center;">
+              <button class="btn btn-primary" type="submit">Uploaden</button>
+              <span id="cp-status" style="font-size:.85rem; color:#888"></span>
+            </div>
+          </form>
+        </div>
+        <div style="margin-top: 1.5rem;">
+          <div class="photo-feed-container">
+            ${consumptionPhotosHtml(photos)}
+          </div>
+        </div>
+      </div>
+
       <div id="tab-history" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
         <div class="section-title" style="margin:0">My History</div>
-        <button class="btn btn-primary btn-sm" onclick="openCheckin()">+ Check in today</button>
+        <button class="btn btn-primary btn-sm" onclick="openCheckin(dateKeyFromOffset(-1))">+ Check in yesterday</button>
       </div>
       ${(() => {
-        const monthStats = buildMonthlyStats(checkins);
-        return `
+            const monthStats = buildMonthlyStats(checkins);
+            return `
           <div class="card" style="margin-bottom:1rem">
             <div class="section-title" style="margin:0 0 .75rem 0">${monthStats.label} Stats</div>
             <div class="summary-bar" style="margin:0">
@@ -1333,10 +2398,10 @@ async function renderUser() {
               <div><b style="color:#e8c84a">Best day</b> ${monthStats.bestDay}</div>
             </div>
           </div>`;
-      })()}
+          })()}
       ${isLastWeekOfYear() ? (() => {
-        const wrapped = buildWrappedStats(checkins);
-        return `
+            const wrapped = buildWrappedStats(checkins);
+            return `
           <div class="card" style="margin-bottom:1rem">
             <div class="section-title" style="margin:0 0 .75rem 0">${wrapped.year} Wrapped</div>
             <div class="summary-bar" style="margin:0">
@@ -1350,7 +2415,7 @@ async function renderUser() {
               <div><b style="color:#e8c84a">Top item</b> ${wrapped.topItem}</div>
             </div>
           </div>`;
-      })() : ''}
+          })() : ''}
       <div class="card">
         <table class="history-table">
           <thead>
@@ -1359,28 +2424,36 @@ async function renderUser() {
             </tr>
           </thead>
           <tbody>`;
-    
-    const sorted = [...checkins].sort((a,b) => b.date.localeCompare(a.date));
-    if (sorted.length === 0) {
-      html += `<tr><td colspan="9" style="color:#555;text-align:center;padding:1.5rem">No check-ins yet.</td></tr>`;
-    } else {
-      const yesterdayKey = dateKeyFromOffset(-1);
-      const yearPrefix = `${currentYear()}-`;
-      sorted.forEach(c => {
-        const eq = fmt(calcScoreFromEntry(c));
-        const canEdit = c.date === yesterdayKey && yesterdayKey.startsWith(yearPrefix);
-        html += `<tr>
+
+        const sorted = [...checkins].sort((a, b) => b.date.localeCompare(a.date));
+        if (sorted.length === 0) {
+          html += `<tr><td colspan="9" style="color:#555;text-align:center;padding:1.5rem">No check-ins yet.</td></tr>`;
+        } else {
+          const yesterdayKey = dateKeyFromOffset(-1);
+          const yearPrefix = `${currentYear()}-`;
+          sorted.forEach(c => {
+            const eq = fmt(calcScoreFromEntry(c));
+            const canEdit = c.date === yesterdayKey && yesterdayKey.startsWith(yearPrefix);
+            html += `<tr>
           <td>${c.date}</td>
           <td>${c.nb}</td><td>${c.sb}</td><td>${c.sh}</td><td>${c.co}</td><td>${c.wi || 0}</td><td>${c.jo}</td>
           <td class="gold">${eq}</td>
           <td>${canEdit ? `<button class="btn btn-ghost btn-sm" onclick="openCheckin('${c.date}')">Edit</button>` : ''}</td>
         </tr>`;
-      });
-    }
-    
-    html += `</tbody></table></div></div>
+          });
+        }
+
+        html += `</tbody></table></div></div>
 
       <div id="tab-stats" style="display:none">
+        <div class="section-title">Consumption Heatmap</div>
+        <div id="heatmap-placeholder" style="margin-bottom:1.5rem"></div>
+
+        <div class="section-title">If you were a real man, you would need:</div>
+        <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;" id="user-catchup-container">
+          <!-- Populated dynamically by calculateUserCatchup() -->
+        </div>
+
         <div class="section-title">Consumption Overview</div>
         <div class="card">
           <table class="history-table">
@@ -1429,71 +2502,140 @@ async function renderUser() {
             </tbody>
           </table>
         </div>
+        <div class="card" style="margin-top:1rem">
+          <div class="section-title" style="margin:0 0 .75rem 0">Test Notifications</div>
+          <p style="font-size:0.85rem;color:#888;margin-bottom:1rem">Ensure you have allowed notifications in your browser, then trigger a test push:</p>
+          <button class="btn btn-primary btn-sm" onclick="sendTestPush()">Send Test Push</button>
+        </div>
+      </div>
+      
+      <div id="tab-achievements" style="display:none">
+        ${buildAchievementsHtml(allTimeTotals)}
       </div>`;
 
-    document.getElementById('main-content').innerHTML = html;
-  } catch (err) {
-    showToast(`Error: ${err.message}`);
-  }
-}
+        document.getElementById('main-content').innerHTML = html;
+        loadUserHeatmap(currentUser.username);
+        calculateUserCatchup();
 
-// ============================================================
-// ADMIN VIEW
-// ============================================================
-async function renderAdmin() {
-  try {
-    const usersData = await apiCall('/users');
-    const users = usersData.users;
-    
-    const championsData = await apiCall('/scoreboard?mode=champions');
-    const europaData = await apiCall('/scoreboard?mode=europa');
-    const conferenceData = await apiCall('/scoreboard?mode=conference');
-    const champions = championsData.scoreboard;
-    const europa = europaData.scoreboard;
-    const conference = conferenceData.scoreboard;
-    let quoteBlock = '';
-    try {
-      const quoteData = await apiCall('/quotes/today');
-      quoteBlock = dailyQuoteHtml(quoteData.quote);
-    } catch (quoteErr) {
-      quoteBlock = '';
-      console.warn('Daily quote unavailable:', quoteErr.message);
+        // Restore active tab if it exists
+        if (activeTabId) {
+          const tabBtn = Array.from(document.querySelectorAll('.tab')).find(btn => {
+            const onclickAttr = btn.getAttribute('onclick') || '';
+            return onclickAttr.includes(`'${activeTabId}'`) || onclickAttr.includes(`"${activeTabId}"`);
+          });
+          if (tabBtn) {
+            switchTab(tabBtn, activeTabId);
+          }
+        }
+        if (activeTabId === 'tab-photos' || activeTabId === 'atab-photos') {
+          setTimeout(checkScrollAndLoad, 50);
+        }
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      }
     }
-    
-    const championsHtml = buildScoreboardHtml(champions, 'Total 🍺eq', 'admin-champions');
-    const europaHtml = buildScoreboardHtml(europa, 'Total 🍺eq', 'admin-europa');
-    const conferenceHtml = buildScoreboardHtml(conference, 'Total 🚬', 'admin-conference');
-    
-    let userListHtml = '';
-    if (users.length === 0) {
-      userListHtml = '<p style="color:#555;font-size:.875rem">No users yet. Add one →</p>';
-    } else {
-      users.forEach(u => {
-        const mustChangePw = u.must_change_pw ? '<span style="font-size:.7rem;color:#e8a;margin-left:4px">needs pw change</span>' : '';
-        userListHtml += `
+
+    // ============================================================
+    // ADMIN VIEW
+    // ============================================================
+    async function renderAdmin() {
+      try {
+        const usersData = await apiCall('/users');
+        const users = usersData.users;
+
+        const championsData = await apiCall('/scoreboard?mode=champions');
+        const europaData = await apiCall('/scoreboard?mode=europa');
+        const conferenceData = await apiCall('/scoreboard?mode=conference');
+        const champions = championsData.scoreboard;
+        adminChampionsScoreboard = champions;
+        const europa = europaData.scoreboard;
+        const conference = conferenceData.scoreboard;
+
+        let allTimeCheckins = [];
+        try {
+          const checkinsData = await apiCall('/checkins');
+          allTimeCheckins = checkinsData.checkins || [];
+        } catch (checkinErr) {
+          console.warn('Checkins unavailable:', checkinErr.message);
+        }
+        const allTimeTotals = buildConsumptionTotals(allTimeCheckins);
+        let photos = [];
+        try {
+          const photosData = await apiCall('/consumption-photos?limit=5&offset=0');
+          photos = photosData.photos || [];
+        } catch (photoErr) {
+          photos = [];
+          console.warn('Consumption photos unavailable:', photoErr.message);
+        }
+        loadedPhotosOffset = photos.length;
+        noMorePhotos = photos.length < 5;
+        isLoadingPhotos = false;
+        let quoteBlock = '';
+        try {
+          const quoteData = await apiCall('/quotes/today');
+          quoteBlock = dailyQuoteHtml(quoteData.quote);
+        } catch (quoteErr) {
+          quoteBlock = '';
+          console.warn('Daily quote unavailable:', quoteErr.message);
+        }
+        let announcements = [];
+        try {
+          const annData = await apiCall('/announcements');
+          announcements = annData.announcements || [];
+        } catch (annErr) {
+          console.warn('Announcements unavailable:', annErr.message);
+        }
+
+        const championsHtml = buildScoreboardHtml(champions, 'Total 🍺eq', 'admin-champions');
+        const europaHtml = buildScoreboardHtml(europa, 'Total 🍺eq', 'admin-europa');
+        const conferenceHtml = buildScoreboardHtml(conference, 'Total 🚬', 'admin-conference');
+
+        let userListHtml = '';
+        if (users.length === 0) {
+          userListHtml = '<p style="color:#555;font-size:.875rem">No users yet. Add one →</p>';
+        } else {
+          users.forEach(u => {
+            const mustChangePw = u.must_change_pw ? '<span style="font-size:.7rem;color:#e8a;margin-left:4px">needs pw change</span>' : '';
+            userListHtml += `
           <div class="user-list-item">
             <div>
-              <div class="name">${u.username} ${mustChangePw}</div>
+              <div class="name">${escapeHtml(u.username)} ${mustChangePw}</div>
               <div class="meta">${u.days} days logged</div>
             </div>
             <div class="actions">
-              <button class="btn btn-ghost btn-sm" onclick="openResetPw('${u.username}')">Reset PW</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.username}')">Delete</button>
+              <button class="btn btn-ghost btn-sm" data-username="${escapeHtml(u.username)}" onclick="openResetPw(this.dataset.username)">Reset PW</button>
+              <button class="btn btn-danger btn-sm" data-username="${escapeHtml(u.username)}" onclick="deleteUser(this.dataset.username)">Delete</button>
             </div>
           </div>`;
-      });
-    }
-    
-    const html = `
+          });
+        }
+
+        const html = `
       <div class="tabs">
         <button class="tab active" onclick="switchTab(this,'atab-score')">Champions League</button>
         <button class="tab" onclick="switchTab(this,'atab-europa')">Europa League</button>
         <button class="tab" onclick="switchTab(this,'atab-conference')">Conference League</button>
+        <button class="tab" onclick="switchTab(this,'atab-photos')">Feet pics only</button>
+        <button class="tab" onclick="switchTab(this,'atab-italy')">Italy 26</button>
         <button class="tab" onclick="switchTab(this,'atab-users')">Manage Users</button>
+        <button class="tab" onclick="switchTab(this,'atab-stats')">Statistics (Test)</button>
+        <button class="tab" onclick="switchTab(this,'atab-achievements')">Achievements</button>
       </div>
 
       <div id="atab-score">
         ${quoteBlock}
+        ${(() => {
+            let annHtml = '';
+            if (announcements.length > 0) {
+              announcements.forEach(ann => {
+                annHtml += `
+                <div class="announcement-banner">
+                  <p>${escapeHtml(ann.content)}</p>
+                </div>`;
+              });
+            }
+            return annHtml;
+          })()}
         <div class="section-title">Champions League</div>
         <div class="scoreboard-scroll">
           <div class="scoreboard">${championsHtml}</div>
@@ -1514,6 +2656,49 @@ async function renderAdmin() {
           <div class="scoreboard">${conferenceHtml}</div>
         </div>
       </div>
+
+      <div id="atab-photos" class="instagram-feed-tab" style="display:none; max-width: 480px; margin: 0 auto;">
+        <div class="section-title">Upload Photo</div>
+        <div class="card" style="padding: 1.25rem;">
+          <form id="photo-upload-form" onsubmit="event.preventDefault(); uploadConsumptionPhoto();" style="display:flex; flex-direction:column; gap:12px;">
+            <div class="upload-zone-wrapper">
+              <label for="cp-file" class="upload-label-zone">
+                <span class="upload-icon">📸</span>
+                <span class="upload-text-main">Tik om een foto te kiezen</span>
+                <span class="upload-text-sub">Camera of fotobibliotheek (JPG, PNG)</span>
+                
+                <img id="upload-preview" class="upload-preview-img" alt="Preview">
+              </label>
+              <button type="button" id="upload-clear-btn" class="upload-preview-clear" onclick="clearUploadPreview(event)">&times;</button>
+              
+              <input id="cp-file" name="photo" type="file" accept="image/*" class="hidden-file-input" onchange="previewUploadImage(this)" required>
+            </div>
+
+            <div class="field">
+              <label for="cp-caption">Onderschrift (Caption)</label>
+              <input id="cp-caption" name="caption" type="text" placeholder="Voeg een onderschrift toe..." autocomplete="off">
+            </div>
+
+            <div style="display:flex; gap:10px; align-items:center;">
+              <button class="btn btn-primary" type="submit">Uploaden</button>
+              <span id="cp-status" style="font-size:.85rem; color:#888"></span>
+            </div>
+          </form>
+        </div>
+        <div style="margin-top: 1.5rem;">
+          <div class="photo-feed-container">
+            ${consumptionPhotosHtml(photos)}
+          </div>
+        </div>
+      </div>
+
+      <div id="atab-italy" style="display:none">
+        <div class="section-title">Italië September '26</div>
+        <div id="italy-content-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+
 
       <div id="atab-users" style="display:none">
         <div class="admin-grid">
@@ -1542,269 +2727,1266 @@ async function renderAdmin() {
             </div>
           </div>
         </div>
+
+        <div class="card" style="margin-top:1.5rem">
+          <div class="section-title" style="margin:0 0 .75rem 0">Announcements</div>
+          <form id="announcement-form" onsubmit="event.preventDefault(); addAnnouncement();" style="display:flex; flex-direction:column; gap:10px; margin-bottom:1.5rem">
+            <div class="field">
+              <label>New Announcement Content</label>
+              <textarea id="ann-content" placeholder="Enter announcement text..." required style="width:100%; min-height:80px; background:#111; border:1px solid #2a2828; color:#fff; border-radius:6px; padding:8px; font-family:inherit; resize:vertical;"></textarea>
+            </div>
+            <div>
+              <button class="btn btn-primary" type="submit">Post Announcement</button>
+            </div>
+          </form>
+          <div style="display:flex; flex-direction:column; gap:8px">
+            ${(() => {
+            let annListHtml = '';
+            if (announcements.length === 0) {
+              annListHtml = '<p style="color:#555;font-size:.875rem">No announcements posted yet.</p>';
+            } else {
+              announcements.forEach(ann => {
+                annListHtml += `
+                    <div class="user-list-item">
+                      <div style="flex:1; margin-right:1rem; word-break:break-word;">
+                        <div style="font-size:0.9rem; color:#fff">${escapeHtml(ann.content)}</div>
+                        <div class="meta" style="font-size:0.75rem; color:#666; margin-top:4px">${ann.created_at}</div>
+                      </div>
+                      <div class="actions">
+                        <button class="btn btn-danger btn-sm" onclick="deleteAnnouncement(${ann.id})">Delete</button>
+                      </div>
+                    </div>`;
+              });
+            }
+            return annListHtml;
+          })()}
+          </div>
+        </div>
       </div>
-      ${downloadButtonsHtml()}`;
-    
-    document.getElementById('main-content').innerHTML = html;
-  } catch (err) {
-    showToast(`Error: ${err.message}`);
-  }
-}
 
-// ============================================================
-// TABS
-// ============================================================
-function switchTab(el, targetId) {
-  const tabArea = el.closest('.tabs');
-  tabArea.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
+      <div id="atab-stats" style="display:none">
+        <div class="section-title">If you were a real man, you would need: (Test)</div>
+        <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+          <label for="catchup-user-select" style="display:block; margin-bottom: 8px; font-weight: 500;">Select User to calculate catch-up for:</label>
+          <select id="catchup-user-select" onchange="calculateCatchup()" style="width: 100%; padding: 8px; border-radius: 6px; background: #222; color: #fff; border: 1px solid #444; margin-bottom: 1rem;">
+            ${champions.map(u => `<option value="${escapeHtml(u.username)}">${escapeHtml(u.username)} (Rank ${u.rank}, Score ${u.score})</option>`).join('')}
+          </select>
+          <div id="catchup-result-container">
+            <!-- Populated dynamically by calculateCatchup() -->
+          </div>
+        </div>
+      </div>
+      
+      <div id="atab-achievements" style="display:none">
+        ${buildAchievementsHtml(allTimeTotals)}
+      </div>`;
 
-  let sibling = tabArea.nextElementSibling;
-  while (sibling) {
-    if (sibling.id && (sibling.id.startsWith('tab') || sibling.id.startsWith('atab'))) {
-      sibling.style.display = sibling.id === targetId ? 'block' : 'none';
+        document.getElementById('main-content').innerHTML = html;
+        loadItalyInfo();
+        calculateCatchup();
+
+        // Restore active tab if it exists
+        if (activeTabId) {
+          const tabBtn = Array.from(document.querySelectorAll('.tab')).find(btn => {
+            const onclickAttr = btn.getAttribute('onclick') || '';
+            return onclickAttr.includes(`'${activeTabId}'`) || onclickAttr.includes(`"${activeTabId}"`);
+          });
+          if (tabBtn) {
+            switchTab(tabBtn, activeTabId);
+          }
+        }
+        if (activeTabId === 'tab-photos' || activeTabId === 'atab-photos') {
+          setTimeout(checkScrollAndLoad, 50);
+        }
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      }
     }
-    sibling = sibling.nextElementSibling;
-  }
-}
 
-// ============================================================
-// MODALS
-// ============================================================
-function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-async function doAddUser() {
-  const username = document.getElementById('nu-user').value.trim().toLowerCase();
-  const password = document.getElementById('nu-pass').value;
-  const err = document.getElementById('nu-err');
-  
-  if (!username || username.includes(' ')) {
-    err.textContent = 'Username required, no spaces.';
-    return;
-  }
-  
-  if (password.length < 3) {
-    err.textContent = 'Password too short.';
-    return;
-  }
-  
-  try {
-    await apiCall('/users/add', 'POST', { username, password });
-    err.textContent = '';
-    document.getElementById('nu-user').value = '';
-    document.getElementById('nu-pass').value = '';
-    closeModal('add-user-modal');
-    showToast(`User "${username}" created!`);
-    renderAdmin();
-  } catch (e) {
-    err.textContent = e.message;
-  }
-}
 
-let resetTarget = null;
+    function renderItalyInfo(items) {
+      const categories = {
+        vervoer: { title: "Vervoer & Reis", icon: "✈️", items: [] },
+        huisje: { title: "Huisje (Lodging)", icon: "🏡", items: [] },
+        todo: { title: "Te Doen & Feesten", icon: "🎉", items: [] },
+        snorkelen: { title: "Snorkelen Spots", icon: "🤿", items: [] },
+        diving: { title: "Cliff Diving", icon: "🧗", items: [] },
+        special: { title: "Speciale Activiteiten", icon: "🏁", items: [] }
+      };
 
-function openResetPw(username) {
-  resetTarget = username;
-  document.getElementById('reset-target-name').textContent = username;
-  document.getElementById('rp-pass').value = '';
-  document.getElementById('rp-err').textContent = '';
-  openModal('reset-pw-modal');
-}
-
-async function doResetPw() {
-  const pw = document.getElementById('rp-pass').value;
-  if (pw.length < 3) {
-    document.getElementById('rp-err').textContent = 'Too short.';
-    return;
-  }
-  
-  try {
-    await apiCall('/users/reset-password', 'POST', { username: resetTarget, password: pw });
-    closeModal('reset-pw-modal');
-    showToast(`Password reset for "${resetTarget}"`);
-    renderAdmin();
-  } catch (e) {
-    document.getElementById('rp-err').textContent = e.message;
-  }
-}
-
-async function deleteUser(username) {
-  if (!confirm(`Delete user "${username}"? All their data will be lost.`)) return;
-  
-  try {
-    await apiCall('/users/delete', 'POST', { username });
-    showToast(`User "${username}" deleted.`);
-    renderAdmin();
-  } catch (e) {
-    showToast(`Error: ${e.message}`);
-  }
-}
-
-// ============================================================
-// DAILY CHECK-IN
-// ============================================================
-const counts = { nb: 0, sb: 0, sh: 0, co: 0, wi: 0, jo: 0 };
-let checkinTargetDate = null;
-
-function adj(key, delta) {
-  counts[key] = Math.max(0, counts[key] + delta);
-  document.getElementById('cnt-' + key).textContent = counts[key];
-  updateEquiv();
-}
-
-function updateEquiv() {
-  const eq = counts.nb * MULT.nb + counts.sb * MULT.sb + counts.sh * MULT.sh + counts.co * MULT.co + counts.wi * MULT.wi + counts.jo * MULT.jo;
-  document.getElementById('checkin-equiv').textContent = `= ${eq.toFixed(2)} standard beer equivalents`;
-}
-
-async function openCheckin(dateKey = null) {
-  try {
-    const checkinsData = await apiCall('/checkins');
-    const checkins = checkinsData.checkins;
-
-    const targetDate = dateKey || today();
-    const existing = checkins.find(c => c.date === targetDate);
-    checkinTargetDate = targetDate;
-
-    Object.keys(counts).forEach(k => {
-      counts[k] = existing && typeof existing[k] === 'number' ? existing[k] : 0;
-    });
-    ['nb','sb','sh','co','wi','jo'].forEach(k => { document.getElementById('cnt-' + k).textContent = counts[k]; });
-    updateEquiv();
-
-    const label = formatDateLabel(targetDate);
-    document.getElementById('checkin-modal-date').textContent = `${label} — ${existing ? 'updating existing entry' : 'new entry'}`;
-    openModal('checkin-modal');
-  } catch (err) {
-    showToast(`Error: ${err.message}`);
-  }
-}
-
-async function submitCheckin() {
-  try {
-    const payload = { ...counts, date: checkinTargetDate || today() };
-    await apiCall('/checkins', 'POST', payload);
-    closeModal('checkin-modal');
-    showToast('Check-in saved! 🍺');
-    renderUser();
-  } catch (err) {
-    showToast(`Error: ${err.message}`);
-  }
-}
-
-// ============================================================
-// TOAST
-// ============================================================
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
-}
-
-// ============================================================
-// KEY BINDINGS
-// ============================================================
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    if (document.getElementById('login-view').style.display !== 'none') doLogin();
-    if (document.getElementById('changepw-view').style.display !== 'none') doChangePw();
-  }
-  if (e.key === 'Escape') {
-    ['add-user-modal','reset-pw-modal','checkin-modal'].forEach(id => closeModal(id));
-  }
-});
-
-// ============================================================
-// BOOT
-// ============================================================
-let swRegistration = null;
-let reminderTimeoutId = null;
-let reminderIntervalId = null;
-
-function isStandaloneMode() {
-  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-}
-
-function scheduleDailyReminder(reg) {
-  if (!reg || Notification.permission !== 'granted') return;
-
-  if (reminderTimeoutId) clearTimeout(reminderTimeoutId);
-  if (reminderIntervalId) clearInterval(reminderIntervalId);
-
-  const now = new Date();
-  const next = new Date();
-  next.setHours(21, 0, 0, 0);
-  if (next <= now) next.setDate(next.getDate() + 1);
-
-  const msUntilNext = next.getTime() - now.getTime();
-  reminderTimeoutId = setTimeout(() => {
-    reg.showNotification('did you drink yet?', {
-      tag: 'daily-9pm',
-      renotify: false
-    });
-    reminderIntervalId = setInterval(() => {
-      reg.showNotification('did you drink yet?', {
-        tag: 'daily-9pm',
-        renotify: false
+      // Group items by category
+      items.forEach(item => {
+        if (categories[item.category]) {
+          categories[item.category].items.push(item);
+        }
       });
-    }, 24 * 60 * 60 * 1000);
-  }, msUntilNext);
-}
 
-function initDailyReminder() {
-  if (!swRegistration || !isStandaloneMode() || !('Notification' in window)) return;
+      let html = '';
+      for (const [catKey, cat] of Object.entries(categories)) {
+        let itemsHtml = '';
+        if (cat.items.length === 0 && addingItalyCategory !== catKey) {
+          itemsHtml = '<p style="color:#555;font-size:0.85rem;font-style:italic;">Geen items in deze categorie.</p>';
+        } else {
+          cat.items.forEach((item, index) => {
+            if (editingItalyItemId === item.id) {
+              // Edit mode form
+              itemsHtml += `
+                <div style="display:flex; flex-direction:column; gap:8px; background:#111012; padding:10px; border-radius:8px; border:1px solid #e8c84a44; margin-bottom:10px; width:100%;">
+                  <div class="field">
+                    <label style="font-size:0.75rem; color:#888;">Titel (Optioneel)</label>
+                    <input id="edit-ii-title-${item.id}" type="text" value="${escapeHtml(item.title || '')}" placeholder="Bijv. Heenvlucht" style="width:100%;">
+                  </div>
+                  <div class="field">
+                    <label style="font-size:0.75rem; color:#888;">Details (Inhoud)</label>
+                    <textarea id="edit-ii-content-${item.id}" placeholder="Details..." required style="min-height:60px; width:100%;">${escapeHtml(item.content)}</textarea>
+                  </div>
+                  <div class="field">
+                    <label style="font-size:0.75rem; color:#888;">Link (Optioneel)</label>
+                    <input id="edit-ii-link-${item.id}" type="url" value="${escapeHtml(item.link || '')}" placeholder="Bijv. Maps URL" style="width:100%;">
+                  </div>
+                  <div style="display:flex; gap:8px; justify-content:flex-end;">
+                    <button class="btn btn-ghost btn-sm" onclick="setEditingItalyItem(null)">Cancel</button>
+                    <button class="btn btn-primary btn-sm" onclick="saveItalyItem(${item.id})">Save</button>
+                  </div>
+                </div>
+              `;
+            } else {
+              // Display mode
+              const hasLink = item.link ? `<br><a href="${escapeHtml(item.link)}" target="_blank" style="color:#e8c84a; text-decoration:underline; font-size:0.8rem">Link / Kaart</a>` : '';
+              const titleHtml = item.title ? `<strong style="color:#e8c84a">${escapeHtml(item.title)}: </strong>` : '• ';
+              const contentFormatted = escapeHtml(item.content).replace(/\n/g, '<br>');
 
-  if (Notification.permission === 'granted') {
-    scheduleDailyReminder(swRegistration);
-    return;
-  }
+              itemsHtml += `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; padding: 6px 0; border-radius:6px; transition: background 0.15s;" class="italy-hover-row">
+                  <div style="flex:1;">
+                    ${titleHtml}
+                    <span>${contentFormatted}</span>
+                    ${hasLink}
+                  </div>
+                  <div style="display:flex; gap:4px; flex-shrink:0; margin-top:2px;">
+                    <button class="btn btn-ghost btn-sm" style="padding:2px 6px; font-size:0.75rem;" onclick="setEditingItalyItem(${item.id})">✏️</button>
+                    <button class="btn btn-danger btn-sm" style="padding:2px 6px; font-size:0.75rem;" onclick="deleteItalyInfoItem(${item.id})">❌</button>
+                  </div>
+                </div>
+                ${index < cat.items.length - 1 ? '<hr style="border:0; border-top:1px solid #2a2828; margin: 4px 0;">' : ''}
+              `;
+            }
+          });
+        }
 
-  if (Notification.permission === 'default') {
-    Notification.requestPermission().then(result => {
-      if (result === 'granted') scheduleDailyReminder(swRegistration);
-    });
-  }
-}
+        // Render inline add form at the bottom if active
+        if (addingItalyCategory === catKey) {
+          itemsHtml += `
+            <div style="display:flex; flex-direction:column; gap:8px; background:#111012; padding:10px; border-radius:8px; border:1px solid #e8c84a44; margin-top:10px; width:100%;">
+              <div class="field">
+                <label style="font-size:0.75rem; color:#888;">Titel (Optioneel)</label>
+                <input id="add-ii-title-${catKey}" type="text" placeholder="Bijv. Nieuw item" style="width:100%;">
+              </div>
+              <div class="field">
+                <label style="font-size:0.75rem; color:#888;">Details (Inhoud)</label>
+                <textarea id="add-ii-content-${catKey}" placeholder="Details..." required style="min-height:60px; width:100%;"></textarea>
+              </div>
+              <div class="field">
+                <label style="font-size:0.75rem; color:#888;">Link (Optioneel)</label>
+                <input id="add-ii-link-${catKey}" type="url" placeholder="Bijv. Website URL" style="width:100%;">
+              </div>
+              <div style="display:flex; gap:8px; justify-content:flex-end;">
+                <button class="btn btn-ghost btn-sm" onclick="setAddingItalyCategory(null)">Cancel</button>
+                <button class="btn btn-primary btn-sm" onclick="saveNewItalyItem('${catKey}')">Save</button>
+              </div>
+            </div>
+          `;
+        } else {
+          itemsHtml += `
+            <button class="btn btn-ghost btn-sm" style="width:100%; border-style:dashed; border-color:#444; margin-top:12px; font-size:0.8rem;" onclick="setAddingItalyCategory('${catKey}')">
+              + Voeg item toe
+            </button>
+          `;
+        }
 
+        html += `
+          <div class="card" style="border-color: #e8c84a44;">
+            <div style="display:flex; align-items:center; gap: 8px; margin-bottom: 12px;">
+              <span style="font-size: 1.3rem;">${cat.icon}</span>
+              <h3 style="font-family:'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 1px; color: #e8c84a; margin:0;">${cat.title}</h3>
+            </div>
+            <div style="display:flex; flex-direction:column; gap: 10px; font-size:0.9rem; line-height:1.5;">
+              ${itemsHtml}
+            </div>
+          </div>
+        `;
+      }
 
-async function bootstrap() {
-  try {
-    const data = await apiCall('/auth/me');
-    currentUser = data.user;
-
-    if (currentUser.must_change_pw) {
-      show('changepw-view');
-      return;
+      const gridEl = document.getElementById('italy-content-grid');
+      if (gridEl) {
+        gridEl.innerHTML = html;
+      }
     }
 
-    enterApp();
-    initDailyReminder();
-  } catch (err) {
-    currentUser = null;
-    show('login-view');
-  }
-}
+    async function loadItalyInfo() {
+      try {
+        const data = await apiCall('/italy-info');
+        renderItalyInfo(data.items || []);
+      } catch (err) {
+        console.error('Error loading Italy info:', err);
+      }
+    }
 
-bootstrap();
+    function setEditingItalyItem(id) {
+      editingItalyItemId = id;
+      addingItalyCategory = null;
+      loadItalyInfo();
+    }
 
-// ============================================================
-// PWA SERVICE WORKER REGISTRATION
-// ============================================================
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js').then(reg => {
-      swRegistration = reg;
-      initDailyReminder();
-      console.log('Service Worker registered successfully', reg);
-    }).catch(err => {
-      console.log('Service Worker registration failed:', err);
+    function setAddingItalyCategory(category) {
+      addingItalyCategory = category;
+      editingItalyItemId = null;
+      loadItalyInfo();
+    }
+
+    async function saveItalyItem(id) {
+      const title = document.getElementById(`edit-ii-title-${id}`).value.trim();
+      const content = document.getElementById(`edit-ii-content-${id}`).value.trim();
+      const link = document.getElementById(`edit-ii-link-${id}`).value.trim();
+
+      if (!content) {
+        showToast('Details zijn verplicht.');
+        return;
+      }
+
+      try {
+        await apiCall(`/italy-info/${id}`, 'PUT', { title, content, link });
+        showToast('Item bijgewerkt!');
+        editingItalyItemId = null;
+        loadItalyInfo();
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      }
+    }
+
+    async function saveNewItalyItem(category) {
+      const title = document.getElementById(`add-ii-title-${category}`).value.trim();
+      const content = document.getElementById(`add-ii-content-${category}`).value.trim();
+      const link = document.getElementById(`add-ii-link-${category}`).value.trim();
+
+      if (!content) {
+        showToast('Details zijn verplicht.');
+        return;
+      }
+
+      try {
+        await apiCall('/italy-info', 'POST', { category, title, content, link });
+        showToast('Nieuw item toegevoegd!');
+        addingItalyCategory = null;
+        loadItalyInfo();
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      }
+    }
+
+    async function deleteItalyInfoItem(id) {
+      if (!confirm('Dit item verwijderen?')) return;
+      try {
+        await apiCall(`/italy-info/${id}`, 'DELETE');
+        showToast('Item verwijderd.');
+        loadItalyInfo();
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      }
+    }
+
+    function previewUploadImage(input) {
+      const preview = document.getElementById('upload-preview');
+      const clearBtn = document.getElementById('upload-clear-btn');
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+          clearBtn.style.display = 'flex';
+        };
+        reader.readAsDataURL(input.files[0]);
+      } else {
+        preview.src = '';
+        preview.style.display = 'none';
+        clearBtn.style.display = 'none';
+      }
+    }
+
+    function clearUploadPreview(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      const fileInput = document.getElementById('cp-file');
+      const preview = document.getElementById('upload-preview');
+      const clearBtn = document.getElementById('upload-clear-btn');
+      if (fileInput) fileInput.value = '';
+      if (preview) {
+        preview.src = '';
+        preview.style.display = 'none';
+      }
+      if (clearBtn) clearBtn.style.display = 'none';
+    }
+
+    async function uploadConsumptionPhoto() {
+      const statusEl = document.getElementById('cp-status');
+      const form = document.getElementById('photo-upload-form');
+      const fileInput = document.getElementById('cp-file');
+      const captionInput = document.getElementById('cp-caption');
+
+      if (!fileInput.files || fileInput.files.length === 0) {
+        statusEl.textContent = 'Choose an image first.';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('photo', fileInput.files[0]);
+      if (captionInput) {
+        formData.append('caption', captionInput.value.trim());
+      }
+
+      statusEl.textContent = 'Uploading...';
+
+      try {
+        const response = await fetch(`${API_BASE}/consumption-photos`, {
+          method: 'POST',
+          credentials: 'include',
+          body: formData
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || `HTTP ${response.status}`);
+        }
+
+        statusEl.textContent = 'Photo uploaded.';
+        form.reset();
+        clearUploadPreview();
+        if (currentUser && currentUser.role === 'admin') {
+          renderAdmin();
+        } else {
+          renderUser();
+        }
+      } catch (err) {
+        statusEl.textContent = err.message;
+      }
+    }
+
+    async function deleteConsumptionPhoto(photoId) {
+      if (!confirm('Delete this photo?')) {
+        return;
+      }
+
+      try {
+        await apiCall(`/consumption-photos/${photoId}`, 'DELETE');
+        showToast('Photo deleted.');
+        if (currentUser && currentUser.role === 'admin') {
+          renderAdmin();
+        } else {
+          renderUser();
+        }
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      }
+    }
+
+    async function likePhoto(button, photoId, event) {
+      if (button.disabled) return;
+      button.disabled = true;
+
+      const clientX = event.clientX;
+      const clientY = event.clientY;
+      const isAlreadyLiked = button.classList.contains('liked');
+
+      // Local optimistic update for immediate tactile feedback
+      if (!isAlreadyLiked) {
+        button.classList.add('animating');
+        button.addEventListener('animationend', () => {
+          button.classList.remove('animating');
+        }, { once: true });
+        spawnBeerBottlesAnimation(clientX, clientY);
+      }
+
+      try {
+        const data = await apiCall(`/consumption-photos/${photoId}/like`, 'POST');
+        
+        // Update emoji inside button
+        const emojiEl = button.querySelector('.like-emoji');
+        if (emojiEl) {
+          emojiEl.textContent = data.liked_by_me ? '🍻' : '🍺';
+        }
+
+        // Toggle liked class based on backend response
+        if (data.liked_by_me) {
+          button.classList.add('liked');
+        } else {
+          button.classList.remove('liked');
+        }
+
+        // Update likes count text
+        const card = button.closest('.ig-card');
+        if (card) {
+          const countEl = card.querySelector('.ig-likes-count');
+          if (countEl) {
+            countEl.textContent = `${data.likes_count} ${data.likes_count === 1 ? 'like' : 'likes'}`;
+          }
+        }
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    function spawnBeerBottlesAnimation(x, y) {
+      if (!x && !y) {
+        x = window.innerWidth / 2;
+        y = window.innerHeight / 2;
+      }
+
+      const emojis = ['🍾', '🍺', '🍻'];
+      const numEmojis = 12;
+
+      for (let i = 0; i < numEmojis; i++) {
+        const emoji = document.createElement('div');
+        emoji.className = 'floating-emoji';
+        emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+        // Randomize spawn offset slightly
+        const spawnX = x + (Math.random() - 0.5) * 15;
+        const spawnY = y + (Math.random() - 0.5) * 15;
+
+        emoji.style.left = `${spawnX}px`;
+        emoji.style.top = `${spawnY}px`;
+
+        // Target random direction upward (angles between roughly -60 and 60 degrees from vertical)
+        const angle = (Math.random() - 0.5) * (Math.PI / 1.5);
+        const distance = 80 + Math.random() * 100;
+
+        const tx = Math.sin(angle) * distance;
+        const ty = -Math.cos(angle) * distance; // negative is up
+
+        const scale = 0.5 + Math.random() * 0.8;
+        const rot = (Math.random() - 0.5) * 720;
+        const duration = 0.8 + Math.random() * 0.6;
+
+        emoji.style.setProperty('--tx', `${tx}px`);
+        emoji.style.setProperty('--ty', `${ty}px`);
+        emoji.style.setProperty('--scale', scale);
+        emoji.style.setProperty('--rot', `${rot}deg`);
+        emoji.style.animationDuration = `${duration}s`;
+
+        document.body.appendChild(emoji);
+
+        emoji.addEventListener('animationend', () => {
+          emoji.remove();
+        });
+      }
+    }
+
+    // ============================================================
+    // INFINITE SCROLL / PAGINATION FOR PHOTOS
+    // ============================================================
+    async function loadMorePhotos() {
+      if (isLoadingPhotos || noMorePhotos) return;
+      isLoadingPhotos = true;
+
+      const container = document.querySelector('.photo-feed-container');
+      if (!container) {
+        isLoadingPhotos = false;
+        return;
+      }
+
+      try {
+        const photosData = await apiCall(`/consumption-photos?limit=5&offset=${loadedPhotosOffset}`);
+        const newPhotos = photosData.photos || [];
+
+        if (newPhotos.length < 5) {
+          noMorePhotos = true;
+        }
+
+        if (newPhotos.length > 0) {
+          loadedPhotosOffset += newPhotos.length;
+          const additionalHtml = consumptionPhotosHtml(newPhotos);
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = additionalHtml;
+          while (tempDiv.firstChild) {
+            container.appendChild(tempDiv.firstChild);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load more photos:', err);
+      } finally {
+        isLoadingPhotos = false;
+      }
+    }
+
+    function checkScrollAndLoad() {
+      if (activeTabId !== 'tab-photos' && activeTabId !== 'atab-photos') return;
+      if (isLoadingPhotos || noMorePhotos) return;
+
+      const threshold = 300;
+      const totalHeight = document.documentElement.scrollHeight;
+      const scrollPosition = window.innerHeight + window.scrollY;
+
+      if (totalHeight - scrollPosition < threshold) {
+        loadMorePhotos().then(() => {
+          setTimeout(checkScrollAndLoad, 100);
+        });
+      }
+    }
+
+    window.addEventListener('scroll', checkScrollAndLoad);
+
+    // ============================================================
+    // TABS
+    // ============================================================
+    function switchTab(el, targetId) {
+      activeTabId = targetId;
+      const tabArea = el.closest('.tabs');
+      tabArea.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+      let sibling = tabArea.nextElementSibling;
+      while (sibling) {
+        if (sibling.id && (sibling.id.startsWith('tab') || sibling.id.startsWith('atab'))) {
+          sibling.style.display = sibling.id === targetId ? 'block' : 'none';
+        }
+        sibling = sibling.nextElementSibling;
+      }
+
+      if (targetId === 'tab-photos' || targetId === 'atab-photos') {
+        setTimeout(checkScrollAndLoad, 50);
+      }
+      if (targetId === 'tab-stats') {
+        calculateUserCatchup();
+      }
+    }
+
+    // ============================================================
+    // MODALS
+    // ============================================================
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    async function doAddUser() {
+      const username = document.getElementById('nu-user').value.trim().toLowerCase();
+      const password = document.getElementById('nu-pass').value;
+      const err = document.getElementById('nu-err');
+
+      if (!username || username.includes(' ')) {
+        err.textContent = 'Username required, no spaces.';
+        return;
+      }
+
+      if (password.length < 3) {
+        err.textContent = 'Password too short.';
+        return;
+      }
+
+      try {
+        await apiCall('/users/add', 'POST', { username, password });
+        err.textContent = '';
+        document.getElementById('nu-user').value = '';
+        document.getElementById('nu-pass').value = '';
+        closeModal('add-user-modal');
+        showToast(`User "${username}" created!`);
+        renderAdmin();
+      } catch (e) {
+        err.textContent = e.message;
+      }
+    }
+
+    let resetTarget = null;
+
+    function openResetPw(username) {
+      resetTarget = username;
+      document.getElementById('reset-target-name').textContent = username;
+      document.getElementById('rp-pass').value = '';
+      document.getElementById('rp-err').textContent = '';
+      openModal('reset-pw-modal');
+    }
+
+    async function doResetPw() {
+      const pw = document.getElementById('rp-pass').value;
+      if (pw.length < 3) {
+        document.getElementById('rp-err').textContent = 'Too short.';
+        return;
+      }
+
+      try {
+        await apiCall('/users/reset-password', 'POST', { username: resetTarget, password: pw });
+        closeModal('reset-pw-modal');
+        showToast(`Password reset for "${resetTarget}"`);
+        renderAdmin();
+      } catch (e) {
+        document.getElementById('rp-err').textContent = e.message;
+      }
+    }
+
+    async function deleteUser(username) {
+      if (!confirm(`Delete user "${username}"? All their data will be lost.`)) return;
+
+      try {
+        await apiCall('/users/delete', 'POST', { username });
+        showToast(`User "${username}" deleted.`);
+        renderAdmin();
+      } catch (e) {
+        showToast(`Error: ${e.message}`);
+      }
+    }
+
+    // ============================================================
+    // DAILY CHECK-IN
+    // ============================================================
+    const counts = { nb: 0, sb: 0, sh: 0, co: 0, wi: 0, jo: 0 };
+    let checkinTargetDate = null;
+
+    function adj(key, delta) {
+      counts[key] = Math.max(0, counts[key] + delta);
+      document.getElementById('cnt-' + key).textContent = counts[key];
+      updateEquiv();
+    }
+
+    function updateEquiv() {
+      const eq = counts.nb * MULT.nb + counts.sb * MULT.sb + counts.sh * MULT.sh + counts.co * MULT.co + counts.wi * MULT.wi + counts.jo * MULT.jo;
+      document.getElementById('checkin-equiv').textContent = `= ${eq.toFixed(2)} standard beer equivalents`;
+    }
+
+    async function openCheckin(dateKey = null) {
+      try {
+        const checkinsData = await apiCall('/checkins');
+        const checkins = checkinsData.checkins;
+
+        const targetDate = dateKey || today();
+        const existing = checkins.find(c => c.date === targetDate);
+        checkinTargetDate = targetDate;
+
+        Object.keys(counts).forEach(k => {
+          counts[k] = existing && typeof existing[k] === 'number' ? existing[k] : 0;
+        });
+        ['nb', 'sb', 'sh', 'co', 'wi', 'jo'].forEach(k => { document.getElementById('cnt-' + k).textContent = counts[k]; });
+        updateEquiv();
+
+        const label = formatDateLabel(targetDate);
+        document.getElementById('checkin-modal-date').textContent = `${label} — ${existing ? 'updating existing entry' : 'new entry'}`;
+        openModal('checkin-modal');
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      }
+    }
+
+    async function submitCheckin() {
+      try {
+        const payload = { ...counts, date: checkinTargetDate || today() };
+        await apiCall('/checkins', 'POST', payload);
+        closeModal('checkin-modal');
+        showToast('Check-in saved! 🍺');
+        renderUser();
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      }
+    }
+
+    // ============================================================
+    // ANNOUNCEMENTS & HEATMAP UTILITIES
+    // ============================================================
+    async function addAnnouncement() {
+      const contentEl = document.getElementById('ann-content');
+      if (!contentEl) return;
+      const content = contentEl.value.trim();
+      if (!content) return;
+
+      try {
+        const res = await apiCall('/announcements', 'POST', { content });
+        if (res.success) {
+          contentEl.value = '';
+          showToast('Announcement posted.');
+          renderAdmin();
+        }
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      }
+    }
+
+    async function deleteAnnouncement(id) {
+      if (!confirm('Are you sure you want to delete this announcement?')) return;
+
+      try {
+        const res = await apiCall(`/announcements/${id}`, 'DELETE');
+        if (res.success) {
+          showToast('Announcement deleted.');
+          renderAdmin();
+        }
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      }
+    }
+
+    function buildHeatmapHtml(checkins) {
+      const todayDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(todayDate.getDate() - 364); // 365 days total
+
+      const scoreMap = {};
+      checkins.forEach(c => {
+        scoreMap[c.date] = calcScoreFromEntry(c);
+      });
+
+      // 0 = Monday, 6 = Sunday
+      const startDayOfWeek = (startDate.getDay() + 6) % 7;
+
+      let cellsHtml = '';
+
+      for (let i = 0; i < startDayOfWeek; i++) {
+        cellsHtml += `<div class="heatmap-cell heatmap-cell-empty"></div>`;
+      }
+
+      const tempDate = new Date(startDate);
+      const months = [];
+      let cellCount = startDayOfWeek;
+
+      for (let d = 0; d < 365; d++) {
+        const dateStr = tempDate.toISOString().split('T')[0];
+        const score = scoreMap[dateStr] || 0;
+
+        let lvl = 0;
+        if (score > 0) {
+          if (score <= 1.5) lvl = 1;
+          else if (score <= 3.0) lvl = 2;
+          else if (score <= 6.0) lvl = 3;
+          else lvl = 4;
+        }
+
+        const formattedDate = tempDate.toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+        const tooltip = `${score.toFixed(2)} consumptions on ${formattedDate}`;
+
+        cellsHtml += `<div class="heatmap-cell lvl-${lvl}" title="${tooltip}" data-date="${dateStr}"></div>`;
+
+        const currentColumn = Math.floor(cellCount / 7);
+        if (tempDate.getDate() === 1 || d === 0) {
+          const monthName = tempDate.toLocaleString('default', { month: 'short' });
+          if (months.length === 0 || months[months.length - 1].name !== monthName) {
+            months.push({ name: monthName, colIndex: currentColumn });
+          }
+        }
+
+        tempDate.setDate(tempDate.getDate() + 1);
+        cellCount++;
+      }
+
+      let monthLabelsHtml = '';
+      let prevCol = -1;
+      months.forEach(m => {
+        if (m.colIndex > prevCol + 2) {
+          monthLabelsHtml += `<span style="grid-column: ${m.colIndex + 1}">${m.name}</span>`;
+          prevCol = m.colIndex;
+        }
+      });
+
+      return `
+    <div class="heatmap-wrapper">
+      <div style="min-width: 780px; padding-bottom: 4px;">
+        <div class="heatmap-months" style="display: grid; grid-auto-flow: column; grid-auto-columns: 11px; gap: 3px; margin-bottom: 4px; font-size: 0.7rem; color: #888; padding-left: 28px;">
+          ${monthLabelsHtml}
+        </div>
+        <div style="display: flex; gap: 6px; align-items: flex-start;">
+          <div class="heatmap-weekdays" style="display: grid; grid-template-rows: repeat(7, 11px); gap: 3px; font-size: 0.65rem; color: #888; text-align: right; width: 22px; padding-top: 1px;">
+            <span>Mon</span>
+            <span></span>
+            <span>Wed</span>
+            <span></span>
+            <span>Fri</span>
+            <span></span>
+            <span>Sun</span>
+          </div>
+          <div class="heatmap-grid">
+            ${cellsHtml}
+          </div>
+        </div>
+        <div class="heatmap-legend" style="display: flex; justify-content: flex-end; align-items: center; gap: 4px; margin-top: 10px; font-size: 0.7rem; color: #888; padding-right: 10px;">
+          <span style="margin-right: 4px;">Less</span>
+          <div class="heatmap-cell lvl-0" title="0.00 beer eq"></div>
+          <div class="heatmap-cell lvl-1" title="&le; 1.50 beer eq"></div>
+          <div class="heatmap-cell lvl-2" title="&le; 3.00 beer eq"></div>
+          <div class="heatmap-cell lvl-3" title="&le; 6.00 beer eq"></div>
+          <div class="heatmap-cell lvl-4" title="&gt; 6.00 beer eq"></div>
+          <span style="margin-left: 4px;">More</span>
+        </div>
+      </div>
+    </div>
+  `;
+    }
+
+    async function loadUserHeatmap(username) {
+      const container = document.getElementById('heatmap-placeholder');
+      if (!container) return;
+
+      container.innerHTML = '<div style="color:#888; font-size:0.875rem; text-align:center; padding:1.5rem;">Loading heatmap...</div>';
+
+      try {
+        const data = await apiCall(`/checkins?scope=all&username=${encodeURIComponent(username)}`);
+        const checkins = data.checkins || [];
+        container.innerHTML = buildHeatmapHtml(checkins);
+      } catch (err) {
+        container.innerHTML = `<div style="color:#e87a7a; font-size:0.875rem; text-align:center; padding:1.5rem;">Error: ${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    function calculateUserCustomCatchupRow() {
+      const input = document.getElementById('catchup-user-custom-days');
+      const projEl = document.getElementById('catchup-user-custom-projected');
+      const neededEl = document.getElementById('catchup-user-custom-needed');
+      const rateEl = document.getElementById('catchup-user-custom-rate');
+
+      if (!input || !projEl || !neededEl || !rateEl || !userChampionsScoreboard || userChampionsScoreboard.length === 0) return;
+
+      const N = parseInt(input.value);
+      if (isNaN(N) || N <= 0) {
+        projEl.textContent = '-';
+        neededEl.textContent = '-';
+        rateEl.textContent = '-';
+        return;
+      }
+
+      customCatchupDays = N;
+
+      const firstUser = userChampionsScoreboard[0];
+      const targetUser = userChampionsScoreboard.find(u => u.username === currentUser.username);
+
+      if (!firstUser || !targetUser) return;
+
+      const S1 = firstUser.score;
+      const A1 = firstUser.avg;
+      const SU = targetUser.score;
+
+      const S1_proj = S1 + A1 * N;
+      const requiredGain = S1_proj - SU;
+      const dailyCatchup = requiredGain / N;
+
+      projEl.textContent = S1_proj.toFixed(1);
+      neededEl.textContent = requiredGain.toFixed(1);
+      rateEl.textContent = `${dailyCatchup.toFixed(2)} / day`;
+    }
+
+    function calculateUserCatchup() {
+      const container = document.getElementById('user-catchup-container');
+      if (!container || !currentUser || !userChampionsScoreboard || userChampionsScoreboard.length === 0) return;
+
+      const firstUser = userChampionsScoreboard[0];
+      const targetUser = userChampionsScoreboard.find(u => u.username === currentUser.username);
+
+      if (!firstUser || !targetUser) {
+        container.innerHTML = '<p style="color:#888">No catch-up data available (you are not on the user scoreboard).</p>';
+        return;
+      }
+
+      if (targetUser.username === firstUser.username || targetUser.rank === 1) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 0.5rem; color: #e8c84a; font-weight: bold; font-size: 1.1rem;">
+            🏆 "You're performing great, keep on going!"
+          </div>`;
+        return;
+      }
+
+      const S1 = firstUser.score;
+      const A1 = firstUser.avg;
+      const SU = targetUser.score;
+
+      const intervals = [10, 20, 30];
+      let rowsHtml = '';
+
+      intervals.forEach(N => {
+        const S1_proj = S1 + A1 * N;
+        const requiredGain = S1_proj - SU;
+        const dailyCatchup = requiredGain / N;
+
+        rowsHtml += `
+          <tr>
+            <td><strong>${N} days</strong></td>
+            <td class="gold mobile-hide">${S1_proj.toFixed(1)}</td>
+            <td class="gold mobile-hide">${requiredGain.toFixed(1)}</td>
+            <td class="gold" style="font-weight: bold; color: #e8c84a;">${dailyCatchup.toFixed(2)} / day</td>
+          </tr>`;
+      });
+
+      // Add 4th custom row
+      rowsHtml += `
+        <tr>
+          <td style="display: flex; align-items: center; gap: 6px;">
+            <input type="number" id="catchup-user-custom-days" min="1" max="365" value="${customCatchupDays}" oninput="calculateUserCustomCatchupRow()" style="width: 55px; padding: 4px 6px; border-radius: 4px; border: 1px solid #444; background: #111; color: #fff; text-align: center; font-size: 0.85rem; font-family: inherit;">
+            <strong>days</strong>
+          </td>
+          <td class="gold mobile-hide" id="catchup-user-custom-projected">-</td>
+          <td class="gold mobile-hide" id="catchup-user-custom-needed">-</td>
+          <td class="gold" id="catchup-user-custom-rate" style="font-weight: bold; color: #e8c84a;">-</td>
+        </tr>`;
+
+      container.innerHTML = `
+        <div>
+          <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 1rem;">
+            To catch up to <strong>${escapeHtml(firstUser.username)}</strong>:
+          </p>
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th class="mobile-hide">Leader Projected Score</th>
+                <th class="mobile-hide">Total Needed</th>
+                <th>Required Intake</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+          <p style="font-size: 0.75rem; color: #666; margin-top: 1rem; line-height: 1.4;">
+            * Assumes <strong>${escapeHtml(firstUser.username)}</strong> maintains their current daily average of ${A1.toFixed(2)} beer equivalents.
+          </p>
+        </div>`;
+
+      calculateUserCustomCatchupRow();
+    }
+
+    function calculateCustomCatchupRow() {
+      const input = document.getElementById('catchup-custom-days');
+      const projEl = document.getElementById('catchup-custom-projected');
+      const neededEl = document.getElementById('catchup-custom-needed');
+      const rateEl = document.getElementById('catchup-custom-rate');
+
+      if (!input || !projEl || !neededEl || !rateEl || !adminChampionsScoreboard || adminChampionsScoreboard.length === 0) return;
+
+      const N = parseInt(input.value);
+      if (isNaN(N) || N <= 0) {
+        projEl.textContent = '-';
+        neededEl.textContent = '-';
+        rateEl.textContent = '-';
+        return;
+      }
+
+      const select = document.getElementById('catchup-user-select');
+      if (!select) return;
+      const targetUsername = select.value;
+      const firstUser = adminChampionsScoreboard[0];
+      const targetUser = adminChampionsScoreboard.find(u => u.username === targetUsername);
+
+      if (!firstUser || !targetUser) return;
+
+      const S1 = firstUser.score;
+      const A1 = firstUser.avg;
+      const SU = targetUser.score;
+
+      const S1_proj = S1 + A1 * N;
+      const requiredGain = S1_proj - SU;
+      const dailyCatchup = requiredGain / N;
+
+      projEl.textContent = S1_proj.toFixed(1);
+      neededEl.textContent = requiredGain.toFixed(1);
+      rateEl.textContent = `${dailyCatchup.toFixed(2)} / day`;
+    }
+
+    function calculateCatchup() {
+      const select = document.getElementById('catchup-user-select');
+      const container = document.getElementById('catchup-result-container');
+      if (!select || !container || !adminChampionsScoreboard || adminChampionsScoreboard.length === 0) return;
+
+      const targetUsername = select.value;
+      const firstUser = adminChampionsScoreboard[0];
+      const targetUser = adminChampionsScoreboard.find(u => u.username === targetUsername);
+
+      if (!firstUser || !targetUser) {
+        container.innerHTML = '<p style="color:#888">Error: User not found.</p>';
+        return;
+      }
+
+      if (targetUser.username === firstUser.username || targetUser.rank === 1) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 1.5rem; color: #e8c84a; font-weight: bold; font-size: 1.1rem;">
+            🏆 "You're performing great, keep on going!"
+          </div>`;
+        return;
+      }
+
+      const S1 = firstUser.score;
+      const A1 = firstUser.avg;
+      const SU = targetUser.score;
+
+      const intervals = [10, 20, 30];
+      let rowsHtml = '';
+
+      intervals.forEach(N => {
+        const S1_proj = S1 + A1 * N;
+        const requiredGain = S1_proj - SU;
+        const dailyCatchup = requiredGain / N;
+
+        rowsHtml += `
+          <tr>
+            <td><strong>${N} days</strong></td>
+            <td class="gold mobile-hide">${S1_proj.toFixed(1)}</td>
+            <td class="gold mobile-hide">${requiredGain.toFixed(1)}</td>
+            <td class="gold" style="font-weight: bold; color: #e8c84a;">${dailyCatchup.toFixed(2)} / day</td>
+          </tr>`;
+      });
+
+      // Add a 4th custom row
+      rowsHtml += `
+        <tr>
+          <td style="display: flex; align-items: center; gap: 6px;">
+            <input type="number" id="catchup-custom-days" min="1" max="365" value="15" oninput="calculateCustomCatchupRow()" style="width: 55px; padding: 4px 6px; border-radius: 4px; border: 1px solid #444; background: #111; color: #fff; text-align: center; font-size: 0.85rem; font-family: inherit;">
+            <strong>days</strong>
+          </td>
+          <td class="gold mobile-hide" id="catchup-custom-projected">-</td>
+          <td class="gold mobile-hide" id="catchup-custom-needed">-</td>
+          <td class="gold" id="catchup-custom-rate" style="font-weight: bold; color: #e8c84a;">-</td>
+        </tr>`;
+
+      container.innerHTML = `
+        <div style="margin-top: 1rem;">
+          <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 1rem;">
+            To catch up to <strong>${escapeHtml(firstUser.username)}</strong>:
+          </p>
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th class="mobile-hide">Leader Projected Score</th>
+                <th class="mobile-hide">Total Needed</th>
+                <th>Required Intake</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+          <p style="font-size: 0.75rem; color: #666; margin-top: 1rem; line-height: 1.4;">
+            * Assumes <strong>${escapeHtml(firstUser.username)}</strong> maintains their current daily average of ${A1.toFixed(2)} beer equivalents.
+          </p>
+        </div>`;
+
+      // Calculate the initial custom row values
+      calculateCustomCatchupRow();
+    }
+
+    // ============================================================
+    // TOAST
+    // ============================================================
+    let toastTimer;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    // ============================================================
+    // KEY BINDINGS
+    // ============================================================
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        if (document.getElementById('login-view').style.display !== 'none') doLogin();
+        if (document.getElementById('changepw-view').style.display !== 'none') doChangePw();
+      }
+      if (e.key === 'Escape') {
+        ['add-user-modal', 'reset-pw-modal', 'checkin-modal'].forEach(id => closeModal(id));
+      }
     });
-  });
-}
-</script>
+
+    // ============================================================
+    // BOOT
+    // ============================================================
+    let swRegistration = null;
+    let reminderTimeoutId = null;
+    let reminderIntervalId = null;
+
+    function isStandaloneMode() {
+      return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
+    function scheduleDailyReminder(reg) {
+      if (!reg || Notification.permission !== 'granted') return;
+
+      if (reminderTimeoutId) clearTimeout(reminderTimeoutId);
+      if (reminderIntervalId) clearInterval(reminderIntervalId);
+
+      const now = new Date();
+      const next = new Date();
+      next.setHours(21, 0, 0, 0);
+      if (next <= now) next.setDate(next.getDate() + 1);
+
+      const msUntilNext = next.getTime() - now.getTime();
+      reminderTimeoutId = setTimeout(() => {
+        reg.showNotification('did you drink yet?', {
+          tag: 'daily-9pm',
+          renotify: false
+        });
+        reminderIntervalId = setInterval(() => {
+          reg.showNotification('did you drink yet?', {
+            tag: 'daily-9pm',
+            renotify: false
+          });
+        }, 24 * 60 * 60 * 1000);
+      }, msUntilNext);
+    }
+
+    async function subscribeUserToPush(reg) {
+      if (!reg || !('pushManager' in reg)) {
+        console.warn('Push messaging is not supported in this browser/mode');
+        return;
+      }
+
+      try {
+        if (Notification.permission === 'default') {
+          const permission = await Notification.requestPermission();
+          if (permission !== 'granted') return;
+        } else if (Notification.permission !== 'granted') {
+          return;
+        }
+
+        const { publicKey } = await apiCall('/push/public-key');
+        if (!publicKey) {
+          console.warn('VAPID public key not found on server');
+          return;
+        }
+
+        const subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlB64ToUint8Array(publicKey)
+        });
+
+        await apiCall('/push/subscribe', 'POST', { subscription });
+        console.log('Successfully subscribed to push notifications!');
+      } catch (err) {
+        console.warn('Could not subscribe user to push notifications (likely blocked by browser settings or missing service connection):', err);
+      }
+    }
+
+    function urlB64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+
+    function triggerLocalTestNotification() {
+      if (!('Notification' in window)) {
+        showToast('Notifications not supported by this browser.');
+        return;
+      }
+      if (Notification.permission === 'granted') {
+        if (swRegistration) {
+          swRegistration.showNotification('UDAKO CL (Local Test)', {
+            body: 'This is a local fallback notification! 🍺',
+            icon: 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 192 192\'><rect fill=\'%23e8c84a\' width=\'192\' height=\'192\'/><text x=\'50%\' y=\'50%\' font-size=\'90\' font-weight=\'bold\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%230f0f11\' font-family=\'Arial\'>UCL</text></svg>',
+            badge: 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 192 192\'><rect fill=\'%23e8c84a\' width=\'192\' height=\'192\'/><text x=\'50%\' y=\'50%\' font-size=\'90\' font-weight=\'bold\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%230f0f11\' font-family=\'Arial\'>UCL</text></svg>',
+            tag: 'local-test'
+          });
+        } else {
+          new Notification('UDAKO CL (Local Test)', {
+            body: 'This is a local fallback notification! 🍺'
+          });
+        }
+      } else {
+        showToast('Notification permission not granted.');
+      }
+    }
+
+    async function sendTestPush() {
+      try {
+        const res = await apiCall('/push/test', 'POST');
+        if (res.success) {
+          showToast(`Push sent! (${res.sent} success, ${res.failed} failed)`);
+          if (res.sent === 0) {
+            showToast('No active server subscriptions. Triggering local test...');
+            triggerLocalTestNotification();
+          }
+        }
+      } catch (err) {
+        showToast(`Server push failed (${err.message}). Triggering local test...`);
+        triggerLocalTestNotification();
+      }
+    }
+
+    function initDailyReminder() {
+      if (!swRegistration || !isStandaloneMode() || !('Notification' in window)) return;
+
+      if (Notification.permission === 'granted') {
+        scheduleDailyReminder(swRegistration);
+        return;
+      }
+
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then(result => {
+          if (result === 'granted') scheduleDailyReminder(swRegistration);
+        });
+      }
+    }
+
+
+    async function bootstrap() {
+      try {
+        const data = await apiCall('/auth/me');
+        currentUser = data.user;
+
+        if (currentUser.must_change_pw) {
+          show('changepw-view');
+          return;
+        }
+
+        enterApp();
+        initDailyReminder();
+      } catch (err) {
+        currentUser = null;
+        show('login-view');
+      }
+    }
+
+    bootstrap();
+
+    // ============================================================
+    // PWA SERVICE WORKER REGISTRATION
+    // ============================================================
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').then(reg => {
+          swRegistration = reg;
+          initDailyReminder();
+          console.log('Service Worker registered successfully', reg);
+
+          // Force check for updates on load
+          reg.update();
+
+          // Periodically check for updates (every 30 minutes)
+          setInterval(() => {
+            reg.update();
+          }, 30 * 60 * 1000);
+
+        }).catch(err => {
+          console.log('Service Worker registration failed:', err);
+        });
+      });
+
+      // Reload the page when a new service worker takes control (claims client)
+      // Only do this if there was an active controller when the page loaded.
+      let refreshing = false;
+      const wasControlled = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (wasControlled && !refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
+    }
+  </script>
 </body>
+
 </html>

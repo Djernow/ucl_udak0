@@ -6,7 +6,6 @@ set -e
 
 DATASET_PATH="/mnt/immich/Jarno_app/udako"
 DATA_PATH="$DATASET_PATH/data"
-DOWNLOADS_PATH="$DATASET_PATH/downloads"
 
 # Get script directory to find files relative to where script runs
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -57,16 +56,9 @@ chmod 755 "$DATA_PATH"
 echo "✓ Data directory ready at $DATA_PATH"
 echo ""
 
-# Create downloads directory for mobile builds
-mkdir -p "$DOWNLOADS_PATH"
-chmod 755 "$DOWNLOADS_PATH"
-echo "✓ Downloads directory ready at $DOWNLOADS_PATH"
-echo ""
-
 # Copy application files
 echo "📋 Copying application files to $DATASET_PATH..."
 cp -v "$SCRIPT_DIR/website.html" "$DATASET_PATH/"
-cp -v "$SCRIPT_DIR/index.html" "$DATASET_PATH/"
 cp -v "$SCRIPT_DIR/manifest.json" "$DATASET_PATH/"
 cp -v "$SCRIPT_DIR/service-worker.js" "$DATASET_PATH/"
 cp -v "$SCRIPT_DIR/app.py" "$DATASET_PATH/"
@@ -76,17 +68,17 @@ cp -v "$SCRIPT_DIR/docker-compose.yaml" "$DATASET_PATH/"
 cp -v "$SCRIPT_DIR/httpd.conf" "$DATASET_PATH/"
 cp -v "$SCRIPT_DIR/httpd-proxy.conf" "$DATASET_PATH/"
 
-# Copy mobile builds if present
-if [ -d "$SCRIPT_DIR/downloads" ]; then
-    echo "📦 Copying mobile builds from $SCRIPT_DIR/downloads..."
-    cp -v "$SCRIPT_DIR/downloads"/* "$DOWNLOADS_PATH/" 2>/dev/null || true
+# Copy badges directory
+if [ -d "$SCRIPT_DIR/badges" ]; then
+    echo "📋 Copying badges directory..."
+    mkdir -p "$DATASET_PATH/badges"
+    cp -rv "$SCRIPT_DIR/badges/"* "$DATASET_PATH/badges/"
 fi
 
 # Set correct permissions
 echo ""
 echo "🔒 Setting file permissions..."
 chmod 644 "$DATASET_PATH/website.html"
-chmod 644 "$DATASET_PATH/index.html"
 chmod 644 "$DATASET_PATH/manifest.json"
 chmod 644 "$DATASET_PATH/service-worker.js"
 chmod 644 "$DATASET_PATH/app.py"
@@ -96,8 +88,9 @@ chmod 644 "$DATASET_PATH/docker-compose.yaml"
 chmod 644 "$DATASET_PATH/httpd.conf"
 chmod 644 "$DATASET_PATH/httpd-proxy.conf"
 
-if [ -d "$DOWNLOADS_PATH" ]; then
-    chmod -R 644 "$DOWNLOADS_PATH"/* 2>/dev/null || true
+if [ -d "$DATASET_PATH/badges" ]; then
+    chmod 755 "$DATASET_PATH/badges"
+    chmod 644 "$DATASET_PATH/badges/"*
 fi
 
 # Verify all files were deployed

@@ -1,0 +1,880 @@
+diff --git a/website.html b/website.html
+index 74bf3cb6..0bf565b5 100644
+--- a/website.html
++++ b/website.html
+@@ -20,7 +20,8 @@
+     --mult-special-beer:  1.5;   /* 1 special beer  = 1.5 standard beers */
+     --mult-shot:          0.75;  /* 1 shot          = 0.75 standard beer */
+     --mult-cocktail:      1.25;  /* 1 cocktail      = 1.25 standard beers*/
+-    --mult-joint:         2.0;   /* 1 joint         = 2.0 standard beers */
++    --mult-wine:          1.5;   /* 1 wine          = 1.5 standard beers */
++    --mult-joint:         1.25;  /* 1 joint         = 1.25 standard beers */
+   }
+ 
+   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap');
+@@ -120,6 +121,43 @@
+     padding: 1.5rem;
+   }
+ 
++  .daily-quote-card {
++    margin: 0 0 1rem 0;
++    border-color: #e8c84a55;
++    background: linear-gradient(180deg, #201b12 0%, #18171a 100%);
++  }
++
++  .daily-quote-label {
++    font-size: 0.75rem;
++    text-transform: uppercase;
++    letter-spacing: .08em;
++    color: #b9a35f;
++    margin-bottom: 0.65rem;
++  }
++
++  .daily-quote-text {
++    font-size: 1.05rem;
++    line-height: 1.55;
++    color: #f4efe4;
++    margin-bottom: 0.75rem;
++  }
++
++  .daily-quote-meta {
++    display: flex;
++    flex-wrap: wrap;
++    gap: 0.5rem;
++    align-items: center;
++    color: #a99a6b;
++    font-size: 0.85rem;
++  }
++
++  .daily-quote-meta span {
++    padding: 3px 8px;
++    border-radius: 999px;
++    background: #111012;
++    border: 1px solid #2a2828;
++  }
++
+   /* ---- sections ---- */
+   .section-title {
+     font-family: 'Bebas Neue', sans-serif;
+@@ -167,6 +205,10 @@
+   /* ---- scoreboard ---- */
+   .scoreboard { display: flex; flex-direction: column; gap: 8px; }
+ 
++  .scoreboard-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
++  .scoreboard-scroll::-webkit-scrollbar { height: 8px; }
++  .scoreboard-scroll::-webkit-scrollbar-thumb { background: #2a2828; border-radius: 8px; }
++
+   .score-row {
+     display: grid;
+     grid-template-columns: 2.5rem 1fr 6rem 6rem 6rem 6rem;
+@@ -207,6 +249,45 @@
+   .top-3 .rank { color: #c07840; }
+ 
+   .user-name { font-weight: 500; font-size: 0.95rem; }
++  .user-name-btn {
++    font: inherit;
++    color: inherit;
++    background: none;
++    border: none;
++    padding: 0;
++    text-align: left;
++    cursor: pointer;
++    border-bottom: 1px dashed #4a4848;
++  }
++  .user-name-btn:hover { color: #e8c84a; border-bottom-color: #e8c84a66; }
++
++  .score-detail-row {
++    display: none;
++    margin: -4px 0 8px 0;
++    padding-left: calc(2.5rem + 12px);
++  }
++
++  .score-detail-card {
++    background: #111012;
++    border: 1px solid #2a2828;
++    border-radius: 10px;
++    padding: 10px 12px;
++  }
++
++  .score-detail-title {
++    font-size: 0.75rem;
++    text-transform: uppercase;
++    letter-spacing: .06em;
++    color: #777;
++    margin-bottom: 6px;
++  }
++
++  .history-table.compact th,
++  .history-table.compact td {
++    padding: 6px 10px;
++  }
++
++  .history-table.compact th { font-size: 0.7rem; }
+   .score-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: #e8c84a; text-align: right; }
+   .score-sub { font-size: 0.75rem; color: #555; text-align: right; }
+ 
+@@ -409,6 +490,20 @@
+   .history-table tr:last-child td { border-bottom: none; }
+   .history-table .gold { color: #e8c84a; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; }
+ 
++  /* ---- download ---- */
++  .download-cta {
++    margin-top: 2rem;
++  }
++
++  .download-actions {
++    display: flex;
++    flex-wrap: wrap;
++    gap: 12px;
++    justify-content: center;
++  }
++
++  .download-actions a { text-decoration: none; }
++
+   /* ---- change pw ---- */
+   #changepw-view {
+     display: flex;
+@@ -447,11 +542,22 @@
+   .checkin-banner p { font-size: 0.9rem; color: #e8c84a; }
+   .checkin-banner small { display: block; font-size: 0.78rem; color: #888; margin-top: 2px; }
+ 
++  /* ---- announcement ---- */
++  .announcement-banner {
++    background: #1a1111;
++    border: 1px solid #5a2a2a;
++    border-radius: 12px;
++    padding: 14px 18px;
++    margin-bottom: 1.25rem;
++  }
++  .announcement-banner p { font-size: 0.9rem; color: #e8c84a; }
++
+   @media (max-width: 680px) {
+     .admin-grid { grid-template-columns: 1fr; }
+-    .score-row { grid-template-columns: 2rem 1fr 5rem 5rem; }
++    .score-row { grid-template-columns: 2rem 1fr 4.5rem 4.5rem; gap: 8px; }
+     .score-row .score-val:nth-child(5),
+     .score-row .score-val:nth-child(6) { display: none; }
++    .score-detail-row { padding-left: calc(2rem + 8px); }
+     .checkin-grid { grid-template-columns: 1fr 1fr; }
+     main { padding: 1rem; }
+   }
+@@ -464,6 +570,9 @@
+     .btn { padding: 10px 18px; }
+     .card { padding: 1.25rem; }
+     .score-row { padding: 12px; gap: 8px; }
++    .score-row .user-name { font-size: 0.9rem; }
++    .score-row .user-name-btn { font-size: 0.9rem; }
++    .score-val { font-size: 1.05rem; }
+   }
+ </style>
+ </head>
+@@ -590,6 +699,15 @@
+           <button class="counter-btn" onclick="adj('co',1)">+</button>
+         </div>
+       </div>
++      <div class="checkin-item">
++        <div class="checkin-emoji">🍷</div>
++        <div class="checkin-label">Wine</div>
++        <div class="checkin-counter">
++          <button class="counter-btn" onclick="adj('wi',-1)">−</button>
++          <span class="counter-val" id="cnt-wi">0</span>
++          <button class="counter-btn" onclick="adj('wi',1)">+</button>
++        </div>
++      </div>
+       <div class="checkin-item" style="grid-column: span 2">
+         <div class="checkin-emoji">🚬</div>
+         <div class="checkin-label">Joints</div>
+@@ -618,7 +736,13 @@ const MULT = {
+   sb: 1.5,    // special beer
+   sh: 0.75,   // shot
+   co: 1.25,   // cocktail
+-  jo: 2.0     // joint
++  wi: 1.5,    // wine
++  jo: 1.25    // joint
++};
++
++const DOWNLOAD_LINKS = {
++  apple: 'https://udako.libertronics.org/downloads/udako-ios.ipa',
++  android: 'https://udako.libertronics.org/downloads/udako-android.apk'
+ };
+ 
+ // ============================================================
+@@ -739,7 +863,8 @@ async function enterApp() {
+ // SCORE CALCULATION
+ // ============================================================
+ function calcScoreFromEntry(c) {
+-  return c.nb * MULT.nb + c.sb * MULT.sb + c.sh * MULT.sh + c.co * MULT.co + c.jo * MULT.jo;
++  const wine = typeof c.wi === 'number' ? c.wi : 0;
++  return c.nb * MULT.nb + c.sb * MULT.sb + c.sh * MULT.sh + c.co * MULT.co + wine * MULT.wi + c.jo * MULT.jo;
+ }
+ 
+ function today() {
+@@ -768,7 +893,16 @@ function formatDateLabel(dateKey) {
+ 
+ function fmt(n) {
+   const val = typeof n === 'number' ? n : Number(n);
+-  return Number.isFinite(val) ? val.toFixed(1) : '0.0';
++  return Number.isFinite(val) ? val.toFixed(2) : '0.00';
++}
++
++function escapeHtml(value) {
++  return String(value)
++    .replace(/&/g, '&amp;')
++    .replace(/</g, '&lt;')
++    .replace(/>/g, '&gt;')
++    .replace(/"/g, '&quot;')
++    .replace(/'/g, '&#39;');
+ }
+ 
+ function daysInYear(year) {
+@@ -798,13 +932,13 @@ function buildWrappedStats(checkins) {
+   let daysWith = 0;
+   let bestDay = null;
+   let bestScore = -1;
+-  const totals = { nb: 0, sb: 0, sh: 0, co: 0, jo: 0 };
++  const totals = { nb: 0, sb: 0, sh: 0, co: 0, wi: 0, jo: 0 };
+ 
+   checkins.forEach(c => {
+     const dayScore = calcScoreFromEntry(c);
+     totalScore += dayScore;
+ 
+-    const consumed = (c.nb + c.sb + c.sh + c.co + c.jo) > 0;
++    const consumed = (c.nb + c.sb + c.sh + c.co + (c.wi || 0) + c.jo) > 0;
+     if (consumed) daysWith += 1;
+ 
+     if (dayScore > bestScore) {
+@@ -816,6 +950,7 @@ function buildWrappedStats(checkins) {
+     totals.sb += c.sb;
+     totals.sh += c.sh;
+     totals.co += c.co;
++    totals.wi += c.wi || 0;
+     totals.jo += c.jo;
+   });
+ 
+@@ -827,6 +962,7 @@ function buildWrappedStats(checkins) {
+     ['Special beer', totals.sb],
+     ['Shot', totals.sh],
+     ['Cocktail', totals.co],
++    ['Wine', totals.wi],
+     ['Joint', totals.jo]
+   ];
+   itemEntries.sort((a, b) => b[1] - a[1]);
+@@ -861,7 +997,7 @@ function buildMonthlyStats(checkins) {
+     const dayScore = calcScoreFromEntry(c);
+     totalScore += dayScore;
+ 
+-    const consumed = (c.nb + c.sb + c.sh + c.co + c.jo) > 0;
++    const consumed = (c.nb + c.sb + c.sh + c.co + (c.wi || 0) + c.jo) > 0;
+     if (consumed) daysWith += 1;
+ 
+     if (dayScore > bestScore) {
+@@ -884,6 +1020,26 @@ function buildMonthlyStats(checkins) {
+   };
+ }
+ 
++function dailyQuoteHtml(quote) {
++  if (!quote || !quote.quote) return '';
++
++  const quoteText = escapeHtml(quote.quote);
++  const author = quote.author ? escapeHtml(quote.author) : '';
++  const category = quote.category ? escapeHtml(quote.category) : '';
++  const sourceDate = today();
++
++  return `
++    <div class="card daily-quote-card">
++      <div class="daily-quote-label">Daily quote</div>
++      <div class="daily-quote-text">${quoteText}</div>
++      <div class="daily-quote-meta">
++        ${author ? `<span>— ${author}</span>` : ''}
++        ${category ? `<span>${category}</span>` : ''}
++        <span>${sourceDate}</span>
++      </div>
++    </div>`;
++}
++
+ function multipliersCardHtml() {
+   return `
+     <div class="card" style="margin:1rem 0 0 0">
+@@ -895,24 +1051,188 @@ function multipliersCardHtml() {
+           <tr><td>🍻 Special beer</td><td class="gold">${MULT.sb}x</td></tr>
+           <tr><td>🥃 Shot</td><td class="gold">${MULT.sh}x</td></tr>
+           <tr><td>🍹 Cocktail</td><td class="gold">${MULT.co}x</td></tr>
++          <tr><td>🍷 Wine</td><td class="gold">${MULT.wi}x</td></tr>
+           <tr><td>🚬 Joint</td><td class="gold">${MULT.jo}x</td></tr>
+         </tbody>
+       </table>
+     </div>`;
+ }
+ 
++function buildConsumptionTotals(checkins) {
++  const totals = { nb: 0, sb: 0, sh: 0, co: 0, wi: 0, jo: 0 };
++  checkins.forEach(c => {
++    totals.nb += c.nb;
++    totals.sb += c.sb;
++    totals.sh += c.sh;
++    totals.co += c.co;
++    totals.wi += c.wi || 0;
++    totals.jo += c.jo;
++  });
++  return totals;
++}
++
++function sumScoreboardTotals(scoreboard) {
++  const totals = { nb: 0, sb: 0, sh: 0, co: 0, wi: 0, jo: 0 };
++  scoreboard.forEach(u => {
++    const t = u.totals || {};
++    totals.nb += t.nb || 0;
++    totals.sb += t.sb || 0;
++    totals.sh += t.sh || 0;
++    totals.co += t.co || 0;
++    totals.wi += t.wi || 0;
++    totals.jo += t.jo || 0;
++  });
++  return totals;
++}
++
++function buildScoreDetailsHtml(username, totals = {}) {
++  const nb = totals.nb || 0;
++  const sb = totals.sb || 0;
++  const sh = totals.sh || 0;
++  const co = totals.co || 0;
++  const wi = totals.wi || 0;
++  const jo = totals.jo || 0;
++
++  return `
++      <div class="score-detail-card">
++        <div class="score-detail-title">${username} - consumption</div>
++        <table class="history-table compact">
++          <thead>
++            <tr><th>Item</th><th>Total</th></tr>
++          </thead>
++          <tbody>
++            <tr><td>🍺 Normal beer</td><td class="gold">${nb}</td></tr>
++            <tr><td>🍻 Special beer</td><td class="gold">${sb}</td></tr>
++            <tr><td>🥃 Shot</td><td class="gold">${sh}</td></tr>
++            <tr><td>🍹 Cocktail</td><td class="gold">${co}</td></tr>
++            <tr><td>🍷 Wine</td><td class="gold">${wi}</td></tr>
++            <tr><td>🚬 Joint</td><td class="gold">${jo}</td></tr>
++          </tbody>
++        </table>
++      </div>`;
++}
++
++function buildScoreboardHtml(scoreboard, totalLabel, boardKey) {
++  let html = `
++      <div class="score-row header-row">
++        <span>#</span><span>User</span>
++        <span style="text-align:right">${totalLabel}</span>
++        <span style="text-align:right">Days</span>
++        <span style="text-align:right">Avg/day</span>
++        <span style="text-align:right">Last entry</span>
++      </div>`;
++
++  scoreboard.forEach((u, i) => {
++    const cls = i === 0 ? 'top-1' : i === 1 ? 'top-2' : i === 2 ? 'top-3' : '';
++    const detailId = `score-detail-${boardKey}-${i}`;
++    html += `
++        <div class="score-row ${cls}">
++          <div class="rank">${u.rank}</div>
++          <div class="user-name"><button class="user-name-btn" type="button" onmouseenter="cancelHideScoreDetails('${detailId}'); showScoreDetails(this, '${detailId}')" onmouseleave="scheduleHideScoreDetails(this, '${detailId}')" ontouchstart="holdScoreDetails(this, '${detailId}', event)" ontouchend="releaseScoreDetails(this, '${detailId}', event)" ontouchcancel="releaseScoreDetails(this, '${detailId}', event)" aria-expanded="false">${u.username}</button></div>
++          <div class="score-val">${fmt(u.score)}</div>
++          <div class="score-val">${u.days}</div>
++          <div class="score-val">${fmt(u.avg)}</div>
++          <div class="score-sub">${u.last_date}</div>
++        </div>
++        <div id="${detailId}" class="score-detail-row" onmouseenter="cancelHideScoreDetails('${detailId}')" onmouseleave="hideScoreDetails(null, '${detailId}')">
++          ${buildScoreDetailsHtml(u.username, u.totals)}
++        </div>`;
++  });
++
++  return html;
++}
++
++const scoreDetailHoldTimers = new Map();
++const scoreDetailHideTimers = new Map();
++
++function showScoreDetails(button, detailId) {
++  const scoreboard = button.closest('.scoreboard');
++  if (!scoreboard) return;
++
++  const detail = document.getElementById(detailId);
++  if (!detail) return;
++
++  scoreboard.querySelectorAll('.score-detail-row').forEach(row => {
++    row.style.display = 'none';
++  });
++  scoreboard.querySelectorAll('.user-name-btn').forEach(btn => {
++    btn.setAttribute('aria-expanded', 'false');
++  });
++
++  detail.style.display = 'block';
++  button.setAttribute('aria-expanded', 'true');
++}
++
++function hideScoreDetails(button, detailId) {
++  const detail = document.getElementById(detailId);
++  if (!detail) return;
++  detail.style.display = 'none';
++  if (button) {
++    button.setAttribute('aria-expanded', 'false');
++  } else {
++    const scoreboard = detail.closest('.scoreboard');
++    if (scoreboard) {
++      scoreboard.querySelectorAll('.user-name-btn').forEach(btn => {
++        btn.setAttribute('aria-expanded', 'false');
++      });
++    }
++  }
++}
++
++function scheduleHideScoreDetails(button, detailId) {
++  clearTimeout(scoreDetailHideTimers.get(detailId));
++  const timer = setTimeout(() => hideScoreDetails(button, detailId), 120);
++  scoreDetailHideTimers.set(detailId, timer);
++}
++
++function cancelHideScoreDetails(detailId) {
++  clearTimeout(scoreDetailHideTimers.get(detailId));
++  scoreDetailHideTimers.delete(detailId);
++}
++
++function holdScoreDetails(button, detailId, event) {
++  if (event) event.preventDefault();
++  clearTimeout(scoreDetailHoldTimers.get(detailId));
++  const timer = setTimeout(() => showScoreDetails(button, detailId), 450);
++  scoreDetailHoldTimers.set(detailId, timer);
++}
++
++function releaseScoreDetails(button, detailId, event) {
++  if (event) event.preventDefault();
++  clearTimeout(scoreDetailHoldTimers.get(detailId));
++  scoreDetailHoldTimers.delete(detailId);
++  hideScoreDetails(button, detailId);
++}
++
++function downloadButtonsHtml() {
++  return `
++    <div class="card download-cta">
++      <div class="section-title" style="margin:0 0 .75rem 0">Get the app</div>
++      <div class="download-actions">
++        <a class="btn btn-ghost" href="${DOWNLOAD_LINKS.apple}" target="_blank" rel="noopener"> Download for Apple</a>
++        <a class="btn btn-primary" href="${DOWNLOAD_LINKS.android}" target="_blank" rel="noopener">Android APK</a>
++      </div>
++    </div>`;
++}
++
+ // ============================================================
+ // USER VIEW
+ // ============================================================
+ async function renderUser() {
+   try {
+-    // Fetch scoreboard
+-    const scoreboardData = await apiCall('/scoreboard');
+-    const scoreboard = scoreboardData.scoreboard;
++    // Fetch scoreboards
++    const championsData = await apiCall('/scoreboard?mode=champions');
++    const europaData = await apiCall('/scoreboard?mode=europa');
++    const conferenceData = await apiCall('/scoreboard?mode=conference');
++    const champions = championsData.scoreboard;
++    const europa = europaData.scoreboard;
++    const conference = conferenceData.scoreboard;
+     
+     // Fetch user checkins
+     const checkinsData = await apiCall('/checkins');
+     const checkins = checkinsData.checkins;
++    const allTimeData = await apiCall('/checkins?scope=all');
++    const allTimeCheckins = allTimeData.checkins;
+     
+     const todayKey = today();
+     const checkedIn = checkins.some(c => c.date === todayKey);
+@@ -920,43 +1240,40 @@ async function renderUser() {
+     // Calculate stats
+     const totalScore = checkins.reduce((sum, c) => sum + calcScoreFromEntry(c), 0);
+     const days = checkins.length;
+-    const avg = days > 0 ? fmt(totalScore / days) : '0.0';
++    const avg = days > 0 ? fmt(totalScore / days) : '0.00';
+     const best = checkins.reduce((max, c) => {
+       const s = calcScoreFromEntry(c);
+       return s > max ? s : max;
+     }, 0);
++    const totals = buildConsumptionTotals(checkins);
++    const allTimeTotals = buildConsumptionTotals(allTimeCheckins);
++    const combinedTotals = sumScoreboardTotals(champions);
+     
+-    // Render scoreboard HTML
+-    let scoreboardHtml = `
+-      <div class="score-row header-row">
+-        <span>#</span><span>User</span>
+-        <span style="text-align:right">Total 🍺eq</span>
+-        <span style="text-align:right">Days</span>
+-        <span style="text-align:right">Avg/day</span>
+-        <span style="text-align:right">Last entry</span>
+-      </div>`;
+-    
+-    scoreboard.forEach((u, i) => {
+-      const cls = i === 0 ? 'top-1' : i === 1 ? 'top-2' : i === 2 ? 'top-3' : '';
+-      scoreboardHtml += `
+-        <div class="score-row ${cls}">
+-          <div class="rank">${u.rank}</div>
+-          <div class="user-name">${u.username}</div>
+-          <div class="score-val">${fmt(u.score)}</div>
+-          <div class="score-val">${u.days}</div>
+-          <div class="score-val">${fmt(u.avg)}</div>
+-          <div class="score-sub">${u.last_date}</div>
+-        </div>`;
+-    });
++    const championsHtml = buildScoreboardHtml(champions, 'Total 🍺eq', 'user-champions');
++    const europaHtml = buildScoreboardHtml(europa, 'Total 🍺eq', 'user-europa');
++    const conferenceHtml = buildScoreboardHtml(conference, 'Total 🚬', 'user-conference');
+     
+     let html = `
+       <div class="tabs">
+-        <button class="tab active" onclick="switchTab(this,'tab-score')">Scoreboard</button>
++        <button class="tab active" onclick="switchTab(this,'tab-score')">Champions League</button>
++        <button class="tab" onclick="switchTab(this,'tab-europa')">Europa League</button>
++        <button class="tab" onclick="switchTab(this,'tab-conference')">Conference League</button>
+         <button class="tab" onclick="switchTab(this,'tab-history')">My History</button>
++        <button class="tab" onclick="switchTab(this,'tab-stats')">Statistics</button>
+       </div>
+ 
+       <div id="tab-score">`;
+     
++    const seasonStart = new Date('2026-06-11T00:00:00');
++    const announcementEnd = new Date(seasonStart);
++    announcementEnd.setDate(announcementEnd.getDate() + 7);
++    if (new Date() <= announcementEnd) {
++      html += `
++        <div class="announcement-banner">
++          <p>Training is almost done, get ready for ultimate drinking league starting on 11 june.</p>
++        </div>`;
++    }
++
+     if (!checkedIn) {
+       html += `
+         <div class="checkin-banner">
+@@ -975,11 +1292,27 @@ async function renderUser() {
+         <div class="summary-card"><div class="summary-label">Daily avg</div><div class="summary-val">${fmt(avg)}</div></div>
+         <div class="summary-card"><div class="summary-label">Best day</div><div class="summary-val">${fmt(best)}</div></div>
+       </div>
+-      <div class="section-title">Scoreboard</div>
+-      <div class="scoreboard">${scoreboardHtml}</div>
++      <div class="section-title">Champions League</div>
++      <div class="scoreboard-scroll">
++        <div class="scoreboard">${championsHtml}</div>
++      </div>
+       ${multipliersCardHtml()}
+     </div>
+ 
++      <div id="tab-europa" style="display:none">
++        <div class="section-title">Europa League</div>
++        <div class="scoreboard-scroll">
++          <div class="scoreboard">${europaHtml}</div>
++        </div>
++      </div>
++
++      <div id="tab-conference" style="display:none">
++        <div class="section-title">Conference League</div>
++        <div class="scoreboard-scroll">
++          <div class="scoreboard">${conferenceHtml}</div>
++        </div>
++      </div>
++
+       <div id="tab-history" style="display:none">
+       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+         <div class="section-title" style="margin:0">My History</div>
+@@ -1022,14 +1355,14 @@ async function renderUser() {
+         <table class="history-table">
+           <thead>
+             <tr>
+-              <th>Date</th><th>🍺</th><th>🍻</th><th>🥃</th><th>🍹</th><th>🚬</th><th>🍺eq</th><th></th>
++              <th>Date</th><th>🍺</th><th>🍻</th><th>🥃</th><th>🍹</th><th>🍷</th><th>🚬</th><th>🍺eq</th><th></th>
+             </tr>
+           </thead>
+           <tbody>`;
+     
+     const sorted = [...checkins].sort((a,b) => b.date.localeCompare(a.date));
+     if (sorted.length === 0) {
+-      html += `<tr><td colspan="8" style="color:#555;text-align:center;padding:1.5rem">No check-ins yet.</td></tr>`;
++      html += `<tr><td colspan="9" style="color:#555;text-align:center;padding:1.5rem">No check-ins yet.</td></tr>`;
+     } else {
+       const yesterdayKey = dateKeyFromOffset(-1);
+       const yearPrefix = `${currentYear()}-`;
+@@ -1038,15 +1371,66 @@ async function renderUser() {
+         const canEdit = c.date === yesterdayKey && yesterdayKey.startsWith(yearPrefix);
+         html += `<tr>
+           <td>${c.date}</td>
+-          <td>${c.nb}</td><td>${c.sb}</td><td>${c.sh}</td><td>${c.co}</td><td>${c.jo}</td>
++          <td>${c.nb}</td><td>${c.sb}</td><td>${c.sh}</td><td>${c.co}</td><td>${c.wi || 0}</td><td>${c.jo}</td>
+           <td class="gold">${eq}</td>
+           <td>${canEdit ? `<button class="btn btn-ghost btn-sm" onclick="openCheckin('${c.date}')">Edit</button>` : ''}</td>
+         </tr>`;
+       });
+     }
+     
+-    html += `</tbody></table></div></div>`;
+-    
++    html += `</tbody></table></div></div>
++
++      <div id="tab-stats" style="display:none">
++        <div class="section-title">Consumption Overview</div>
++        <div class="card">
++          <table class="history-table">
++            <thead>
++              <tr><th>Item</th><th>Total</th></tr>
++            </thead>
++            <tbody>
++              <tr><td>🍺 Normal beer</td><td class="gold">${totals.nb}</td></tr>
++              <tr><td>🍻 Special beer</td><td class="gold">${totals.sb}</td></tr>
++              <tr><td>🥃 Shot</td><td class="gold">${totals.sh}</td></tr>
++              <tr><td>🍹 Cocktail</td><td class="gold">${totals.co}</td></tr>
++              <tr><td>🍷 Wine</td><td class="gold">${totals.wi}</td></tr>
++              <tr><td>🚬 Joint</td><td class="gold">${totals.jo}</td></tr>
++            </tbody>
++          </table>
++        </div>
++        <div class="card" style="margin-top:1rem">
++          <div class="section-title" style="margin:0 0 .75rem 0">All Time (You)</div>
++          <table class="history-table">
++            <thead>
++              <tr><th>Item</th><th>Total</th></tr>
++            </thead>
++            <tbody>
++              <tr><td>🍺 Normal beer</td><td class="gold">${allTimeTotals.nb}</td></tr>
++              <tr><td>🍻 Special beer</td><td class="gold">${allTimeTotals.sb}</td></tr>
++              <tr><td>🥃 Shot</td><td class="gold">${allTimeTotals.sh}</td></tr>
++              <tr><td>🍹 Cocktail</td><td class="gold">${allTimeTotals.co}</td></tr>
++              <tr><td>🍷 Wine</td><td class="gold">${allTimeTotals.wi}</td></tr>
++              <tr><td>🚬 Joint</td><td class="gold">${allTimeTotals.jo}</td></tr>
++            </tbody>
++          </table>
++        </div>
++        <div class="card" style="margin-top:1rem">
++          <div class="section-title" style="margin:0 0 .75rem 0">Users combined</div>
++          <table class="history-table">
++            <thead>
++              <tr><th>Item</th><th>Total</th></tr>
++            </thead>
++            <tbody>
++              <tr><td>🍺 Normal beer</td><td class="gold">${combinedTotals.nb}</td></tr>
++              <tr><td>🍻 Special beer</td><td class="gold">${combinedTotals.sb}</td></tr>
++              <tr><td>🥃 Shot</td><td class="gold">${combinedTotals.sh}</td></tr>
++              <tr><td>🍹 Cocktail</td><td class="gold">${combinedTotals.co}</td></tr>
++              <tr><td>🍷 Wine</td><td class="gold">${combinedTotals.wi}</td></tr>
++              <tr><td>🚬 Joint</td><td class="gold">${combinedTotals.jo}</td></tr>
++            </tbody>
++          </table>
++        </div>
++      </div>`;
++
+     document.getElementById('main-content').innerHTML = html;
+   } catch (err) {
+     showToast(`Error: ${err.message}`);
+@@ -1061,30 +1445,24 @@ async function renderAdmin() {
+     const usersData = await apiCall('/users');
+     const users = usersData.users;
+     
+-    const scoreboardData = await apiCall('/scoreboard');
+-    const scoreboard = scoreboardData.scoreboard;
+-    
+-    let scoreboardHtml = `
+-      <div class="score-row header-row">
+-        <span>#</span><span>User</span>
+-        <span style="text-align:right">Total 🍺eq</span>
+-        <span style="text-align:right">Days</span>
+-        <span style="text-align:right">Avg/day</span>
+-        <span style="text-align:right">Last entry</span>
+-      </div>`;
++    const championsData = await apiCall('/scoreboard?mode=champions');
++    const europaData = await apiCall('/scoreboard?mode=europa');
++    const conferenceData = await apiCall('/scoreboard?mode=conference');
++    const champions = championsData.scoreboard;
++    const europa = europaData.scoreboard;
++    const conference = conferenceData.scoreboard;
++    let quoteBlock = '';
++    try {
++      const quoteData = await apiCall('/quotes/today');
++      quoteBlock = dailyQuoteHtml(quoteData.quote);
++    } catch (quoteErr) {
++      quoteBlock = '';
++      console.warn('Daily quote unavailable:', quoteErr.message);
++    }
+     
+-    scoreboard.forEach((u, i) => {
+-      const cls = i === 0 ? 'top-1' : i === 1 ? 'top-2' : i === 2 ? 'top-3' : '';
+-      scoreboardHtml += `
+-        <div class="score-row ${cls}">
+-          <div class="rank">${u.rank}</div>
+-          <div class="user-name">${u.username}</div>
+-          <div class="score-val">${fmt(u.score)}</div>
+-          <div class="score-val">${u.days}</div>
+-          <div class="score-val">${fmt(u.avg)}</div>
+-          <div class="score-sub">${u.last_date}</div>
+-        </div>`;
+-    });
++    const championsHtml = buildScoreboardHtml(champions, 'Total 🍺eq', 'admin-champions');
++    const europaHtml = buildScoreboardHtml(europa, 'Total 🍺eq', 'admin-europa');
++    const conferenceHtml = buildScoreboardHtml(conference, 'Total 🚬', 'admin-conference');
+     
+     let userListHtml = '';
+     if (users.length === 0) {
+@@ -1108,16 +1486,35 @@ async function renderAdmin() {
+     
+     const html = `
+       <div class="tabs">
+-        <button class="tab active" onclick="switchTab(this,'atab-score')">Scoreboard</button>
++        <button class="tab active" onclick="switchTab(this,'atab-score')">Champions League</button>
++        <button class="tab" onclick="switchTab(this,'atab-europa')">Europa League</button>
++        <button class="tab" onclick="switchTab(this,'atab-conference')">Conference League</button>
+         <button class="tab" onclick="switchTab(this,'atab-users')">Manage Users</button>
+       </div>
+ 
+       <div id="atab-score">
+-        <div class="section-title">Scoreboard</div>
+-        <div class="scoreboard">${scoreboardHtml}</div>
++        ${quoteBlock}
++        <div class="section-title">Champions League</div>
++        <div class="scoreboard-scroll">
++          <div class="scoreboard">${championsHtml}</div>
++        </div>
+         ${multipliersCardHtml()}
+       </div>
+ 
++      <div id="atab-europa" style="display:none">
++        <div class="section-title">Europa League</div>
++        <div class="scoreboard-scroll">
++          <div class="scoreboard">${europaHtml}</div>
++        </div>
++      </div>
++
++      <div id="atab-conference" style="display:none">
++        <div class="section-title">Conference League</div>
++        <div class="scoreboard-scroll">
++          <div class="scoreboard">${conferenceHtml}</div>
++        </div>
++      </div>
++
+       <div id="atab-users" style="display:none">
+         <div class="admin-grid">
+           <div>
+@@ -1138,13 +1535,15 @@ async function renderAdmin() {
+                   <tr><td>🍻 Special beer</td><td class="gold">${MULT.sb}×</td></tr>
+                   <tr><td>🥃 Shot</td><td class="gold">${MULT.sh}×</td></tr>
+                   <tr><td>🍹 Cocktail</td><td class="gold">${MULT.co}×</td></tr>
++                  <tr><td>🍷 Wine</td><td class="gold">${MULT.wi}×</td></tr>
+                   <tr><td>🚬 Joint</td><td class="gold">${MULT.jo}×</td></tr>
+                 </tbody>
+               </table>
+             </div>
+           </div>
+         </div>
+-      </div>`;
++      </div>
++      ${downloadButtonsHtml()}`;
+     
+     document.getElementById('main-content').innerHTML = html;
+   } catch (err) {
+@@ -1245,7 +1644,7 @@ async function deleteUser(username) {
+ // ============================================================
+ // DAILY CHECK-IN
+ // ============================================================
+-const counts = { nb: 0, sb: 0, sh: 0, co: 0, jo: 0 };
++const counts = { nb: 0, sb: 0, sh: 0, co: 0, wi: 0, jo: 0 };
+ let checkinTargetDate = null;
+ 
+ function adj(key, delta) {
+@@ -1255,7 +1654,7 @@ function adj(key, delta) {
+ }
+ 
+ function updateEquiv() {
+-  const eq = counts.nb * MULT.nb + counts.sb * MULT.sb + counts.sh * MULT.sh + counts.co * MULT.co + counts.jo * MULT.jo;
++  const eq = counts.nb * MULT.nb + counts.sb * MULT.sb + counts.sh * MULT.sh + counts.co * MULT.co + counts.wi * MULT.wi + counts.jo * MULT.jo;
+   document.getElementById('checkin-equiv').textContent = `= ${eq.toFixed(2)} standard beer equivalents`;
+ }
+ 
+@@ -1268,8 +1667,10 @@ async function openCheckin(dateKey = null) {
+     const existing = checkins.find(c => c.date === targetDate);
+     checkinTargetDate = targetDate;
+ 
+-    Object.keys(counts).forEach(k => counts[k] = existing ? existing[k] : 0);
+-    ['nb','sb','sh','co','jo'].forEach(k => { document.getElementById('cnt-' + k).textContent = counts[k]; });
++    Object.keys(counts).forEach(k => {
++      counts[k] = existing && typeof existing[k] === 'number' ? existing[k] : 0;
++    });
++    ['nb','sb','sh','co','wi','jo'].forEach(k => { document.getElementById('cnt-' + k).textContent = counts[k]; });
+     updateEquiv();
+ 
+     const label = formatDateLabel(targetDate);
+@@ -1320,6 +1721,56 @@ document.addEventListener('keydown', e => {
+ // ============================================================
+ // BOOT
+ // ============================================================
++let swRegistration = null;
++let reminderTimeoutId = null;
++let reminderIntervalId = null;
++
++function isStandaloneMode() {
++  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
++}
++
++function scheduleDailyReminder(reg) {
++  if (!reg || Notification.permission !== 'granted') return;
++
++  if (reminderTimeoutId) clearTimeout(reminderTimeoutId);
++  if (reminderIntervalId) clearInterval(reminderIntervalId);
++
++  const now = new Date();
++  const next = new Date();
++  next.setHours(21, 0, 0, 0);
++  if (next <= now) next.setDate(next.getDate() + 1);
++
++  const msUntilNext = next.getTime() - now.getTime();
++  reminderTimeoutId = setTimeout(() => {
++    reg.showNotification('did you drink yet?', {
++      tag: 'daily-9pm',
++      renotify: false
++    });
++    reminderIntervalId = setInterval(() => {
++      reg.showNotification('did you drink yet?', {
++        tag: 'daily-9pm',
++        renotify: false
++      });
++    }, 24 * 60 * 60 * 1000);
++  }, msUntilNext);
++}
++
++function initDailyReminder() {
++  if (!swRegistration || !isStandaloneMode() || !('Notification' in window)) return;
++
++  if (Notification.permission === 'granted') {
++    scheduleDailyReminder(swRegistration);
++    return;
++  }
++
++  if (Notification.permission === 'default') {
++    Notification.requestPermission().then(result => {
++      if (result === 'granted') scheduleDailyReminder(swRegistration);
++    });
++  }
++}
++
++
+ async function bootstrap() {
+   try {
+     const data = await apiCall('/auth/me');
+@@ -1331,6 +1782,7 @@ async function bootstrap() {
+     }
+ 
+     enterApp();
++    initDailyReminder();
+   } catch (err) {
+     currentUser = null;
+     show('login-view');
+@@ -1345,6 +1797,8 @@ bootstrap();
+ if ('serviceWorker' in navigator) {
+   window.addEventListener('load', () => {
+     navigator.serviceWorker.register('/service-worker.js').then(reg => {
++      swRegistration = reg;
++      initDailyReminder();
+       console.log('Service Worker registered successfully', reg);
+     }).catch(err => {
+       console.log('Service Worker registration failed:', err);
